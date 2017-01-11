@@ -1,0 +1,23 @@
+<section class="admin__page-section request-view-request-response">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('Response Body') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item response-body">
+            <div class="admin__page-section-item-content" style="word-wrap: break-word;" >
+                <script>
+                    require(['jquery'], function($){
+                        $(function() {
+                            $('.response-body pre code').text(JSON.stringify(
+                                <?php echo $this->getRequest()->getResponseBody(); ?>,
+                                null,
+                                2)
+                            );
+                        });
+                    });
+                </script>
+                <pre><code style="white-space: pre-wrap"></code></pre>
+            </div>
+        </div>
+    </div>
+</section>

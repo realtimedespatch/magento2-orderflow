@@ -1,0 +1,25 @@
+<?php if ($this->canDisplayAdminInfo()): ?>
+<section class="admin__page-section order-view-orderflow">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('OrderFlow Notice') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item">
+            <p>OrderFlow users with the appropriate permissions can use the link below to view or edit the product inventory in the OrderFlow environment. Note that any changes made in OrderFlow will not be reflected in Magento.</p>
+
+            <a style="color: #ea7601;" title="View Order" target="_blank" href="<?php echo $this->getInventoryUrl(); ?>">
+                <?php echo $this->getInventoryUrl(); ?>
+            </a>
+        </div>
+    </div>
+    <div class="admin__page-section-content" style="margin-top: 20px;">
+        <div class="admin__page-section-item">
+            <p>OrderFlow users with the appropriate permissions can use the link below to view or edit the product in the OrderFlow environment. Note that any changes made in OrderFlow will not be reflected in Magento.</p>
+
+            <a style="color: #ea7601;" title="View Order" target="_blank" href="<?php echo $this->getProductUrl(); ?>">
+                <?php echo $this->getProductUrl(); ?>
+            </a>
+        </div>
+    </div>
+</section>
+<?php endif; ?>

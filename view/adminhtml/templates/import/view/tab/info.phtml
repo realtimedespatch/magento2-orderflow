@@ -1,0 +1,43 @@
+<?php $_import = $block->getImport() ?>
+
+<section class="admin__page-section import-view-import-details">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('Import Details') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item import-information">
+            <div class="admin__page-section-item-content">
+                <table class="admin__table-secondary import-information-table">
+                    <tr>
+                        <th><?php echo __('Export ID') ?></th>
+                        <td><?php echo $_import->getId(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Request ID') ?></th>
+                        <td><?php echo $_import->getMessageId(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Successes') ?></th>
+                        <td><?php echo $_import->getSuccesses(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Duplicates') ?></th>
+                        <td><?php echo $_import->getDuplicates(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Superseded') ?></th>
+                        <td><?php echo $_import->getSuperseded(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Failures') ?></th>
+                        <td><?php echo $_import->getFailures(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Processed') ?></th>
+                        <td><?php echo $block->formatDate($block->getOrderAdminDate($_import->getCreatedAt()), \IntlDateFormatter::MEDIUM, true); ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="admin.scope.col.wrap" htmlClass="admin__old" />
+        <referenceContainer name="content">
+            <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\View" name="orderflow_import_view"/>
+        </referenceContainer>
+        <referenceContainer name="left">
+            <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\View\Tabs" name="orderflow_import_tabs">
+                <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\View\Tab\Info" name="import_tab_info" template="import/view/tab/info.phtml" />
+                <action method="addTab">
+                    <argument name="name" xsi:type="string">import_info</argument>
+                    <argument name="block" xsi:type="string">import_tab_info</argument>
+                </action>
+                <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\View\Tab\Lines" name="import_tab_lines" template="import/view/tab/inventory/info.phtml" />
+                <action method="addTab">
+                    <argument name="name" xsi:type="string">import_lines</argument>
+                    <argument name="block" xsi:type="string">import_tab_lines</argument>
+                </action>
+            </block>
+        </referenceContainer>
+        <referenceBlock name="import_tab_lines">
+            <block class="\Magento\Framework\View\Element\Text\ListText" name="lines">
+                <uiComponent name="inventory_import_line_listing"/>
+                <uiComponent name="shipment_import_line_listing"/>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

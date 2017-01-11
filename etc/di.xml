@@ -1,0 +1,250 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\RequestInterface" type="RealtimeDespatch\OrderFlow\Model\Request" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface" type="RealtimeDespatch\OrderFlow\Model\RequestLine" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\RequestRepository" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\ExportInterface" type="RealtimeDespatch\OrderFlow\Model\Export" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface" type="RealtimeDespatch\OrderFlow\Model\ExportLine" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\ExportRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\ExportRepository" />    
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\ImportInterface" type="RealtimeDespatch\OrderFlow\Model\Import" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface" type="RealtimeDespatch\OrderFlow\Model\ImportLine" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\ImportRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\ImportRepository" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\ShipmentRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\ShipmentRequestService" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\InventoryRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\InventoryRequestService" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\OrderRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\OrderRequestService" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\ProductRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\ProductRequestService" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface" type="RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface" type="RealtimeDespatch\OrderFlow\Model\SequenceItem" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface" type="RealtimeDespatch\OrderFlow\Model\QuantityItem" />
+    <virtualType name="OrderCreateRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">OrderCreateRequestProcessorType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderExportRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">OrderExportRequestProcessorType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderCancelRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">OrderCancelRequestProcessorType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductCreateRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">ProductCreateRequestProcessorType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductUpdateRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">ProductUpdateRequestProcessorType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductExportRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">ProductExportRequestProcessorType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="InventoryUpdateRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">InventoryUpdateRequestProcessorType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShipmentCreateRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">ShipmentCreateRequestProcessorType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderCreateExporter" type="RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Model\Service\Export\Type\OrderCreateExporterType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderExportExporter" type="RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Model\Service\Export\Type\OrderExportExporterType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderCancelExporter" type="RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Model\Service\Export\Type\OrderCancelExporterType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductCreateExporter" type="RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Model\Service\Export\Type\ProductCreateExporterType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductUpdateExporter" type="RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Model\Service\Export\Type\ProductUpdateExporterType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductExportExporter" type="RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Model\Service\Export\Type\ProductExportExporterType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="InventoryUpdateImporter" type="RealtimeDespatch\OrderFlow\Model\Service\Import\Importer">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Model\Service\Import\Type\InventoryUpdateImporterType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShipmentCreateImporter" type="RealtimeDespatch\OrderFlow\Model\Service\Import\Importer">
+        <arguments>
+            <argument name="type" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Model\Service\Import\Type\ShipmentCreateImporterType</argument>
+            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductCreateRequestProcessorType" type="RealtimeDespatch\OrderFlow\Model\Service\Request\Type\ExportRequestProcessorType">
+        <arguments>
+            <argument name="exporter" xsi:type="object">ProductCreateExporter</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductUpdateRequestProcessorType" type="RealtimeDespatch\OrderFlow\Model\Service\Request\Type\ExportRequestProcessorType">
+        <arguments>
+            <argument name="exporter" xsi:type="object">ProductUpdateExporter</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ProductExportRequestProcessorType" type="RealtimeDespatch\OrderFlow\Model\Service\Request\Type\ExportRequestProcessorType">
+        <arguments>
+            <argument name="exporter" xsi:type="object">ProductExportExporter</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderCreateRequestProcessorType" type="RealtimeDespatch\OrderFlow\Model\Service\Request\Type\ExportRequestProcessorType">
+        <arguments>
+            <argument name="exporter" xsi:type="object">OrderCreateExporter</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderExportRequestProcessorType" type="RealtimeDespatch\OrderFlow\Model\Service\Request\Type\ExportRequestProcessorType">
+        <arguments>
+            <argument name="exporter" xsi:type="object">OrderExportExporter</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="OrderCancelRequestProcessorType" type="RealtimeDespatch\OrderFlow\Model\Service\Request\Type\ExportRequestProcessorType">
+        <arguments>
+            <argument name="exporter" xsi:type="object">OrderCancelExporter</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="InventoryUpdateRequestProcessorType" type="RealtimeDespatch\OrderFlow\Model\Service\Request\Type\ImportRequestProcessorType">
+        <arguments>
+            <argument name="importer" xsi:type="object">InventoryUpdateImporter</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShipmentCreateRequestProcessorType" type="RealtimeDespatch\OrderFlow\Model\Service\Request\Type\ImportRequestProcessorType">
+        <arguments>
+            <argument name="importer" xsi:type="object">ShipmentCreateImporter</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">rtd_requests</argument>
+            <argument name="resourceModel" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Request</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">rtd_request_lines</argument>
+            <argument name="resourceModel" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="RealtimeDespatch\OrderFlow\Model\ResourceModel\Export\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">rtd_exports</argument>
+            <argument name="resourceModel" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Export</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="RealtimeDespatch\OrderFlow\Model\ResourceModel\ExportLine\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">rtd_export_lines</argument>
+            <argument name="resourceModel" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\ExportLine</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="RealtimeDespatch\OrderFlow\Model\ResourceModel\Import\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">rtd_imports</argument>
+            <argument name="resourceModel" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Import</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">rtd_import_lines</argument>
+            <argument name="resourceModel" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="export_request_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Grid\Collection</item>
+                <item name="import_request_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Grid\Collection</item>
+                <item name="request_import_line_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine\Grid\Collection</item>
+                <item name="request_export_line_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine\Grid\Collection</item>
+                <item name="order_export_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Export\Grid\Collection</item>
+                <item name="product_export_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Export\Grid\Collection</item>
+                <item name="order_export_line_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\ExportLine\Grid\Collection</item>
+                <item name="product_export_line_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\ExportLine\Grid\Collection</item>
+                <item name="inventory_import_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Import\Grid\Collection</item>
+                <item name="shipment_import_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\Import\Grid\Collection</item>
+                <item name="inventory_import_line_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine\Grid\Collection</item>
+                <item name="shipment_import_line_listing_data_source" xsi:type="string">RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\Model\Entity\RepositoryFactory">
+        <arguments>
+            <argument name="entities" xsi:type="array">
+                <item name="RealtimeDespatch\OrderFlow\Api\Data\RequestInterface" xsi:type="string">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="orderflow_export_status" xsi:type="string">sales_order.orderflow_export_status</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
+        <plugin name="orderflow_soap_product_export_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ProductExport"/>
+    </type>
+    <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
+        <plugin name="orderflow_soap_order_export_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\OrderExport"/>
+    </type>
+    <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
+        <plugin name="orderflow_soap_shipment_import_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ShipmentImport"/>
+    </type>
+    <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
+        <plugin name="orderflow_soap_inventory_import_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\InventoryImport"/>
+    </type>
+    <virtualType name="orderflowLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="handlers"  xsi:type="array">
+                <item name="debug" xsi:type="object">RealtimeDespatch\OrderFlow\Logger\Handler\OrderFlow</item>
+            </argument>
+        </arguments>
+    </virtualType>
+</config>

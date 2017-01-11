@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="RealtimeDespatch_OrderFlow::orderflow_exports" title="OrderFlow Exports" module="RealtimeDespatch_OrderFlow" sortOrder="50" parent="Magento_Backend::system" resource="RealtimeDespatch_OrderFlow::orderflow" />
+        <add id="RealtimeDespatch_OrderFlow::orderflow_imports" title="OrderFlow Imports" module="RealtimeDespatch_OrderFlow" sortOrder="50" parent="Magento_Backend::system" resource="RealtimeDespatch_OrderFlow::orderflow" />
+        <add id="RealtimeDespatch_OrderFlow::orderflow_exports_products" title="Products" module="RealtimeDespatch_OrderFlow" sortOrder="0" parent="RealtimeDespatch_OrderFlow::orderflow_exports" action="orderflow/export/index/type/product" resource="RealtimeDespatch_OrderFlow::orderflow_exports_products"/>
+        <add id="RealtimeDespatch_OrderFlow::orderflow_exports_orders" title="Orders" module="RealtimeDespatch_OrderFlow" sortOrder="0" parent="RealtimeDespatch_OrderFlow::orderflow_exports" action="orderflow/export/index/type/order" resource="RealtimeDespatch_OrderFlow::orderflow_exports_orders"/>
+        <add id="RealtimeDespatch_OrderFlow::orderflow_exports_requests" title="Requests" module="RealtimeDespatch_OrderFlow" sortOrder="0" parent="RealtimeDespatch_OrderFlow::orderflow_exports" action="orderflow/request/index/type/export" resource="RealtimeDespatch_OrderFlow::orderflow_requests_exports"/>
+        <add id="RealtimeDespatch_OrderFlow::orderflow_imports_inventory" title="Inventory" module="RealtimeDespatch_OrderFlow" sortOrder="0" parent="RealtimeDespatch_OrderFlow::orderflow_imports" action="orderflow/import/index/type/inventory" resource="RealtimeDespatch_OrderFlow::orderflow_imports_inventory"/>
+        <add id="RealtimeDespatch_OrderFlow::orderflow_imports_shipments" title="Shipments" module="RealtimeDespatch_OrderFlow" sortOrder="0" parent="RealtimeDespatch_OrderFlow::orderflow_imports" action="orderflow/import/index/type/shipment" resource="RealtimeDespatch_OrderFlow::orderflow_imports_shipments"/>
+        <add id="RealtimeDespatch_OrderFlow::orderflow_imports_requests" title="Requests" module="RealtimeDespatch_OrderFlow" sortOrder="0" parent="RealtimeDespatch_OrderFlow::orderflow_imports" action="orderflow/request/index/type/import" resource="RealtimeDespatch_OrderFlow::orderflow_requests_imports"/>
+    </menu>
+</config>

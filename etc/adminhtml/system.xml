@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="orderflow_tab" translate="label" sortOrder="500">
+            <label>OrderFlow</label>
+        </tab>
+        <section id="orderflow_api" translate="label" type="text" sortOrder="1000" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>API Settings</label>
+            <tab>orderflow_tab</tab>
+            <resource>RealtimeDespatch_OrderFlow::config_orderflow</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>API Settings</label>
+                <field id="endpoint" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Endpoint</label>
+                    <validate>validate-url</validate>
+                </field>
+                <field id="username" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Username</label>
+                    <validate>validate-no-empty</validate>
+                </field>
+                <field id="password" translate="label" type="password" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Password</label>
+                    <validate>validate-no-empty</validate>
+                </field>
+                <field id="organisation" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Organisation</label>
+                    <validate>validate-no-empty</validate>
+                </field>
+                <field id="channel" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Channel</label>
+                    <validate>validate-no-empty</validate>
+                </field>
+            </group>
+        </section>
+        <section id="orderflow_email" translate="label" type="text" sortOrder="2000" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Email Settings</label>
+            <tab>orderflow_tab</tab>
+            <resource>RealtimeDespatch_OrderFlow::config_orderflow</resource>
+            <group id="email" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Email Settings</label>
+                <field id="admin_name" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Admin Name</label>
+                    <validate>validate-no-empty</validate>
+                </field>
+                <field id="admin_email" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Admin Email</label>
+                    <validate>validate-email</validate>
+                </field>
+            </group>
+        </section>
+        <section id="orderflow_order_export" translate="label" type="text" sortOrder="3000" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Order Export</label>
+            <tab>orderflow_tab</tab>
+            <resource>RealtimeDespatch_OrderFlow::config_orderflow</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Order Export Settings</label>
+                <field id="is_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="cron_expression" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Cron Expression</label>
+                    <backend_model>RealtimeDespatch\OrderFlow\Model\Config\Backend\Cron</backend_model>
+                </field>
+                <field id="exportable_status" translate="label" type="multiselect" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Exportable Order Status</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+                <field id="batch_size" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Batch Size</label>
+                    <validate>validate-no-empty</validate>
+                </field>
+            </group>
+        </section>
+        <section id="orderflow_product_export" translate="label" type="text" sortOrder="4000" showInDefault="1" showInWebsite="1" showInStore="0">
+            <label>Product Export</label>
+            <tab>orderflow_tab</tab>
+            <resource>RealtimeDespatch_OrderFlow::config_orderflow</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Product Export Settings</label>
+                <field id="is_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="cron_expression" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Cron Expression</label>
+                    <backend_model>RealtimeDespatch\OrderFlow\Model\Config\Backend\Cron</backend_model>
+                </field>
+                <field id="batch_size" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Batch Size</label>
+                    <validate>validate-no-empty</validate>
+                </field>
+                <field id="store_id" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Store ID</label>
+                    <source_model>Magento\Config\Model\Config\Source\Store</source_model>
+                </field>
+            </group>
+        </section>        
+        <section id="orderflow_inventory_import" translate="label" type="text" sortOrder="5000" showInDefault="1" showInWebsite="0" showInStore="0">
+            <label>Inventory Import</label>
+            <tab>orderflow_tab</tab>
+            <resource>RealtimeDespatch_OrderFlow::config_orderflow</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Inventory Import Settings</label>
+                <field id="is_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="cron_expression" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Cron Expression</label>
+                    <backend_model>RealtimeDespatch\OrderFlow\Model\Config\Backend\Cron</backend_model>
+                </field>
+                <field id="batch_size" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Batch Size</label>
+                    <validate>validate-digits</validate>
+                </field>
+                <field id="negative_qtys_enabled" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Allow Negative Quantities</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="adjust_inventory" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Adjust Inventory</label>
+                    <source_model>RealtimeDespatch\OrderFlow\Model\Source\Inventory\Adjustment</source_model>
+                </field>
+                <field id="valid_unsent_order_statuses" translate="label" type="multiselect" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Unsent Order Statuses</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+                <field id="active_quote_cutoff" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Active Quote Cutoff</label>
+                    <validate>validate-digits</validate>
+                    <comment>The number of days for which active quotes will be considered when calculating product inventory. Adjustments will only be applied for quotes created on or after this cutoff.</comment>
+                </field>
+                <field id="unsent_order_cutoff" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Unsent Order Cutoff</label>
+                    <validate>validate-digits</validate>
+                    <comment>The number of days for which unsent orders will be considered when calculating product inventory. Adjustments will only be applied for orders submitted on or after this cutoff.</comment>
+                </field>
+            </group>
+        </section>
+        <section id="orderflow_shipment_import" translate="label" type="text" sortOrder="6000" showInDefault="1" showInWebsite="0" showInStore="0">
+            <label>Shipment Import</label>
+            <tab>orderflow_tab</tab>
+            <resource>RealtimeDespatch_OrderFlow::config_orderflow</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Shipment Import Settings</label>
+                <field id="is_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                 </field>
+                <field id="cron_expression" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Cron Expression</label>
+                    <backend_model>RealtimeDespatch\OrderFlow\Model\Config\Backend\Cron</backend_model>
+                </field>
+                <field id="batch_size" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Batch Size</label>
+                    <validate>validate-no-empty</validate>
+                </field>
+            </group>
+        </section>
+        <section id="orderflow_log_cleaning" translate="label" type="text" sortOrder="7000" showInDefault="1" showInWebsite="0" showInStore="0">
+            <label>Log Cleaning</label>
+            <tab>orderflow_tab</tab>
+            <resource>RealtimeDespatch_OrderFlow::config_orderflow</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Log Cleaning Settings</label>
+                <field id="is_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="cron_expression" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Cron Expression</label>
+                    <backend_model>RealtimeDespatch\OrderFlow\Model\Config\Backend\Cron</backend_model>
+                </field>
+                <field id="export_duration" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Export Log Duration</label>
+                    <source_model>RealtimeDespatch\OrderFlow\Model\Config\Source\Duration</source_model>
+                </field>
+                <field id="import_duration" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Import Log Duration</label>
+                    <source_model>RealtimeDespatch\OrderFlow\Model\Config\Source\Duration</source_model>
+                </field>
+                <field id="request_duration" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Request Log Duration</label>
+                    <source_model>RealtimeDespatch\OrderFlow\Model\Config\Source\Duration</source_model>
+                </field>
+            </group>
+        </section>
+        <section id="orderflow_admin_info" translate="label" type="text" sortOrder="8000" showInDefault="1" showInWebsite="0" showInStore="0">
+            <label>Admin Information</label>
+            <tab>orderflow_tab</tab>
+            <resource>RealtimeDespatch_OrderFlow::config_orderflow</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Admin Information Settings</label>
+                <field id="is_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

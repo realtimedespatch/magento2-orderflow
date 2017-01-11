@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <listingToolbar name="listing_top">
+        <massaction name="listing_massaction">
+            <action name="resetExportStatus">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="confirm" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Reset Export Status (OF)</item>
+                            <item name="message" xsi:type="string" translate="true">Reset Product Export Status?</item>
+                        </item>
+                        <item name="type" xsi:type="string">resetExportStatus</item>
+                        <item name="label" xsi:type="string" translate="true">Reset Export Status (OF)</item>
+                        <item name="url" xsi:type="url" path="orderflow/product/massReset"/>
+                    </item>
+                </argument>
+            </action>
+        </massaction>
+    </listingToolbar>
+    <columns name="product_columns" class="Magento\Catalog\Ui\Component\Listing\Columns">
+        <column name="orderflow_export_status">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">RealtimeDespatch\OrderFlow\Model\Product\ExportStatus\Options</item>
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">select</item>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/select</item>
+                    <item name="add_field" xsi:type="boolean">true</item>
+                    <item name="dataType" xsi:type="string">select</item>
+                    <item name="label" xsi:type="string" translate="true">Status</item>
+                    <item name="sortOrder" xsi:type="number">90</item>
+                </item>
+            </argument>
+        </column>
+    </columns>
+</listing>

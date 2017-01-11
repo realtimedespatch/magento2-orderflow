@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="orderflow">
+        <job name="orderflow_import_inventory_update" instance="RealtimeDespatch\OrderFlow\Cron\Import\InventoryUpdateImport" method="execute">
+            <config_path>orderflow_inventory_import/settings/cron_expression</config_path>
+        </job>
+        <job name="orderflow_import_shipment_update" instance="RealtimeDespatch\OrderFlow\Cron\Import\ShipmentUpdateImport" method="execute">
+            <config_path>orderflow_shipment_import/settings/cron_expression</config_path>
+        </job>
+        <job name="orderflow_export_order_create" instance="RealtimeDespatch\OrderFlow\Cron\Export\OrderCreateExport" method="execute">
+            <config_path>orderflow_order_export/settings/cron_expression</config_path>
+        </job>
+        <job name="orderflow_export_product_create" instance="RealtimeDespatch\OrderFlow\Cron\Export\ProductCreateExport" method="execute">
+            <config_path>orderflow_product_export/settings/cron_expression</config_path>
+        </job>
+        <job name="orderflow_export_product_update" instance="RealtimeDespatch\OrderFlow\Cron\Export\ProductUpdateExport" method="execute">
+            <config_path>orderflow_product_export/settings/cron_expression</config_path>
+        </job>
+        <job name="orderflow_export_log_cleaner" instance="RealtimeDespatch\OrderFlow\Cron\Log\ExportLogCleaner" method="execute">
+            <config_path>orderflow_log_cleaning/settings/cron_expression</config_path>
+        </job>
+        <job name="orderflow_import_log_cleaner" instance="RealtimeDespatch\OrderFlow\Cron\Log\ImportLogCleaner" method="execute">
+            <config_path>orderflow_log_cleaning/settings/cron_expression</config_path>
+        </job>
+        <job name="orderflow_request_log_cleaner" instance="RealtimeDespatch\OrderFlow\Cron\Log\RequestLogCleaner" method="execute">
+            <config_path>orderflow_log_cleaning/settings/cron_expression</config_path>
+        </job>
+    </group>
+</config>

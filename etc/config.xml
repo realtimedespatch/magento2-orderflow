@@ -1,0 +1,50 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <orderflow_inventory_import>
+            <settings>
+                <is_enabled>1</is_enabled>
+                <batch_size>100</batch_size>
+                <cron_expression>* * * * *</cron_expression>
+                <allow_negative_quantities>0</allow_negative_quantities>
+                <active_quote_cutoff>1</active_quote_cutoff>
+                <unsent_order_cutoff>1</unsent_order_cutoff>
+                <adjust_inventory>0</adjust_inventory>
+            </settings>
+        </orderflow_inventory_import>
+        <orderflow_shipment_import>
+            <settings>
+                <is_enabled>1</is_enabled>
+                <batch_size>100</batch_size>
+                <cron_expression>* * * * *</cron_expression>
+            </settings>
+        </orderflow_shipment_import>
+        <orderflow_order_export>
+            <settings>
+                <is_enabled>1</is_enabled>
+                <batch_size>100</batch_size>
+                <cron_expression>* * * * *</cron_expression>
+            </settings>
+        </orderflow_order_export>
+        <orderflow_product_export>
+            <settings>
+                <is_enabled>1</is_enabled>
+                <batch_size>100</batch_size>
+                <cron_expression>* * * * *</cron_expression>
+            </settings>
+        </orderflow_product_export>
+        <orderflow_log_cleaning>
+            <settings>
+                <is_enabled>1</is_enabled>
+                <cron_expression>* * * * *</cron_expression>
+                <export_duration>5</export_duration>
+                <import_duration>5</import_duration>
+                <request_duration>5</request_duration>
+            </settings>
+        </orderflow_log_cleaning>
+        <orderflow_admin_info>
+            <settings>
+                <is_enabled>1</is_enabled>
+            </settings>
+        </orderflow_admin_info>
+    </default>
+</config>

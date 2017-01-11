@@ -1,0 +1,13 @@
+<section class="admin__page-section import-view-request-response">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('Response Body') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item response-body">
+            <div class="admin__page-section-item-content" style="word-wrap: break-word;" >
+                <?php echo $this->getImport()->getData('response_body'); ?>
+                <pre><?php echo htmlentities($this->getImport()->getResponseBody()); ?></pre>
+            </div>
+        </div>
+    </div>
+</section>

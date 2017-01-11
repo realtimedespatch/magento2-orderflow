@@ -1,0 +1,28 @@
+<?php echo $this->getItemsHtml() ?>
+<?php if ($this->getExport()->getEntity() === 'Inventory'): ?>
+    <section class="admin__page-section inventory-view-inventory-details">
+        <div class="admin__page-section-title">
+            <span class="title"><?php /* @escapeNotVerified */ echo __('Additional Information') ?></span>
+        </div>
+        <div class="admin__page-section-content">
+            <div class="admin__page-section-item inventory-information">
+                <div class="admin__page-section-item-content">
+                    <strong><?php echo __('Units Received') ?></strong>
+                    <br/>
+                    <p><?php echo __("The 'available stock' figure received from OrderFlow.") ?></p>
+                    <br />
+                    <strong><?php echo __('Units Adjusted (Quotes)') ?></strong>
+                    <br/>
+                    <p><?php echo __("The quantity required for active quotes for orders not yet submitted.") ?></p>
+                    <br />
+                    <strong><?php echo __('Units Adjusted (Queued)') ?></strong>
+                    <br/>
+                    <p><?php echo __("The quantity required by orders not yet exported to OrderFlow.") ?></p>
+                    <br />
+                    <p><?php echo __("How the values in the columns above are used to determine the 'Updated Stock Qty' will be determined by the settings in 'Inventory Export' section of the module configuration.") ?></p>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+<?php endif; ?>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">inventory_import_line_listing.inventory_import_line_listing_data_source</item>
+            <item name="deps" xsi:type="string">inventory_import_line_listing.inventory_import_line_listing_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">orderflow_import_line_columns</item>
+    </argument>
+    <dataSource name="inventory_import_line_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">inventory_import_line_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">line_id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="filter_url_params" xsi:type="array">
+                        <item name="import_id" xsi:type="string">*</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <columnsControls name="columns_controls"/>
+        <exportButton name="export_button"/>
+        <filterSearch name="fulltext"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="orderflow_import_line_columns">
+        <column name="sequence_id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">textRange</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Sequence ID</item>
+                </item>
+            </argument>
+        </column>
+        <column name="reference">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">textRange</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">SKU</item>
+                </item>
+            </argument>
+        </column>
+        <column name="units_received" class="RealtimeDespatch\OrderFlow\Ui\Component\Listing\Columns\UnitsReceived">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Units Received</item>
+                </item>
+            </argument>
+        </column>
+        <column name="active_quotes" class="RealtimeDespatch\OrderFlow\Ui\Component\Listing\Columns\UnitsActiveQuotes">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Units Adjusted (Quotes)</item>
+                </item>
+            </argument>
+        </column>
+        <column name="unsent_orders" class="RealtimeDespatch\OrderFlow\Ui\Component\Listing\Columns\UnitsUnsentOrders">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Units Adjusted (Queued</item>
+                </item>
+            </argument>
+        </column>
+        <column name="units_calculated" class="RealtimeDespatch\OrderFlow\Ui\Component\Listing\Columns\UnitsCalculated">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Updated Stock Qty</item>
+                </item>
+            </argument>
+        </column>
+        <column name="result">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">textRange</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Result</item>
+                </item>
+            </argument>
+        </column>
+        <column name="operation">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">textRange</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Operation</item>
+                </item>
+            </argument>
+        </column>
+        <column name="message">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">textRange</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Message</item>
+                </item>
+            </argument>
+        </column>
+        <column name="created_at" class="RealtimeDespatch\OrderFlow\Ui\Component\Listing\Columns\Processed">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="label" xsi:type="string" translate="true">Processed</item>
+                </item>
+            </argument>
+        </column>
+    </columns>
+</listing>

@@ -1,0 +1,48 @@
+<?php $_request = $block->getRequest() ?>
+
+<section class="admin__page-section request-view-request-details">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('Request Details') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item request-information">
+            <div class="admin__page-section-item-content">
+                <table class="admin__table-secondary request-information-table">
+                    <tr>
+                        <th><?php echo __('Request ID') ?></th>
+                        <td><?php echo $_request->getMessageId(); ?></td>
+                    </tr>
+                    <?php if ($_request->isExport()): ?>
+                        <tr>
+                            <th><?php echo __('Website') ?></th>
+                            <td><?php echo $this->getWebsiteName(); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <th><?php echo __('Entity') ?></th>
+                        <td><?php echo $_request->getEntity(); ?></td>
+                    </tr>
+                    <?php if($_request->getType() == 'Export'): ?>
+                        <tr>
+                            <th><?php echo __('Operation') ?></th>
+                            <td><?php echo $_request->getOperation() === 'Create' || $_request->getOperation() === 'Update' ? 'Queue' : $_request->getOperation(); ?></td>
+                        </tr>
+                    <?php else: ?>
+                        <tr>
+                            <th><?php echo __('Operation') ?></th>
+                            <td><?php echo $_request->getOperation(); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <th><?php echo __('Created') ?></th>
+                        <td><?php echo $_request->getCreatedAt(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Processed') ?></th>
+                        <td><?php echo $_request->getProcessedAt() ?  $_request->getProcessedAt() : __('Pending'); ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

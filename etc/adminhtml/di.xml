@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Catalog\Ui\Component\Listing\Columns\ProductActions">
+        <plugin name="prepare_data_source_after" type="RealtimeDespatch\OrderFlow\Plugin\Adminhtml\ProductActions"/>
+    </type>
+    <type name="Magento\Sales\Ui\Component\Listing\Column\ViewAction">
+        <plugin name="prepare_data_source_after" type="RealtimeDespatch\OrderFlow\Plugin\Adminhtml\OrderActions"/>
+    </type>
+    <type name="Magento\Sales\Model\Order">
+        <plugin name="orderflow_order_cancellation" type="RealtimeDespatch\OrderFlow\Plugin\Adminhtml\OrderCancellation"/>
+    </type>
+    <type name="Magento\Sales\Block\Adminhtml\Order\View">
+        <plugin name="orderflow_order_view" type="RealtimeDespatch\OrderFlow\Plugin\Adminhtml\OrderView"/>
+    </type>
+    <type name="Magento\Catalog\Model\ResourceModel\Product">
+        <plugin name="orderflow_product_save" type="RealtimeDespatch\OrderFlow\Plugin\Catalog\ProductSave"/>
+    </type>
+    <type name="Magento\Framework\Notification\MessageList">
+        <arguments>
+            <argument name="messages" xsi:type="array">
+                <item name="orderflow_export_failures" xsi:type="string">RealtimeDespatch\OrderFlow\System\Message\Export\Failure</item>
+                <item name="orderflow_import_failures" xsi:type="string">RealtimeDespatch\OrderFlow\System\Message\Import\Failure</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

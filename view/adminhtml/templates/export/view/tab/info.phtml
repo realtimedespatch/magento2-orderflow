@@ -1,0 +1,51 @@
+<?php $_export = $block->getExport() ?>
+
+<section class="admin__page-section export-view-export-details">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('Export Details') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item export-information">
+            <div class="admin__page-section-item-content">
+                <table class="admin__table-secondary export-information-table">
+                    <tr>
+                        <th><?php echo __('Export ID') ?></th>
+                        <td><?php echo $_export->getId(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Request ID') ?></th>
+                        <td><?php echo $_export->getMessageId(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Website') ?></th>
+                        <td><?php echo $this->getWebsiteName(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Operation') ?></th>
+                        <td><?php echo $_export->getOperation() === 'Create' || $_export->getOperation() === 'Update' ? 'Queue' : $_export->getOperation(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Successes') ?></th>
+                        <td><?php echo $_export->getSuccesses(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Duplicates') ?></th>
+                        <td><?php echo $_export->getDuplicates(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Superseded') ?></th>
+                        <td><?php echo $_export->getSuperseded(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Failures') ?></th>
+                        <td><?php echo $_export->getFailures(); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php echo __('Processed') ?></th>
+                        <td><?php echo $block->formatDate($block->getOrderAdminDate($_export->getCreatedAt()), \IntlDateFormatter::MEDIUM, true); ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

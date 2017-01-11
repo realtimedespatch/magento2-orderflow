@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="sales_order_tabs">
+            <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Order\View\Tab\OrderFlow" name="order.info.orderflow" template="order/view/tab/orderflow.phtml"/>
+            <action method="addTab">
+                <argument name="name" xsi:type="string">order_info_orderflow</argument>
+                <argument name="block" xsi:type="string">order.info.orderflow</argument>
+            </action>
+        </referenceBlock>
+    </body>
+</page>

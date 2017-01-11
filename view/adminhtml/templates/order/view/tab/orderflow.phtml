@@ -1,0 +1,42 @@
+<?php if ($this->canDisplayAdminInfo()): ?>
+<section class="admin__page-section order-view-orderflow">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('Please Note') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item">
+            <p>OrderFlow users with the appropriate permissions can use the link below to view or edit the order in the OrderFlow environment. Note that any changes made in OrderFlow will not be reflected in Magento.</p>
+
+            <p>As an order progresses through the OrderFlow pack and despatch process the changes that can be made to it become more limited.</p>
+
+            <p>In some circumstances an order may have been split into multiple outgoing shipments, changes can be made to either a particular shipment or to the parent order.</p>
+
+            <a style="color: #ea7601;" title="View Order" target="_blank" href="<?php echo $this->getOrderFlowOrderUrl(); ?>">
+                <?php echo $this->getOrderFlowOrderUrl(); ?>
+            </a>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<section class="admin__page-sections">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('Export Status') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item">
+            <div class="admin__page-section-item-content">
+                <table class="admin__table-secondary">
+                    <tr>
+                        <th style="font-weight: bold;"><?php echo __('Status') ?></th>
+                        <td><?php echo $this->getOrder()->getOrderflowExportStatus() ? $this->getOrder()->getOrderflowExportStatus() : __('Pending') ; ?></td>
+                    </tr>
+                    <tr>
+                        <th style="font-weight: bold;"><?php echo __('Last Exported') ?></th>
+                        <td><?php echo $this->getOrder()->getOrderflowExportDate() ? $this->getOrder()->getOrderflowExportDate() : 'N/A'; ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

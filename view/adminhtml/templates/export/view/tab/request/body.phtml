@@ -1,0 +1,12 @@
+<section class="admin__page-section export-view-request-body">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('Request Body') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item request-body">
+            <div class="admin__page-section-item-content" style="word-wrap: break-word;" >
+                <pre><?php echo htmlentities($this->getExport()->getRequestBody()); ?></pre>
+            </div>
+        </div>
+    </div>
+</section>

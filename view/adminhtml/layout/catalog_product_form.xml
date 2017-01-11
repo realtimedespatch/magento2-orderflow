@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/layout_generic.xsd">
+    <referenceContainer name="content">
+        <block before="product_form" class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Product\Edit\Info\OrderFlow" name="product.info.orderflow" template="product/info/orderflow.phtml"/>
+    </referenceContainer>
+</layout>

@@ -1,0 +1,23 @@
+<?php
+
+namespace RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine;
+
+/**
+ * Class Collection
+ * @package RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine
+ */
+class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
+{
+    /**
+     * @inheritdoc
+     */
+    protected $_idFieldName = 'line_id';
+
+    /**
+     * @inheritdoc
+     */
+    protected function _construct()
+    {
+        $this->_init('RealtimeDespatch\OrderFlow\Model\ImportLine', 'RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine');
+    }
+}

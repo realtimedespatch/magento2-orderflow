@@ -1,0 +1,16 @@
+<section class="admin__page-section order-view-orderflow">
+    <div class="admin__page-section-title">
+        <span class="title"><?php /* @escapeNotVerified */ echo __('OrderFlow Notice') ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item">
+            <p>Credits or Refunds made in Magento will not update orders that have already been passed to OrderFlow.</p>
+            <p>OrderFlow users with the appropriate permissions can use the link below to view or edit the order in the OrderFlow environment. Note that any changes made in OrderFlow will not be reflected in Magento.</p>
+            <p>As an order progresses through the OrderFlow pack and despatch process the changes that can be made to it become more limited.</p>
+
+            <a style="color: #ea7601;" title="View Order" target="_blank" href="<?php echo $this->getOrderFlowOrderUrl(); ?>">
+                <?php echo $this->getOrderFlowOrderUrl(); ?>
+            </a>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="RealtimeDespatch_OrderFlow::config_orderflow" title="OrderFlow" translate="title" sortOrder="90" />
+                        </resource>
+                    </resource>
+                </resource>
+                <resource id="Magento_Backend::system">
+                    <resource id="RealtimeDespatch_OrderFlow::orderflow" title="OrderFlow" translate="title" sortOrder="20">
+                        <resource id="RealtimeDespatch_OrderFlow::orderflow_exports" title="Exports" sortOrder="10">
+                            <resource id="RealtimeDespatch_OrderFlow::orderflow_exports_products" title="Products" sortOrder="10" />
+                            <resource id="RealtimeDespatch_OrderFlow::orderflow_exports_orders" title="Orders" sortOrder="20" />
+                        </resource>                        
+                        <resource id="RealtimeDespatch_OrderFlow::orderflow_imports" title="Imports" sortOrder="10">
+                            <resource id="RealtimeDespatch_OrderFlow::orderflow_imports_inventory" title="Inventory" sortOrder="10" />
+                            <resource id="RealtimeDespatch_OrderFlow::orderflow_imports_shipments" title="Shipments" sortOrder="20" />
+                        </resource>
+                        <resource id="RealtimeDespatch_OrderFlow::orderflow_requests" title="Requests" sortOrder="10">
+                            <resource id="RealtimeDespatch_OrderFlow::orderflow_requests_exports" title="Exports" sortOrder="10" />
+                            <resource id="RealtimeDespatch_OrderFlow::orderflow_requests_imports" title="Imports" sortOrder="20" />
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

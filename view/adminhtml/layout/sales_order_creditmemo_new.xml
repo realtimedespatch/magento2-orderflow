@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="form">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">RealtimeDespatch_OrderFlow::order/creditmemo/create/form.phtml</argument>
+            </action>
+            <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Order\CreditMemo\OrderFlow" name="orderflow_info" template="order/creditmemo/orderflow.phtml"/>
+        </referenceBlock>
+    </body>
+</page>
