@@ -6,8 +6,7 @@
     "OSL-3.0"
   ],
   "require": {
-    "php": "~7.0.0|~7.1.0|~7.2.0|~7.3.0",
-    "sixbysix/realtime-despatch": "1.*"
+    "sixbysix/realtime-despatch": ">=1.0.0"
   },
   "extra": {
     "map": [
