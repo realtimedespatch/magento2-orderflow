@@ -98,7 +98,7 @@ class Failure implements \Magento\Framework\Notification\MessageInterface
             array('export_id' => $this->_unreadExport->getId())
         );
 
-        return __('A recent OrderFlow export contains failures. <a href="%1">View Details</a', $url);
+        return __('A recent OrderFlow export contains failures. <a href="%1">View Details</a>', $url);
     }
 
     /**
