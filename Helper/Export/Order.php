@@ -8,6 +8,7 @@ namespace RealtimeDespatch\OrderFlow\Helper\Export;
 class Order extends \Magento\Framework\App\Helper\AbstractHelper
 {
     const STATUS_PENDING = 'Pending';
+    const STATUS_QUEUED = 'Queued';
 
     /**
      * @var \Mage\Sales\Model\OrderFactory
@@ -112,7 +113,7 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
             ->addFieldToFilter('status', ['in' => $this->getExportableOrderStatuses($website->getId())])
             ->addFieldToFilter('is_virtual', ['eq' => 0])
             ->addFieldToFilter('orderflow_export_date', ['null' => true])
-            ->addFieldToFilter('orderflow_export_status', ['neq' => 'Queued'])
+            ->addFieldToFilter('orderflow_export_status', ['neq' => self::STATUS_QUEUED])
             ->setPage(1, $this->getBatchSize($website->getId()));
     }
 }
