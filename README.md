@@ -2,8 +2,6 @@
 
 ## Installation
 
-Install by running:
-
 ```bash
 composer require realtimedespatch/magento2-orderflow
 php bin/magento module:enable RealtimeDespatch_OrderFlow
