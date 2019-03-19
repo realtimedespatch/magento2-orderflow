@@ -104,6 +104,11 @@ class OrderExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\
 
         try {
             $order = $this->_orderRepository->loadByIncrementId($incrementId);
+
+            if ( ! $order->getId()) {
+                throw new \Exception('Order #'.$incrementId.' does not exist.');
+            }
+
             $order->setOrderflowExportStatus(__('Exported'));
             $order->setOrderflowExportDate($request->getCreatedAt());
             $this->_tx->addObject($order);
