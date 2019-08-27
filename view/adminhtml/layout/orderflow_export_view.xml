@@ -20,7 +20,7 @@
             </block>
         </referenceContainer>
         <referenceBlock name="export_tab_lines">
-            <block class="\Magento\Framework\View\Element\Text\ListText" name="lines">
+            <block class="Magento\Framework\View\Element\Text\ListText" name="lines">
                 <uiComponent name="product_export_line_listing"/>
                 <uiComponent name="order_export_line_listing"/>
             </block>
