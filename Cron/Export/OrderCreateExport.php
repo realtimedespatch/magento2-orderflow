@@ -51,7 +51,12 @@ class OrderCreateExport extends \RealtimeDespatch\OrderFlow\Cron\Export\ExportCr
         $this->_requestBuilder->setScopeId($website->getId());
 
         foreach ($orders as $order) {
-            $this->_requestBuilder->addRequestLine(json_encode(array('increment_id' => $order->getIncrementId())));
+            $this->_requestBuilder->addRequestLine(
+                json_encode(array(
+                    'entity_id' => $order->getEntityId(),
+                    'increment_id' => $order->getIncrementId(),
+                ))
+            );
         }
 
         return $this->_requestBuilder->saveRequest();

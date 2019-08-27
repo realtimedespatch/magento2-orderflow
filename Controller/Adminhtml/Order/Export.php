@@ -131,7 +131,12 @@ class Export extends \Magento\Backend\App\Action
         );
 
         $this->_builder->setScopeId($this->_getWebsiteId($order));
-        $this->_builder->addRequestLine(json_encode(array('increment_id' => $order->getIncrementId())));
+        $this->_builder->addRequestLine(
+            json_encode(array(
+                'entity_id' => $order->getEntityId(),
+                'increment_id' => $order->getIncrementId(),
+            ))
+        );
 
         return $this->_builder->saveRequest();
     }
