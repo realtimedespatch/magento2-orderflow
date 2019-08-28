@@ -88,12 +88,6 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('type_id', ['eq' => 'simple'])
             ->addAttributeToFilter([
-                ['attribute' => 'orderflow_export_date', 'null' => true],
-                ['attribute' => 'orderflow_export_date', 'lt' => new \Zend_Db_Expr('updated_at')],
-            ],
-            '',
-            'left')
-            ->addAttributeToFilter([
                 ['attribute' => 'orderflow_export_status', 'null' => true],
                 ['attribute' => 'orderflow_export_status', array('neq' => ['Queued'])],
             ],
@@ -120,8 +114,7 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('type_id', ['eq' => 'simple'])
             ->addAttributeToFilter('orderflow_export_date', ['notnull' => true])
-            ->addAttributeToFilter('orderflow_export_date', ['lt' => new \Zend_Db_Expr('updated_at')])
-            ->addFieldToFilter('orderflow_export_status', ['neq' => 'Queued'])
+            ->addFieldToFilter('orderflow_export_status', ['eq' => 'Pending'])
             ->setStore($this->getStoreId($website->getId()))
             ->setPage(1, $this->getBatchSize($website->getId()));
 
