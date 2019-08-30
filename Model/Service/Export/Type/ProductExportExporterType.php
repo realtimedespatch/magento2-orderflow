@@ -105,7 +105,7 @@ class ProductExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Servic
         try {
             $product = $this->_productRepository->get($sku, true, 0);
             $product->setOrderflowExportStatus(__('Exported'));
-            $product->setOrderflowExportDate($request->getCreatedAt());
+            $product->setOrderflowExportDate($request->getCreationTime());
             $this->_tx->addObject($product);
 
             $requestLine->setResponse(__('Product successfully exported.'));

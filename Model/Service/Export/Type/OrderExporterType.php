@@ -104,7 +104,7 @@ class OrderExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Export
         $service = $this->_factory->getService($request->getScopeId());
 
         try {
-            $service->notifyOrderCreation($incrementId, $entityId);
+            $service->notifyOrderCreation($entityId, $incrementId);
             $request->setResponseBody($service->getLastResponseBody());
 
             return $this->_createSuccessExportLine(
