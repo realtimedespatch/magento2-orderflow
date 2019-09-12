@@ -110,7 +110,7 @@ class OrderExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\
             }
 
             $order->setOrderflowExportStatus(__('Exported'));
-            $order->setOrderflowExportDate($request->getCreatedAt());
+            $order->setOrderflowExportDate($request->getCreationTime());
             $this->_tx->addObject($order);
 
             $requestLine->setResponse(__('Order successfully exported.'));
