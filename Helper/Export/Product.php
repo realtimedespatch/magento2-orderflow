@@ -87,6 +87,7 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
             ->getCollection()
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('type_id', ['eq' => 'simple'])
+            ->addAttributeToFilter('orderflow_export_date', ['null' => true])
             ->addAttributeToFilter([
                 ['attribute' => 'orderflow_export_status', 'null' => true],
                 ['attribute' => 'orderflow_export_status', array('neq' => ['Queued'])],
