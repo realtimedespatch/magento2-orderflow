@@ -435,7 +435,7 @@ class InstallData implements InstallDataInterface
         );
 
         foreach ($this->collectionFactory->create()->getItems() as $product) {
-            $connection->query("insert ignore into ".$tblSalesOrder." (attribute_id, store_id, entity_id, value) values (".$attributeId.", 0, ".$product->getId().", 'Pending');");
+            $connection->query("insert ignore into ".$tblSalesOrder." (attribute_id, store_id, row_id, value) values (".$attributeId.", 0, ".$product->getId().", 'Pending');");
         }
     }
 }
