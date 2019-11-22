@@ -425,17 +425,5 @@ class InstallData implements InstallDataInterface
                 'is_visible_in_grid' => false
             ]
         );
-
-        // Set default product export status.
-        $connection = $this->resource->getConnection();
-        $tblSalesOrder = $connection->getTableName('catalog_product_entity_varchar');
-
-        $attributeId = $connection->fetchOne(
-            "SELECT attribute_id FROM ".$connection->getTableName('eav_attribute')." where attribute_code = 'orderflow_export_status';"
-        );
-
-        foreach ($this->collectionFactory->create()->getItems() as $product) {
-            $connection->query("insert ignore into ".$tblSalesOrder." (attribute_id, store_id, row_id, value) values (".$attributeId.", 0, ".$product->getId().", 'Pending');");
-        }
     }
 }
