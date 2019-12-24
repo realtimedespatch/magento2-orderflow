@@ -11,9 +11,7 @@ php bin/magento setup:di:compile
 
 ## Magento 2.x Compatibility
 
-- Magento 2.3.0 / Module Version 1.3.0
-- Magento 2.2.x / Module Version 1.2.0
-- Magento 2.1.x / Module Version 1.0.0
+- Magento 2.1, 2.2, 2.3  / Module Version 1.3.0
 
 ## Documentation
 
