@@ -1,5 +1,7 @@
 <h1 align="center">Magento 2 OrderFlow Integration</h1>
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2d22302b19714517ab3bf868c17e737e)](https://www.codacy.com/manual/daniel-ness/magento2-orderflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=realtimedespatch/magento2-orderflow&amp;utm_campaign=Badge_Grade)
+
 ## Installation
 
 ```bash
