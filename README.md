@@ -17,4 +17,4 @@ php bin/magento setup:di:compile
 
 The official documentation can be found at the following location:
 
-<a href="https://realtimedespatch.co.uk/orderflow-documentation/?docurl=https://documentation.realtimedespatch.co.uk/html/OrderFlowMagento2Integration/">Documentation</a>
+<a href="https://documentation.realtimedespatch.co.uk/html/Magento2IntegrationGuide/">Documentation</a>
