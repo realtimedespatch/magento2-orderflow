@@ -197,8 +197,12 @@ abstract class ImporterType implements ImporterTypeInterface
      */
     protected function _isDuplicateLine($seqId)
     {
-        $model = $this->_objectManager->create('RealtimeDespatch\OrderFlow\Model\ImportLine');
-        $model->load($seqId, 'sequence_id');
+        $model = $this->_objectManager->create('RealtimeDespatch\OrderFlow\Model\ImportLine')
+            ->getCollection()
+            ->addFieldToFilter('sequence_id', ['eq' => $seqId])
+            ->addFieldToFilter('result', ['eq' => ImportLineInterface::RESULT_SUCCESS])
+            ->setOrder('line_id', 'DESC')
+            ->getFirstItem();
 
         return ! is_null($model->getId());
     }
@@ -218,6 +222,7 @@ abstract class ImporterType implements ImporterTypeInterface
             ->getCollection()
             ->addFieldToFilter('entity', ['eq' => $this->getType()])
             ->addFieldToFilter('reference', ['eq' => $reference])
+            ->addFieldToFilter('result', ['eq' => ImportLineInterface::RESULT_SUCCESS])
             ->setOrder('sequence_id','DESC')
             ->getFirstItem();
 
