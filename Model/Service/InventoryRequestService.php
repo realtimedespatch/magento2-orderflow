@@ -96,8 +96,14 @@ class InventoryRequestService implements InventoryRequestManagementInterface
 
         $this->_builder->setRequestBody($this->_httpRequest->getContent());
 
-        foreach ($productSeqs as $index => $seq) {
-            $body = (array) $productQtys[$index];
+        $productSeqsMap = [];
+        foreach ($productSeqs as $productSeq) {
+            $productSeqsMap[$productSeq->getSku()] = $productSeq;
+        }
+
+        foreach ($productQtys as $productQty) {
+            $body = (array) $productQty;
+            $seq = $productSeqsMap[$productQty->getSku()];
             $body['lastOrderExported'] = $seq->getLastOrderExported();
             $this->_builder->addRequestLine(json_encode($body), $seq->getSeq());
         }
