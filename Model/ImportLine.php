@@ -3,20 +3,9 @@
 namespace RealtimeDespatch\OrderFlow\Model;
 
 use RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface;
-use Magento\Framework\DataObject\IdentityInterface;
 
-class ImportLine extends \Magento\Framework\Model\AbstractModel implements ImportLineInterface, IdentityInterface
+class ImportLine extends \Magento\Framework\Model\AbstractModel implements ImportLineInterface
 {
-    /**
-     * @inheritdoc
-     */
-    const CACHE_TAG = 'rtd_import_line';
-
-    /**
-     * @inheritdoc
-     */
-    protected $_cacheTag = 'rtd_import_line';
-
     /**
      * @inheritdoc
      */
@@ -28,14 +17,6 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
     protected function _construct()
     {
         $this->_init('RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine');
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getIdentities()
-    {
-        return [self::CACHE_TAG . '_' . $this->getId()];
     }
 
     /**

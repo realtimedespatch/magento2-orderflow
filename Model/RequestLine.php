@@ -3,20 +3,9 @@
 namespace RealtimeDespatch\OrderFlow\Model;
 
 use RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface;
-use Magento\Framework\DataObject\IdentityInterface;
 
-class RequestLine extends \Magento\Framework\Model\AbstractModel implements RequestLineInterface, IdentityInterface
+class RequestLine extends \Magento\Framework\Model\AbstractModel implements RequestLineInterface
 {
-    /**
-     * CMS page cache tag
-     */
-    const CACHE_TAG = 'rtd_request_line';
-
-    /**
-     * @var string
-     */
-    protected $_cacheTag = 'rtd_request_line';
-
     /**
      * Prefix of model events names
      *
@@ -49,16 +38,6 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
     public function getId()
     {
         return $this->getData(self::LINE_ID);
-    }
-
-    /**
-     * Return unique ID(s) for each object in system
-     *
-     * @return array
-     */
-    public function getIdentities()
-    {
-        return [self::CACHE_TAG . '_' . $this->getId()];
     }
 
     /**

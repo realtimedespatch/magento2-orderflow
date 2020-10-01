@@ -3,20 +3,9 @@
 namespace RealtimeDespatch\OrderFlow\Model;
 
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
-use Magento\Framework\DataObject\IdentityInterface;
 
-class Request extends \Magento\Framework\Model\AbstractModel implements RequestInterface, IdentityInterface
+class Request extends \Magento\Framework\Model\AbstractModel implements RequestInterface
 {
-    /**
-     * CMS page cache tag
-     */
-    const CACHE_TAG = 'rtd_request';
-
-    /**
-     * @var string
-     */
-    protected $_cacheTag = 'rtd_request';
-
     /**
      * Prefix of model events names
      *
@@ -96,16 +85,6 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
             ->loadData();
 
         return $this->_lines;
-    }
-
-    /**
-     * Return unique ID(s) for each object in system
-     *
-     * @return array
-     */
-    public function getIdentities()
-    {
-        return [self::CACHE_TAG . '_' . $this->getId()];
     }
 
     /**

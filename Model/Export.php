@@ -3,20 +3,9 @@
 namespace RealtimeDespatch\OrderFlow\Model;
 
 use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
-use Magento\Framework\DataObject\IdentityInterface;
 
-class Export extends \Magento\Framework\Model\AbstractModel implements ExportInterface, IdentityInterface
+class Export extends \Magento\Framework\Model\AbstractModel implements ExportInterface
 {
-    /**
-     * @inheritdoc
-     */
-    const CACHE_TAG = 'rtd_export';
-
-    /**
-     * @inheritdoc
-     */
-    protected $_cacheTag = 'rtd_export';
-
     /**
      * @inheritdoc
      */
@@ -36,14 +25,6 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
     {
         $this->_init('RealtimeDespatch\OrderFlow\Model\ResourceModel\Export');
         $this->_lines = array();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getIdentities()
-    {
-        return [self::CACHE_TAG . '_' . $this->getId()];
     }
 
     /**
