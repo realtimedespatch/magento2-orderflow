@@ -9,10 +9,8 @@
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\ImportInterface" type="RealtimeDespatch\OrderFlow\Model\Import" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface" type="RealtimeDespatch\OrderFlow\Model\ImportLine" />
     <preference for="RealtimeDespatch\OrderFlow\Api\ImportRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\ImportRepository" />
-    <preference for="RealtimeDespatch\OrderFlow\Api\ShipmentRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\ShipmentRequestService" />
-    <preference for="RealtimeDespatch\OrderFlow\Api\InventoryRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\InventoryRequestService" />
-    <preference for="RealtimeDespatch\OrderFlow\Api\OrderRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\OrderRequestService" />
-    <preference for="RealtimeDespatch\OrderFlow\Api\ProductRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\ProductRequestService" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\ShipmentRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\ShipmentApiService" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\InventoryRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\InventoryApiService" />
     <preference for="RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface" type="RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface" type="RealtimeDespatch\OrderFlow\Model\SequenceItem" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface" type="RealtimeDespatch\OrderFlow\Model\QuantityItem" />

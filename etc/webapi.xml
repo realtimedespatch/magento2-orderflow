@@ -1,19 +1,5 @@
 <?xml version="1.0"?>
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
-    <!-- Products -->
-    <route url="/V1/orderflow/export/product" method="POST">
-        <service class="RealtimeDespatch\OrderFlow\Api\ProductRequestManagementInterface" method="export"/>
-        <resources>
-            <resource ref="anonymous" />
-        </resources>
-    </route>
-    <!-- Orders -->
-    <route url="/V1/orderflow/export/order" method="POST">
-        <service class="RealtimeDespatch\OrderFlow\Api\OrderRequestManagementInterface" method="export"/>
-        <resources>
-            <resource ref="anonymous" />
-        </resources>
-    </route>
     <!-- Inventory -->
     <route url="/V1/orderflow/inventory/" method="POST">
         <service class="RealtimeDespatch\OrderFlow\Api\InventoryRequestManagementInterface" method="update"/>
