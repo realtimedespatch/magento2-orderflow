@@ -2,52 +2,43 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Service\Request;
 
-use \RealtimeDespatch\OrderFlow\Model\Request;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorTypeInterface;
 
+/**
+ * Request Processor.
+ *
+ * Processes an API Request according to type.
+ */
 class RequestProcessor
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestProcessorTypeInterface
+     * @var RequestProcessorTypeInterface
      */
-    protected $_type;
+    protected $type;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @param RequestProcessorTypeInterface $type
      */
-    protected $_logger;
-
-    /**
-     * @var \Magento\Framework\Event\ManagerInterface
-     */
-    protected $_eventManager;
-
-    /**
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestProcessorTypeInterface $type
-     */
-    public function __construct(
-        \RealtimeDespatch\OrderFlow\Api\RequestProcessorTypeInterface $type,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\Event\ManagerInterface $eventManager
-    )
+    public function __construct(RequestProcessorTypeInterface $type)
     {
-        $this->_type = $type;
-        $this->_logger = $logger;
-        $this->_eventManager = $eventManager;
+        $this->type = $type;
     }
 
     /**
-     * Processes a request.
+     * Process Request.
      *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
+     * @param RequestInterface $request
      *
-     * @return void
+     * @return ExportInterface|boolean
      */
-    public function process(Request $request)
+    public function process(RequestInterface $request)
     {
-        if ( ! $request->canProcess()) {
+        if (! $request->canProcess()) {
             return false;
         }
 
-        return $this->_type->process($request);
+        return $this->type->process($request);
     }
 }

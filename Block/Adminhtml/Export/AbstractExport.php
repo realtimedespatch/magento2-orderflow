@@ -2,33 +2,40 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Export;
 
+use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Block\Widget;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Registry;
+use Magento\Store\Model\WebsiteFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+
 /**
  * Adminhtml export abstract block
  */
-class AbstractExport extends \Magento\Backend\Block\Widget
+class AbstractExport extends Widget
 {
     /**
      * Core registry
      *
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $_coreRegistry = null;
 
     /**
-     * @var Magento\Store\Model\WebsiteFactory
+     * @var WebsiteFactory
      */
     protected $_websiteFactory;
 
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Sales\Helper\Admin $adminHelper
+     * @param Context $context
+     * @param Registry $registry
+     * @param WebsiteFactory $websiteFactory
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Store\Model\WebsiteFactory $websiteFactory,
+        Context $context,
+        Registry $registry,
+        WebsiteFactory $websiteFactory,
         array $data = []
     ) {
         $this->_coreRegistry = $registry;
@@ -39,12 +46,12 @@ class AbstractExport extends \Magento\Backend\Block\Widget
     /**
      * Retrieve available export
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return ExportInterface
+     * @throws LocalizedException
      */
     public function getExport()
     {
-        if ($this->hasExport()) {
+        if ($this->getData('export')) {
             return $this->getData('export');
         }
         if ($this->_coreRegistry->registry('current_export')) {
@@ -53,6 +60,6 @@ class AbstractExport extends \Magento\Backend\Block\Widget
         if ($this->_coreRegistry->registry('export')) {
             return $this->_coreRegistry->registry('export');
         }
-        throw new \Magento\Framework\Exception\LocalizedException(__('Export Not Found.'));
+        throw new LocalizedException(__('Export Not Found.'));
     }
 }

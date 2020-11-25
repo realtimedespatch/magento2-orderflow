@@ -2,10 +2,13 @@
 
 namespace RealtimeDespatch\OrderFlow\Ui\Component\Listing\Columns;
 
+use Magento\Framework\AuthorizationInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 use Magento\Framework\UrlInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export;
 
 class RequestExportActions extends Column
 {
@@ -24,12 +27,12 @@ class RequestExportActions extends Column
     private $editUrl;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\ResourceModel\Export
+     * @var Export
      */
     protected $resourceModel;
 
     /**
-     * @var \Magento\Framework\AuthorizationInterface
+     * @var AuthorizationInterface
      */
     protected $auth;
 
@@ -37,8 +40,8 @@ class RequestExportActions extends Column
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
      * @param UrlInterface $urlBuilder
-     * @param \Magento\Framework\AuthorizationInterface $auth
-     * @param \RealtimeDespatch\OrderFlow\Model\ResourceModel\Export $resourceModel
+     * @param AuthorizationInterface $auth
+     * @param Export $resourceModel
      * @param array $components
      * @param array $data
      * @param string $editUrl
@@ -47,8 +50,8 @@ class RequestExportActions extends Column
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
         UrlInterface $urlBuilder,
-        \Magento\Framework\AuthorizationInterface $auth,
-        \RealtimeDespatch\OrderFlow\Model\ResourceModel\Export $resourceModel,
+        AuthorizationInterface $auth,
+        Export $resourceModel,
         array $components = [],
         array $data = [],
         $editUrl = self::REQUEST_URL_PATH_EDIT
@@ -70,16 +73,16 @@ class RequestExportActions extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-                $name = $this->getData('name');
+                $exportName = $this->getData('name');
                 if (isset($item['request_id'])) {
-                    $item[$name]['view'] = [
+                    $item[$exportName]['view'] = [
                         'href'  => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_VIEW, ['request_id' => $item['request_id']]),
                         'label' => __('View Request')
                     ];
                 }
 
                 if (isset($item['processed_at']) && $item['processed_at'] == 'Pending') {
-                    $item[$name]['process'] = [
+                    $item[$exportName]['process'] = [
                         'href' => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_PROCESS, ['request_id' => $item['request_id']]),
                         'label' => __('Process'),
                         'confirm' => [
@@ -92,7 +95,7 @@ class RequestExportActions extends Column
                 $exportId = $this->resourceModel->getIdByRequestId($item['request_id']);
 
                 if ($exportId && $this->canViewExport($item['entity'])) {
-                    $item[$name]['view_export'] = [
+                    $item[$exportName]['view_export'] = [
                         'href'  => $this->urlBuilder->getUrl(self::EXPORT_URL_PATH_VIEW, ['export_id' => $exportId]),
                         'label' => __('View Export Report')
                     ];
@@ -110,13 +113,13 @@ class RequestExportActions extends Column
      *
      * @return bool
      */
-    public function canViewExport($entity)
+    public function canViewExport(string $entity)
     {
-        if ($entity == \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface::ENTITY_PRODUCT) {
+        if ($entity == ExportInterface::ENTITY_PRODUCT) {
             return $this->auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_products');
         }
 
-        if ($entity == \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface::ENTITY_ORDER) {
+        if ($entity == ExportInterface::ENTITY_ORDER) {
             return $this->auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_orders');
         }
 

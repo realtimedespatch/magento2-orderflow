@@ -2,10 +2,14 @@
 
 namespace RealtimeDespatch\OrderFlow\Helper\Import;
 
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Store\Model\ScopeInterface;
+use RealtimeDespatch\OrderFlow\Api\ImportHelperInterface;
+
 /**
  * Inventory Import Helper.
  */
-class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
+class Inventory extends AbstractHelper implements ImportHelperInterface
 {
     /**
      * Checks whether the import process is enabled.
@@ -16,20 +20,20 @@ class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_inventory_import/settings/is_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
     }
 
     /**
      * Returns the maximum batch size for processing.
      *
-     * @return boolean
+     * @return integer
      */
     public function getBatchSize()
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/batch_size',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
     }
 
@@ -42,7 +46,7 @@ class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_inventory_import/settings/negative_qtys_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
     }
 
@@ -55,7 +59,7 @@ class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_inventory_import/settings/adjust_inventory',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
     }
 
@@ -68,7 +72,7 @@ class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $flag = (integer) $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/adjust_inventory',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
 
         return $flag > 0;
@@ -83,7 +87,7 @@ class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $flag = (integer) $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/adjust_inventory',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
 
         return $flag > 1;
@@ -98,7 +102,7 @@ class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $statuses = $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/valid_unsent_order_statuses',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
 
         return explode(',', $statuses);
@@ -107,20 +111,20 @@ class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * Retrieves the active quote cutoff in days.
      *
-     * @return boolean
+     * @return integer
      */
     public function getActiveQuoteCutoff()
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/active_quote_cutoff',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
     }
 
     /**
      * Retrieves the active quote cutoff date.
      *
-     * @return boolean
+     * @return string
      */
     public function getActiveQuoteCutoffDate()
     {
@@ -130,20 +134,20 @@ class Inventory extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * Retrieves the unsent order cutoff in days.
      *
-     * @return boolean
+     * @return integer
      */
     public function getUnsentOrderCutoff()
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/unsent_order_cutoff',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
     }
 
     /**
      * Retrieves the unsent order cutoff date.
      *
-     * @return boolean
+     * @return string
      */
     public function getUnsentOrderCutoffDate()
     {

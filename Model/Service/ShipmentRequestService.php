@@ -1,60 +1,68 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service;
 
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\Session\Generic;
+use Psr\Log\LoggerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
 use RealtimeDespatch\OrderFlow\Api\ShipmentRequestManagementInterface;
 
 /**
  * Class ShipmentRequestService
  *
  * @api
+ * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class ShipmentRequestService implements ShipmentRequestManagementInterface
 {
     /**
-     * @var \Magento\Framework\Registry
+     * @var Generic
      */
-    protected $_registry;
+    protected $session;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
-    protected $_logger;
+    protected $logger;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @var RequestBuilderInterface
      */
-    protected $_builder;
+    protected $builder;
 
     /**
-     * @var \Magento\Framework\App\Request\Http
+     * @var Http
      */
-    protected $_httpRequest;
+    protected $httpRequest;
 
     /**
      * Constructor
      *
-     * @param \Magento\Framework\Registry $registry
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder
-     * @param \Magento\Framework\App\Request\Http $request
+     * @param Generic $session,
+     * @param LoggerInterface $logger
+     * @param RequestBuilderInterface $builder
+     * @param Http $httpRequest
      */
     public function __construct(
-        \Magento\Framework\Registry $registry,
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder,
-        \Magento\Framework\App\Request\Http $httpRequest) {
-        $this->_registry = $registry;
-        $this->_logger = $logger;
-        $this->_builder = $builder;
-        $this->_httpRequest = $httpRequest;
+        Generic $session,
+        LoggerInterface $logger,
+        RequestBuilderInterface $builder,
+        Http $httpRequest) {
+        $this->session = $session;
+        $this->logger = $logger;
+        $this->builder = $builder;
+        $this->httpRequest = $httpRequest;
     }
 
     /**
-     * @api
      * @param string $orderIncrementId
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface[] $skuQty
+     * @param QuantityItemInterface[] $skuQty
      * @param string|null $comment
      * @param string|false $email
      * @param string|false $includeComment
@@ -65,8 +73,9 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
      * @param string|null $messageSeqId
      *
      * @return mixed
+     * @api
      */
-    public function create($orderIncrementId,
+    public function create(string $orderIncrementId,
                            $skuQty = array(),
                            $comment = null,
                            $email = false,
@@ -101,8 +110,8 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
 
     /**
      * @api
-     * @param integer $orderIncrementId
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface[] $skuQty
+     * @param string $orderIncrementId
+     * @param QuantityItemInterface[] $skuQty
      * @param string|null $comment
      * @param string|false $email
      * @param string|false $includeComment
@@ -112,11 +121,11 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
      * @param string|null $dateShipped
      * @param string|null $messageSeqId
      *
-     * @return mixed
+     * @return void
      */
     public function _create(
-        $orderIncrementId,
-        $skuQty = array(),
+        string $orderIncrementId,
+        $skuQty = [],
         $comment = null,
         $email = false,
         $includeComment = false,
@@ -127,7 +136,7 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
         $messageSeqId = null
     )
     {
-        $body = array(
+        $body = [
             'orderIncrementId' => $orderIncrementId,
             'skuQtys' => $skuQty,
             'comment' => $comment,
@@ -138,23 +147,26 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
             'trackingNumber' => $trackingNumber,
             'dateShipped' => $dateShipped,
             'sequenceId' => $messageSeqId
-        );
+        ];
 
-        $this->_builder->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_IMPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_SHIPMENT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_CREATE,
+        $this->builder->setRequestData(
+            RequestInterface::TYPE_IMPORT,
+            RequestInterface::ENTITY_SHIPMENT,
+            RequestInterface::OP_CREATE,
             $messageSeqId
         );
 
-        $this->_builder->setRequestBody($this->_httpRequest->getContent());
-        $this->_builder->addRequestLine(json_encode($body), $messageSeqId);
-        $this->_builder->saveRequest();
+        $this->builder->setRequestBody($this->httpRequest->getContent());
+        $this->builder->addRequestLine(json_encode($body), $messageSeqId);
+        $this->builder->saveRequest();
 
-        // Register request to capture response later.
-        $this->_registry->register(
-            'request_id',
-            $this->_builder->getRequest()->getId()
-        );
+        /**
+         * Register request to capture response later
+         *
+         * see \RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ShipmentImport
+         *
+         * @noinspection PhpUndefinedMethodInspection
+         */
+        $this->session->setRequestId($this->builder->getRequest()->getId());
     }
 }

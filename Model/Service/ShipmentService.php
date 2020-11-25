@@ -1,11 +1,25 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service;
 
+use Exception;
+use Magento\Framework\DB\Transaction;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\Convert\Order;
+use Magento\Sales\Model\Order\Shipment;
+use Magento\Sales\Model\Order\Shipment\Track;
+use Magento\Sales\Model\OrderFactory;
+use Magento\Shipping\Model\Order\TrackFactory;
+use Magento\Shipping\Model\ShipmentNotifier;
 use RealtimeDespatch\OrderFlow\Api\ShipmentManagementInterface;
+use RealtimeDespatch\OrderFlow\Helper\Import\Shipment as ShipmentImportHelper;
 
 /**
  * Class ShipmentService
+ *
+ * Service to process shipments to customers.
  *
  * @api
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -13,58 +27,66 @@ use RealtimeDespatch\OrderFlow\Api\ShipmentManagementInterface;
 class ShipmentService implements ShipmentManagementInterface
 {
     /**
-     * @var RealtimeDespatch\OrderFlow\Helper\Import\Shipment
+     * @var ShipmentImportHelper
      */
     protected $_helper;
 
     /**
-     * @param Magento\Sales\Model\OrderFactory $orderFactory
+     * @param OrderFactory $orderFactory
      */
-    protected $_orderFactory;
+    protected $orderFactory;
 
     /**
-     * @param Magento\Shipping\Model\Order\TrackFactory $trackFactory
+     * @param TrackFactory $trackFactory
      */
-    protected $_trackFactory;
+    protected $trackFactory;
 
     /**
-     * @param Magento\Sales\Model\Convert\Order $orderConverter
+     * @param Order $orderConverter
      */
-    protected $_orderConverter;
+    protected $orderConverter;
 
     /**
-     * @param Magento\Shipping\Model\ShipmentNotifier $shipmentNotifier
+     * @param ShipmentNotifier $shipmentNotifier
      */
-    protected $_shipmentNotifier;
+    protected $shipmentNotifier;
 
     /**
-     * @param Psr\Log\LoggerInterface $logger
-     * @param Magento\Framework\Event\ManagerInterface $eventManager
-     * @param RealtimeDespatch\OrderFlow\Helper\Import\Shipment $helper
-     * @param Magento\Sales\Model\OrderRepository $orderRepository
+     * @var Transaction
+     */
+    protected $transaction;
+
+    /**
+     * @param ShipmentImportHelper $helper
+     * @param OrderFactory $orderFactory
+     * @param TrackFactory $trackFactory
+     * @param Order $orderConverter
+     * @param ShipmentNotifier $shipmentNotifier
+     * @param Transaction $transaction
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\Event\ManagerInterface $eventManager,
-        \RealtimeDespatch\OrderFlow\Helper\Import\Shipment $helper,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Shipping\Model\Order\TrackFactory $trackFactory,
-        \Magento\Sales\Model\Convert\Order $orderConverter,
-        \Magento\Shipping\Model\ShipmentNotifier $shipmentNotifier
+        ShipmentImportHelper $helper,
+        OrderFactory $orderFactory,
+        TrackFactory $trackFactory,
+        Order $orderConverter,
+        ShipmentNotifier $shipmentNotifier,
+        Transaction $transaction
     ) {
         $this->_helper = $helper;
-        $this->_orderFactory = $orderFactory;
-        $this->_trackFactory = $trackFactory;
-        $this->_orderConverter = $orderConverter;
-        $this->_shipmentNotifier = $shipmentNotifier;
+        $this->orderFactory = $orderFactory;
+        $this->trackFactory = $trackFactory;
+        $this->orderConverter = $orderConverter;
+        $this->shipmentNotifier = $shipmentNotifier;
+        $this->transaction = $transaction;
     }
 
     /**
      * Creates a new shipment
      *
-     * @param array $params Shipment Params
+     * @param mixed $params Shipment Params
      *
-     * @return mixed
+     * @return Shipment
+     * @throws LocalizedException
      */
     public function createShipment($params)
     {
@@ -82,83 +104,86 @@ class ShipmentService implements ShipmentManagementInterface
 
             // Register shipment.
             $shipment->register();
+            /** @noinspection PhpUndefinedMethodInspection */
             $shipment->getOrder()->setIsInProcess(true);
 
-            // Ssve shipment.
-            $shipment->save();
-            $shipment->getOrder()->save();
+            // Save shipment.
+            $this->transaction->addObject($shipment);
+            $this->transaction->addObject($shipment->getOrder());
+            $this->transaction->save();
 
             // Notify customer.
             if ($params->email) {
-                $this->_shipmentNotifier->notify($shipment);
+                $this->shipmentNotifier->notify($shipment);
             }
 
-            $shipment->save();
-        } catch (\Exception $e) {
-            throw new \Magento\Framework\Exception\LocalizedException(
+            return $shipment;
+        } catch (Exception $e) {
+            throw new LocalizedException(
                 __($e->getMessage())
             );
         }
     }
 
     /**
-     * Creates a new shipment
+     * Create Shipment.
      *
-     * @param array $params Shipment params.
+     * @param mixed $params
      *
-     * @return \Magento\Sales\Model\Order\Shipment
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Shipment
+     * @throws LocalizedException
      */
     protected function _createShipment($params)
     {
         $incrementId = (string) $params->orderIncrementId;
-        $order = $this->_orderFactory->create()->loadByAttribute('increment_id', $incrementId);
+        $order = $this->orderFactory->create()->loadByAttribute('increment_id', $incrementId);
 
         // Check if the order can be shipped.
-        if ( ! $order->canShip()) {
-            throw new \Magento\Framework\Exception\LocalizedException(
+        if (! $order->canShip()) {
+            throw new LocalizedException(
                 __("Can't create shipment")
             );
         }
 
         // Create shipment.
-        $shipment = $this->_orderConverter->toShipment($order);
+        $shipment = $this->orderConverter->toShipment($order);
         $shipment->addComment($params->comment, $params->email && $params->includeComment);
 
         return $shipment;
     }
 
     /**
-     * Creates the relevant shipment lines.
+     * Create Shipment Lines.
      *
-     * @param Magento\Sales\Model\Order\Shipment $shipment The shipment
-     * @param array $skuQtys SKUs, and Quantities to update
+     * @param Shipment $shipment
+     * @param mixed $skuQtys
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    protected function _createShipmentLines($shipment, $skuQtys)
+    protected function _createShipmentLines(Shipment $shipment, $skuQtys)
     {
         foreach ($skuQtys as $skuQty) {
             $qty = $skuQty->qty;
             $sku = $skuQty->sku;
             $orderItem = $this->_getOrderItem($shipment, $sku);
-            $shipmentItem = $this->_orderConverter->itemToShipmentItem($orderItem)->setQty($qty);
+            $shipmentItem = $this->orderConverter->itemToShipmentItem($orderItem)->setQty($qty);
             $shipment->addItem($shipmentItem);
         }
     }
 
     /**
-     * Adds a track to the shipment.
+     * Add Tracking.
      *
-     * @param Magento\Sales\Model\Order\Shipment $shipment The shipment
-     * @param array $params
+     * @param Shipment $shipment The shipment
+     * @param mixed $params
      *
      * @return void
      */
-    protected function _addTrack($shipment, $params)
+    protected function _addTrack(Shipment $shipment, $params)
     {
-        $track = $this->_trackFactory->create();
-        $track->setCarrierCode(\Magento\Sales\Model\Order\Shipment\Track::CUSTOM_CARRIER_CODE);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $track = $this->trackFactory->create();
+        $track->setCarrierCode(Track::CUSTOM_CARRIER_CODE);
         $track->setTitle($params->courierName.' '.$params->serviceName);
         $track->setNumber($params->trackingNumber);
         $shipment->addTrack($track);
@@ -167,13 +192,13 @@ class ShipmentService implements ShipmentManagementInterface
     /**
      * Retrieves an order item by SKU.
      *
-     * @param Magento\Sales\Model\Order\Shipment $shipment The shipment
-     * @param string $sku The SKU
+     * @param Shipment $shipment
+     * @param string $sku
      *
      * @return mixed
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    protected function _getOrderItem($shipment, $sku)
+    protected function _getOrderItem(Shipment $shipment, string $sku)
     {
         $order = $shipment->getOrder();
 
@@ -183,7 +208,7 @@ class ShipmentService implements ShipmentManagementInterface
             }
         }
 
-        throw new \Magento\Framework\Exception\LocalizedException(
+        throw new LocalizedException(
             __('Order Item with SKU: "'.$sku.'" does not exist.')
         );
     }

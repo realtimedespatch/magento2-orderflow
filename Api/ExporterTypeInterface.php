@@ -2,8 +2,12 @@
 
 namespace RealtimeDespatch\OrderFlow\Api;
 
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+
 /**
  * Exporter Type Interface.
+ *
+ * Defines the methods available for an export processor type.
  *
  * @api
  */
@@ -12,15 +16,15 @@ interface ExporterTypeInterface
     /**
      * Checks whether the export type is enabled
      *
-     * @param integer $scopeId
+     * @param null|integer $scopeId
      *
-     * @api
      * @return boolean
+     * @api
      */
     public function isEnabled($scopeId = null);
 
     /**
-     * Returns the export type
+     * Export Type Getter.
      *
      * @api
      * @return string
@@ -28,12 +32,12 @@ interface ExporterTypeInterface
     public function getType();
 
     /**
-     * Exports an orderflow request.
+     * Processes an Export Request.
      *
      * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
+     * @param RequestInterface $request
      *
      * @return mixed
      */
-    public function export(\RealtimeDespatch\OrderFlow\Model\Request $request);
+    public function export(RequestInterface $request);
 }

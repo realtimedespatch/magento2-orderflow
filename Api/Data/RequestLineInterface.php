@@ -12,6 +12,7 @@ interface RequestLineInterface
     const BODY         = 'body';
     const CREATED_AT   = 'created_at';
     const PROCESSED_AT = 'processed_at';
+    const MESSAGE_ID  = 'message_id';
 
     /**
      * Get ID
@@ -74,61 +75,61 @@ interface RequestLineInterface
      *
      * @param string $requestId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setRequestId($requestId);
+    public function setRequestId(string $requestId);
 
     /**
      * Set sequence ID
      *
      * @param string $sequenceId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setSequenceId($sequenceId);
+    public function setSequenceId(string $sequenceId);
 
     /**
      * Set type
      *
      * @param string $type
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setType($type);
+    public function setType(string $type);
 
     /**
      * Set response
      *
      * @param string $response
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setResponse($response);
+    public function setResponse(string $response);
 
     /**
      * Set body
      *
      * @param string $body
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setBody($body);
+    public function setBody(string $body);
 
     /**
      * Set created timestamp
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setCreatedAt($created);
+    public function setCreatedAt(string $created);
 
     /**
      * Set processed timestamp
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setProcessedAt($processed);
+    public function setProcessedAt(string $processed);
 }

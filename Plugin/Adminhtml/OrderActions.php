@@ -2,24 +2,41 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Adminhtml;
 
+use Magento\Framework\AuthorizationInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\UrlInterface;
+use RealtimeDespatch\OrderFlow\Helper\Export\Order;
 
 /**
- * Class OrderActions
+ * Adds an Export Button to Order Actions.
  */
 class OrderActions
 {
+    /**
+     * @var UrlInterface
+     */
     protected $urlBuilder;
+
+    /**
+     * @var ContextInterface
+     */
     protected $context;
+
+    /**
+     * @var Order
+     */
     protected $helper;
+
+    /**
+     * @var AuthorizationInterface
+     */
     protected $auth;
 
     public function __construct(
         ContextInterface $context,
         UrlInterface $urlBuilder,
-        \RealtimeDespatch\OrderFlow\Helper\Export\Order $helper,
-        \Magento\Framework\AuthorizationInterface $auth
+        Order $helper,
+        AuthorizationInterface $auth
     )
     {
         $this->urlBuilder = $urlBuilder;

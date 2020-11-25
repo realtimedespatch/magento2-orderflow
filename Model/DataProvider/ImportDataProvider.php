@@ -5,6 +5,9 @@ namespace RealtimeDespatch\OrderFlow\Model\DataProvider;
 use Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider;
 use Magento\Framework\Api\Search\SearchResultInterface;
 
+/**
+ * @noinspection DuplicatedCode
+ */
 class ImportDataProvider extends DataProvider
 {
     /**
@@ -16,13 +19,15 @@ class ImportDataProvider extends DataProvider
         $arrItems = [];
 
         $arrItems['items'] = [];
-        foreach ($searchResult->getItems() as $item) {
+        foreach ($searchResult->getItems() as $importItem) {
             // We need to remove the blob data as it breaks the frontend grid
-            $item->setRequestBody(null);
-            $item->setResponseBody(null);
+            /** @noinspection PhpUndefinedMethodInspection */
+            $importItem->setRequestBody(null);
+            /** @noinspection PhpUndefinedMethodInspection */
+            $importItem->setResponseBody(null);
 
             $itemData = [];
-            foreach ($item->getCustomAttributes() as $attribute) {
+            foreach ($importItem->getCustomAttributes() as $attribute) {
                 $itemData[$attribute->getAttributeCode()] = $attribute->getValue();
             }
             $arrItems['items'][] = $itemData;

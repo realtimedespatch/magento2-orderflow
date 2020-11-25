@@ -2,12 +2,22 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Request;
 
+use Magento\Backend\Block\Widget\Context;
+use Magento\Backend\Block\Widget\Form\Container;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Registry;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Import;
+
 /**
  * Adminhtml request view
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class View extends \Magento\Backend\Block\Widget\Form\Container
+class View extends Container
 {
     /**
      * Block group
@@ -19,33 +29,34 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
     /**
      * Core registry
      *
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $_coreRegistry = null;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\ResourceModel\Export
+     * @var Export
      */
     protected $_exportResourceModel;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\ResourceModel\Import
+     * @var Import
      */
     protected $_importResourceModel;
 
     /**
      * View constructor.
-     * @param \Magento\Backend\Block\Widget\Context $context
+     * @param Context $context
+     * @param Registry $registry
+     * @param Export $exportResourceModel
+     * @param Import $importResourceModel
      * @param array $data
-     * @param \Magento\Framework\Registry $registry
-     * @param \RealtimeDespatch\OrderFlow\Model\ResourceModel\Export $exportResourceModel
      */
     public function __construct(
-        \Magento\Backend\Block\Widget\Context $context,
-        array $data = [],
-        \Magento\Framework\Registry $registry,
-        \RealtimeDespatch\OrderFlow\Model\ResourceModel\Export $exportResourceModel,
-        \RealtimeDespatch\OrderFlow\Model\ResourceModel\Import $importResourceModel
+        Context $context,
+        Registry $registry,
+        Export $exportResourceModel,
+        Import $importResourceModel,
+        array $data = []
     ) {
         $this->_coreRegistry = $registry;
         $this->_exportResourceModel = $exportResourceModel;
@@ -60,6 +71,8 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @throws LocalizedException
+     * @throws LocalizedException
      */
     protected function _construct()
     {
@@ -84,11 +97,14 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
         $this->buttonList->remove('delete');
         $this->buttonList->remove('reset');
         $this->buttonList->remove('save');
+
+        /** @noinspection PhpUndefinedMethodInspection */
         $this->setId('orderflow_request_view');
     }
 
     /**
      * Sets the process button.
+     * @param $request
      */
     protected function _setProcessButton($request)
     {
@@ -175,6 +191,8 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
      * Get URL for back (reset) button
      *
      * @return string
+     * @throws LocalizedException
+     * @throws LocalizedException
      */
     public function getBackUrl()
     {
@@ -184,12 +202,12 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
     /**
      * Retrieve available request
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return RequestInterface
+     * @throws LocalizedException
      */
     public function getRequest()
     {
-        if ($this->hasRequest()) {
+        if ($this->getData('request')) {
             return $this->getData('request');
         }
         if ($this->_coreRegistry->registry('current_request')) {
@@ -198,7 +216,7 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
         if ($this->_coreRegistry->registry('request')) {
             return $this->_coreRegistry->registry('request');
         }
-        throw new \Magento\Framework\Exception\LocalizedException(__('Request Not Found'));
+        throw new LocalizedException(__('Request Not Found'));
     }
 
     /**
@@ -208,13 +226,13 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
      *
      * @return bool
      */
-    public function canViewExport($entity)
+    public function canViewExport(string $entity)
     {
-        if ($entity == \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface::ENTITY_PRODUCT) {
+        if ($entity == ExportInterface::ENTITY_PRODUCT) {
             return $this->_authorization->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_products');
         }
 
-        if ($entity == \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface::ENTITY_ORDER) {
+        if ($entity == ExportInterface::ENTITY_ORDER) {
             return $this->_authorization->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_orders');
         }
 
@@ -228,13 +246,13 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
      *
      * @return bool
      */
-    public function canViewImport($entity)
+    public function canViewImport(string $entity)
     {
-        if ($entity == \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface::ENTITY_INVENTORY) {
+        if ($entity == ImportInterface::ENTITY_INVENTORY) {
             return $this->_authorization->isAllowed('RealtimeDespatch_OrderFlow::orderflow_imports_inventory');
         }
 
-        if ($entity == \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface::ENTITY_SHIPMENT) {
+        if ($entity == ImportInterface::ENTITY_SHIPMENT) {
             return $this->_authorization->isAllowed('RealtimeDespatch_OrderFlow::orderflow_imports_shipments');
         }
 

@@ -1,59 +1,79 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service\Export\Type;
 
-class ProductExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Export\Type\ExporterType
+use Exception;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DB\Transaction;
+use Magento\Store\Model\ScopeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use Psr\Log\LoggerInterface;
+
+/**
+ * Product Export Exporter Type.
+ *
+ * Processes product export requests received from OrderFlow to ensure products are marked as exported.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class ProductExportExporterType extends ExporterType
 {
     /* Exporter Type */
     const TYPE = 'Product';
 
     /**
-     * @var \Magento\Framework\DB\Transaction
+     * @var ProductRepositoryInterface
      */
-    protected $_tx;
+    protected $productRepository;
 
     /**
-     * @var \Magento\Catalog\Model\ProductRepository
-     */
-    protected $_productRepository;
-
-    /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @pparam \Magento\Catalog\Model\ProductRepository $productRepository
+     * @param ScopeConfigInterface $config
+     * @param LoggerInterface $logger
+     * @param ExportInterfaceFactory $exportFactory
+     * @param ExportLineInterfaceFactory $exportLineFactory
+     * @param Transaction $transaction
+     * @param ProductRepositoryInterface $productRepository
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Catalog\Model\ProductRepository $productRepository
+        ScopeConfigInterface $config,
+        LoggerInterface $logger,
+        ExportInterfaceFactory $exportFactory,
+        ExportLineInterfaceFactory $exportLineFactory,
+        Transaction $transaction,
+        ProductRepositoryInterface $productRepository
     ) {
-        parent::__construct($config, $logger, $objectManager);
-        $this->_productRepository = $productRepository;
-        $this->_tx = $this->_objectManager->create('Magento\Framework\DB\Transaction');
+        $this->productRepository = $productRepository;
+
+        parent::__construct(
+            $config,
+            $logger,
+            $exportFactory,
+            $exportLineFactory,
+            $transaction
+        );
     }
 
     /**
-     * Checks whether the export type is enabled.
-     *
-     * @api
-     * @return boolean
+     * @inheritDoc
      */
     public function isEnabled($scopeId = null)
     {
-        return $this->_config->getValue(
+        return $this->config->getValue(
             'orderflow_product_export/settings/is_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
 
     /**
-     * Returns the export type.
-     *
-     * @api
-     * @return string
+     * @inheritDoc
      */
     public function getType()
     {
@@ -61,66 +81,41 @@ class ProductExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Servic
     }
 
     /**
-     * Exports a request.
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function export(\RealtimeDespatch\OrderFlow\Model\Request $request)
-    {
-        $export = $this->_createExport($request);
-        $exportLines = array();
-
-        $this->_tx->addObject($export);
-        $this->_tx->addObject($request);
-
-        foreach ($request->getLines() as $requestLine) {
-            $exportLine = $this->_exportLine($export, $request, $requestLine);
-            $export->addLine($exportLine);
-            $this->_tx->addObject($requestLine);
-            $this->_tx->addObject($exportLine);
-        }
-
-        $request->setProcessedAt(date('Y-m-d H:i:s'));
-        $this->_tx->save();
-
-        return $export;
-    }
-
-    /**
-     * Exports a request line;
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
-     */
-    protected function _exportLine($export, $request, $requestLine)
-    {
+    protected function exportLine(
+        ExportInterface $export,
+        RequestInterface $request,
+        $requestLine
+    ) {
         $body = $requestLine->getBody();
         $sku = (string) $body->sku;
 
         try {
-            $product = $this->_productRepository->get($sku, true, 0);
+            /* @var Product $product */
+            $product = $this->productRepository->get($sku, true, 0);
+
+            /** @noinspection PhpUndefinedMethodInspection */
             $product->setOrderflowExportStatus(__('Exported'));
+
+            /** @noinspection PhpUndefinedMethodInspection */
             $product->setOrderflowExportDate($request->getCreationTime());
-            $this->_tx->addObject($product);
+
+            $this->transaction->addObject($product);
 
             $requestLine->setResponse(__('Product successfully exported.'));
 
-            return $this->_createSuccessExportLine(
+            return $this->createSuccessExportLine(
                 $export,
                 $sku,
                 $request->getOperation(),
                 __('Product successfully exported.'),
                 $body
             );
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $requestLine->setResponse($ex->getMessage());
 
-            return $this->_createFailureExportLine(
+            return $this->createFailureExportLine(
                 $export,
                 $sku,
                 $request->getOperation(),

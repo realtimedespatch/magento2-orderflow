@@ -4,4 +4,7 @@
         <observer name="productExportObserver" instance="RealtimeDespatch\OrderFlow\Observer\ProductExport" />
         <observer name="orderExportObserver" instance="RealtimeDespatch\OrderFlow\Observer\OrderExport" />
     </event>
+    <event name="sales_order_shipment_save_after">
+        <observer name="inventory_sales_source_deduction_processor" disabled="true"/>
+    </event>
 </config>

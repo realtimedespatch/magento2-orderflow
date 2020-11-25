@@ -2,73 +2,84 @@
 
 namespace RealtimeDespatch\OrderFlow\Cron\Export;
 
-class OrderCreateExport extends \RealtimeDespatch\OrderFlow\Cron\Export\ExportCron
+use Magento\Store\Model\ResourceModel\Website\CollectionFactory as WebsiteCollectionFactory;
+use Magento\Store\Model\Website;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
+use RealtimeDespatch\OrderFlow\Helper\Export\Order as OrderExportHelper;
+
+/**
+ * Order Create Export Cron.
+ *
+ * Cron Job to Export New Orders to OrderFlow.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class OrderCreateExport extends ExportCron
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Export\Order
+     * @var OrderExportHelper
      */
-    protected $_helper;
+    protected $helper;
 
     /**
-     * OrderExport constructor.
-     * @param \RealtimeDespatch\OrderFlow\Helper\Export\Order $helper
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \Magento\Store\Model\WebsiteFactory $websiteFactory
+     * @param OrderExportHelper $helper
+     * @param RequestBuilderInterface $requestBuilder
+     * @param RequestProcessorFactoryInterface $requestProcessorFactory
+     * @param WebsiteCollectionFactory $websiteCollectionFactory
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Helper\Export\Order $helper,
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Store\Model\WebsiteFactory $websiteFactory) {
-        $this->_helper = $helper;
-        parent::__construct($logger, $requestBuilder, $objectManager, $websiteFactory);
+        OrderExportHelper $helper,
+        RequestBuilderInterface $requestBuilder,
+        RequestProcessorFactoryInterface $requestProcessorFactory,
+        WebsiteCollectionFactory $websiteCollectionFactory
+    ) {
+        $this->helper = $helper;
+
+        parent::__construct(
+            $requestBuilder,
+            $requestProcessorFactory,
+            $websiteCollectionFactory
+        );
     }
 
     /**
-     * Returns the request set to process.
-     *
-     * @param \Magento\Store\Model\Website $website
-     *
-     * @return array
+     * @inheritDoc
      */
-    protected function _getRequest($website)
+    protected function getRequest(Website $website)
     {
-        $orders = $this->_helper->getCreateableOrders($website);
+        $orders = $this->helper->getCreateableOrders($website);
 
         if (count($orders) == 0) {
             return null;
         }
 
-        $this->_requestBuilder->resetBuilder()->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_ORDER,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_CREATE
+        $this->requestBuilder->resetBuilder()->setRequestData(
+            RequestInterface::TYPE_EXPORT,
+            RequestInterface::ENTITY_ORDER,
+            RequestInterface::OP_CREATE
         );
 
-        $this->_requestBuilder->setScopeId($website->getId());
+        $this->requestBuilder->setScopeId($website->getId());
 
         foreach ($orders as $order) {
-            $this->_requestBuilder->addRequestLine(
-                json_encode(array(
+            $this->requestBuilder->addRequestLine(
+                json_encode([
                     'entity_id' => $order->getEntityId(),
                     'increment_id' => $order->getIncrementId(),
-                ))
+                ])
             );
         }
 
-        return $this->_requestBuilder->saveRequest();
+        return $this->requestBuilder->saveRequest();
     }
 
     /**
-     * Returns the import entity type.
-     *
-     * @return \Magento\Framework\App\Helper\AbstractHelper
+     * @inheritDoc
      */
-    protected function _getHelper()
+    protected function getExportHelper()
     {
-        return $this->_helper;
+        return $this->helper;
     }
 }

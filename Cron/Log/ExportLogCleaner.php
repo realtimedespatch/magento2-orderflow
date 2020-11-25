@@ -1,37 +1,48 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Cron\Log;
 
+use Psr\Log\LoggerInterface;
+use RealtimeDespatch\OrderFlow\Helper\Log\Cleaning;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export\CollectionFactory;
+
+/**
+ * Export Log Cleaner.
+ *
+ * Cleanses export logs from the database for performance optimisation.
+ */
 class ExportLogCleaner
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
-    protected $_logger;
+    protected $logger;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\ExportFactory
+     * @var CollectionFactory
      */
-    protected $_factory;
+    protected $factory;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Log\Cleaning
+     * @var Cleaning
      */
-    protected $_helper;
+    protected $helper;
 
     /**
-     * ImportCron constructor.
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Model\ExportFactory $requestFactory
-     * @param \RealtimeDespatch\OrderFlow\Helper\Log\Cleaning $helper
+     * @param LoggerInterface $logger
+     * @param CollectionFactory $factory
+     * @param Cleaning $helper
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Model\ExportFactory $factory,
-        \RealtimeDespatch\OrderFlow\Helper\Log\Cleaning $helper) {
-        $this->_logger = $logger;
-        $this->_factory = $factory;
-        $this->_helper = $helper;
+        LoggerInterface $logger,
+        CollectionFactory $factory,
+        Cleaning $helper
+    ) {
+        $this->logger = $logger;
+        $this->factory = $factory;
+        $this->helper = $helper;
     }
 
     /**
@@ -41,16 +52,15 @@ class ExportLogCleaner
      */
     public function execute()
     {
-        if ( ! $this->_helper->isEnabled()) {
+        if (! $this->helper->isEnabled()) {
             return;
         }
 
-        $cutoff = date('Y-m-d', strtotime('-'.($this->_helper->getExportLogDuration() - 1).' days'));
+        $cutoff = date('Y-m-d', strtotime('-'.($this->helper->getExportLogDuration() - 1).' days'));
 
-        $this->_factory
-            ->create()
-            ->getCollection()
-            ->addFieldToFilter('created_at', ['lteq' => $cutoff])
-            ->walk('delete');
+        $this->factory
+             ->create()
+             ->addFieldToFilter('created_at', ['lteq' => $cutoff])
+             ->walk('delete');
     }
 }

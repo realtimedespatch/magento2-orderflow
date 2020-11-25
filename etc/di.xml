@@ -5,7 +5,7 @@
     <preference for="RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\RequestRepository" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\ExportInterface" type="RealtimeDespatch\OrderFlow\Model\Export" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface" type="RealtimeDespatch\OrderFlow\Model\ExportLine" />
-    <preference for="RealtimeDespatch\OrderFlow\Api\ExportRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\ExportRepository" />    
+    <preference for="RealtimeDespatch\OrderFlow\Api\ExportRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\ExportRepository" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\ImportInterface" type="RealtimeDespatch\OrderFlow\Model\Import" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface" type="RealtimeDespatch\OrderFlow\Model\ImportLine" />
     <preference for="RealtimeDespatch\OrderFlow\Api\ImportRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\ImportRepository" />
@@ -26,8 +26,6 @@
     <virtualType name="OrderExportRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
         <arguments>
             <argument name="type" xsi:type="object" shared="false">OrderExportRequestProcessorType</argument>
-            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
-            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
         </arguments>
     </virtualType>
     <virtualType name="OrderCancelRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
@@ -54,8 +52,6 @@
     <virtualType name="ProductExportRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
         <arguments>
             <argument name="type" xsi:type="object" shared="false">ProductExportRequestProcessorType</argument>
-            <argument name="eventManager" xsi:type="object" shared="false">Magento\Framework\Event\ManagerInterface</argument>
-            <argument name="requestRepository" xsi:type="object" shared="false">RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface</argument>
         </arguments>
     </virtualType>
     <virtualType name="InventoryUpdateRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
@@ -228,6 +224,21 @@
             </argument>
         </arguments>
     </virtualType>
+    <type name="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\OrderExport">
+        <arguments>
+            <argument name="requestProcessor" xsi:type="object">OrderExportRequestProcessor</argument>
+        </arguments>
+    </type>
+    <type name="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ProductExport">
+        <arguments>
+            <argument name="requestProcessor" xsi:type="object">ProductExportRequestProcessor</argument>
+        </arguments>
+    </type>
+    <type name="RealtimeDespatch\OrderFlow\Plugin\Adminhtml\OrderCancellation">
+        <arguments>
+            <argument name="requestProcessor" xsi:type="object">OrderCancelRequestProcessor</argument>
+        </arguments>
+    </type>
     <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
         <plugin name="orderflow_soap_product_export_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ProductExport"/>
     </type>

@@ -2,15 +2,15 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Source\Export;
 
+use Magento\Framework\Data\OptionSourceInterface;
+
 /**
- * Class Status
- * @package RealtimeDespatch\OrderFlow\Model\Source\Export
- * @codeCoverageIgnore
+ * Export Status Source Options.
  */
-class Status implements \Magento\Framework\Option\ArrayInterface
+class Status implements OptionSourceInterface
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function toOptionArray()
     {
@@ -23,10 +23,17 @@ class Status implements \Magento\Framework\Option\ArrayInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Return Options as Array.
+     *
+     * @return array
      */
     public function toArray()
     {
-        return ['Pending' => __('Pending'), 'Queued' => __('Queued'), 'Exported' => __('Exported'), 'Failed' => __('Failed')];
+        return [
+            'Pending' => __('Pending'),
+            'Queued' => __('Queued'),
+            'Exported' => __('Exported'),
+            'Failed' => __('Failed')
+        ];
     }
 }

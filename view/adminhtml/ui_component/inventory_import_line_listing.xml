@@ -36,7 +36,7 @@
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">textRange</item>
                     <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Sequence ID</item>
+                    <item name="label" xsi:type="string" translate="true">Seq ID</item>
                 </item>
             </argument>
         </column>
@@ -72,7 +72,7 @@
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Units Adjusted (Queued</item>
+                    <item name="label" xsi:type="string" translate="true">Units Adjusted (Queued)</item>
                 </item>
             </argument>
         </column>
@@ -81,7 +81,7 @@
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">asc</item>
-                    <item name="label" xsi:type="string" translate="true">Updated Stock Qty</item>
+                    <item name="label" xsi:type="string" translate="true">Updated Units</item>
                 </item>
             </argument>
         </column>

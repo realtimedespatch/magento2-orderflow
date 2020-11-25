@@ -2,62 +2,73 @@
 
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Request;
 
+use Exception;
+use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\Controller\ResultInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
 use \RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface;
+use RealtimeDespatch\OrderFlow\Model\Request;
 
-class Process extends \Magento\Backend\App\Action
+/**
+ * Request Process Controller.
+ *
+ * Processes an individual OrderFlow request.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class Process extends Action
 {
     /**
-     * @var \Magento\Sales\Api\RequestRepositoryInterface
+     * @var RequestRepositoryInterface
      */
-    protected $_requestRepository;
+    protected $requestRepository;
+
+    /**
+     * @var RequestProcessorFactoryInterface
+     */
+    protected $requestProcessorFactory;
 
     /**
      * @param Context $context
      * @param RequestRepositoryInterface $requestRepository
+     * @param RequestProcessorFactoryInterface $requestProcessorFactory
      */
-    public function __construct(Context $context, RequestRepositoryInterface $requestRepository)
-    {
+    public function __construct(
+        Context $context,
+        RequestRepositoryInterface $requestRepository,
+        RequestProcessorFactoryInterface $requestProcessorFactory
+    ) {
         parent::__construct($context);
-        $this->_requestRepository = $requestRepository;
+
+        $this->requestRepository = $requestRepository;
+        $this->requestProcessorFactory = $requestProcessorFactory;
     }
 
     /**
-     * Import action
+     * Execute.
      *
-     * @return \Magento\Framework\Controller\ResultInterface
+     * @return ResultInterface
      */
     public function execute()
     {
-        $id = $this->getRequest()->getParam('request_id');
+        $requestId = $this->getRequest()->getParam('request_id');
         $resultRedirect = $this->resultRedirectFactory->create();
 
-        if ( ! $id) {
-            $this->messageManager->addError(__('Request Not Found'));
+        if (! $requestId) {
+            $this->messageManager->addErrorMessage(__('Cannot retrieve request.'));
             return $resultRedirect->setRefererUrl();
         }
 
         try {
-            $request = $this->_requestRepository->get($id);
-            $this->_getProcessor($request->getEntity(), $request->getOperation())->process($request);
-            $this->messageManager->addSuccess(__('The request has been processed.'));
-        } catch (\Exception $e) {
-            $this->messageManager->addError($e->getMessage());
+            /* @var Request $request */
+            $request = (int) $this->requestRepository->get($requestId);
+            $this->requestProcessorFactory->get($request->getEntity(), $request->getOperation())->process($request);
+            $this->messageManager->addSuccessMessage(__('Request successfully processed.'));
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage($e->getMessage());
         }
 
         return $resultRedirect->setRefererUrl();
-    }
-
-    /**
-     * Retrieve the processor instance.
-     *
-     * @param $type Processor Entity
-     * @param $type Processor Operation
-     *
-     * @return RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor
-     */
-    protected function _getProcessor($entity, $operation)
-    {
-        return $this->_objectManager->create($entity.$operation.'RequestProcessor');
     }
 }

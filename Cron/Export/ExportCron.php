@@ -2,109 +2,102 @@
 
 namespace RealtimeDespatch\OrderFlow\Cron\Export;
 
+use Magento\Store\Model\ResourceModel\Website\CollectionFactory as WebsiteCollectionFactory;
+use Magento\Store\Model\Website;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\ExportHelperInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
+
+/**
+ * Export Cron.
+ *
+ * Abstract Base Class for the Export Cron Jobs.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
 abstract class ExportCron
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var RequestBuilderInterface
      */
-    protected $_logger;
+    protected $requestBuilder;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @var RequestProcessorFactoryInterface
      */
-    protected $_requestBuilder;
+    protected $requestProcessorFactory;
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var WebsiteCollectionFactory
      */
-    protected $_objectManager;
+    protected $websiteCollectionFactory;
 
     /**
-     * @var \Magento\Store\Model\WebsiteFactory
-     */
-    protected $_websiteFactory;
-
-    /**
-     * ExportCron constructor.
-     *
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \Magento\Store\Model\WebsiteFactory $websiteFactory
+     * @param RequestBuilderInterface $requestBuilder
+     * @param RequestProcessorFactoryInterface $requestProcessorFactory
+     * @param WebsiteCollectionFactory $websiteCollectionFactory
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Store\Model\WebsiteFactory $websiteFactory) {
-        $this->_logger = $logger;
-        $this->_requestBuilder = $requestBuilder;
-        $this->_objectManager = $objectManager;
-        $this->_websiteFactory = $websiteFactory;
+        RequestBuilderInterface $requestBuilder,
+        RequestProcessorFactoryInterface $requestProcessorFactory,
+        WebsiteCollectionFactory $websiteCollectionFactory
+    ) {
+        $this->requestBuilder = $requestBuilder;
+        $this->requestProcessorFactory = $requestProcessorFactory;
+        $this->websiteCollectionFactory = $websiteCollectionFactory;
     }
 
     /**
-     * Executes the inventory export job
+     * Execute Cron.
      *
      * @return $this|void
      */
     public function execute()
     {
-        $websites = $this->_websiteFactory->create()->getCollection();
+        $websites = $this->websiteCollectionFactory->create();
 
         foreach ($websites as $website) {
-            $this->_execute($website);
+            $this->executeForWebsite($website);
         }
     }
 
     /**
-     * Executes the cron job for a specific website.
+     *  Execute Cron for Website.
      *
-     * @param mixed $website
+     * @param Website $website
      *
      * @return void
      */
-    protected function _execute($website)
+    protected function executeForWebsite(Website $website)
     {
-        if ( ! $this->_getHelper()->isEnabled($website->getId())) {
+        if (! $this->getExportHelper()->isEnabled($website->getId())) {
             return;
         }
 
-        $request = $this->_getRequest($website);
+        $request = $this->getRequest($website);
 
-        if ( ! $request) {
+        if (! $request) {
             return;
         }
 
-        $this->_getProcessor($request->getEntity(), $request->getOperation())->process($request);
+        $requestProcessor = $this->requestProcessorFactory->get($request->getEntity(), $request->getOperation());
+        $requestProcessor->process($request);
     }
 
     /**
-     * Retrieve the request processor instance.
+     * Helper Getter.
      *
-     * @param string $entity Entity Type
-     * @param string $operation Operation Type
-     *
-     * @return RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor
+     * @return ExportHelperInterface
      */
-    protected function _getProcessor($entity, $operation)
-    {
-        return $this->_objectManager->create($entity.$operation.'RequestProcessor');
-    }
+    abstract protected function getExportHelper();
 
     /**
-     * Returns the request to process.
+     * Request Getter.
      *
-     * @param \Magento\Store\Model\Website $website
+     * @param Website $website
      *
-     * @return array
+     * @return RequestInterface
      */
-    protected abstract function _getRequest($website);
-
-    /**
-     * Returns the appropriate cron helper.
-     *
-     * @return \Magento\Framework\App\Helper\AbstractHelper
-     */
-    protected abstract function _getHelper();
+    abstract protected function getRequest(Website $website);
 }

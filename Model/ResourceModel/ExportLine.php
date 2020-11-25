@@ -2,31 +2,36 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\ResourceModel;
 
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use Magento\Framework\Model\ResourceModel\Db\Context;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+
 /**
  * Export Line Resource Model
  */
-class ExportLine extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
+class ExportLine extends AbstractDb
 {
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
+     * @var DateTime
      */
-    protected $_date;
+    protected $date;
 
     /**
      * Construct
      *
-     * @param \Magento\Framework\Model\ResourceModel\Db\Context $context
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
+     * @param Context $context
+     * @param DateTime $date
      * @param string|null $resourcePrefix
      */
     public function __construct(
-        \Magento\Framework\Model\ResourceModel\Db\Context $context,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        Context $context,
+        DateTime $date,
         $resourcePrefix = null
-    )
-    {
+    ) {
         parent::__construct($context, $resourcePrefix);
-        $this->_date = $date;
+
+        $this->date = $date;
     }
 
     /**
@@ -42,18 +47,18 @@ class ExportLine extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     /**
      * Process post data before saving
      *
-     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param AbstractModel $object
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function _beforeSave(\Magento\Framework\Model\AbstractModel $object)
+    protected function _beforeSave(AbstractModel $object)
     {
-        if ($object->isObjectNew() && ! $object->hasCreationTime()) {
-            $object->setCreationTime($this->_date->gmtDate());
+        /* @var \RealtimeDespatch\OrderFlow\Model\ExportLine $object */
+        if ($object->isObjectNew() && ! $object->getData('creation_time')) {
+            $object->setData('creation_time', $this->date->gmtDate());
         }
 
-        if ( ! $object->getExportId() && $object->getExport()) {
-            $object->setExportId($object->getExport()->getId());
+        if (! $object->getExportId() && $object->getData('export')) {
+            $object->setExportId($object->getData('export')->getId());
         }
 
         return parent::_beforeSave($object);

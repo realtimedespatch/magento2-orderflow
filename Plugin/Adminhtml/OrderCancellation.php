@@ -2,109 +2,114 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Adminhtml;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Helper\Export\Order as OrderHelper;
+use RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor;
+
+/**
+ * Order Cancellation Plugin
+ *
+ * Captures the details of an order cancellation request.
+ *
+ * This occurs when Magento makes a call to OrderFlow to cancel an order.
+ */
 class OrderCancellation
 {
     const STATUS_CANCELLED = 'Cancelled';
     const STATUS_QUEUED = 'Queued';
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Export\Order
+     * @var OrderHelper
      */
-    protected $_helper;
+    protected $helper;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @var RequestProcessor
      */
-    protected $_builder;
+    protected $requestProcessor;
 
     /**
-     * @var \Magento\Sales\Model\OrderRepository
+     * @var RequestBuilderInterface
      */
-    protected $_repository;
+    protected $requestBuilder;
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var OrderRepositoryInterface
      */
-    protected $_objectManager;
+    protected $orderRepository;
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Helper\Export\Order $helper
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder
-     * @param \Magento\Sales\Model\OrderRepository $repository
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param OrderHelper $helper
+     * @param RequestProcessor $requestProcessor
+     * @param RequestBuilderInterface $requestBuilder
+     * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Helper\Export\Order $helper,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder,
-        \Magento\Sales\Model\OrderRepository $repository,
-        \Magento\Framework\ObjectManagerInterface $objectManager)
-    {
-        $this->_helper = $helper;
-        $this->_builder = $builder;
-        $this->_repository = $repository;
-        $this->_objectManager = $objectManager;
+        OrderHelper $helper,
+        RequestProcessor $requestProcessor,
+        RequestBuilderInterface $requestBuilder,
+        OrderRepositoryInterface $orderRepository
+    ) {
+        $this->helper = $helper;
+        $this->requestProcessor = $requestProcessor;
+        $this->requestBuilder = $requestBuilder;
+        $this->orderRepository = $orderRepository;
     }
 
     /**
-     * Attempts to cancel the order within OrderFlow
+     * Capture Order Cancellation Request Details.
      *
-     * @param \Magento\Sales\Model\Order $subject
-     *
-     * @throws Exception
+     * @param Order $order
+     * @throws LocalizedException
      */
-    public function beforeCancel(\Magento\Sales\Model\Order $subject)
+    public function beforeCancel(Order $order)
     {
-        if ( ! $this->_helper->isEnabled()) {
-            throw new Exception(__('Order exports are currently disabled. Please review the OrderFlow module configuration.'));
+        if (! $this->helper->isEnabled()) {
+            throw new LocalizedException(
+                __('Order Exports are Disabled. Please review the OrderFlow module configuration.')
+            );
         }
 
-        try {
-            // Check whether the order can be cancelled.
-            if ( ! $subject->canCancel()) {
-                return;
-            }
+        // Check whether the order can be cancelled.
+        if (! $order->canCancel()) {
+            return;
+        }
 
-            // Orders that are awaiting export cannot be cancelled.
-            if ($subject->getOrderflowExportStatus() === self::STATUS_QUEUED) {
-                throw new \Exception(__('Cannot cancel an order awaiting export to OrderFlow.'));
-            }
+        // Orders that are awaiting export cannot be cancelled.
+        /** @noinspection PhpUndefinedMethodInspection */
+        if ($order->getOrderflowExportStatus() === self::STATUS_QUEUED) {
+            throw new LocalizedException(__('Order Cancellation Failed - The Order is Pending Export to OrderFlow.'));
+        }
 
-            $request = $this->_buildRequest($subject);
-            $this->_getRequestProcessor()->process($request);
+        $request = $this->buildRequest($order);
+        $this->requestProcessor->process($request);
 
-            if ($this->_repository->get($subject->getId())->getOrderflowExportStatus() !== self::STATUS_CANCELLED) {
-                throw new \Exception(__('Order cancellation failed.'));
-            }
-        } catch (\Exception $e) {
-            throw $e;
+        /** @noinspection PhpUndefinedMethodInspection */
+        if ($this->orderRepository->get($order->getId())->getOrderflowExportStatus() !== self::STATUS_CANCELLED) {
+            throw new LocalizedException(__('Order Cancellation Failed - Please Try Again.'));
         }
     }
 
     /**
-     * Retrieves a order from the current request
+     * Builds an order cancellation export request from the order.
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @param Order $order
+     * @return RequestInterface
      */
-    protected function _buildRequest($order)
+    protected function buildRequest(Order $order)
     {
-        $this->_builder->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_ORDER,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_CANCEL
+        $this->requestBuilder->setRequestData(
+            RequestInterface::TYPE_EXPORT,
+            RequestInterface::ENTITY_ORDER,
+            RequestInterface::OP_CANCEL
         );
 
-        $this->_builder->addRequestLine(json_encode(array('increment_id' => $order->getIncrementId())));
+        $this->requestBuilder->addRequestLine(json_encode(['increment_id' => $order->getIncrementId()]));
 
-        return $this->_builder->saveRequest();
-    }
-
-    /**
-     * Retrieve the request processor instance.
-     *
-     * @return OrderCancelRequestProcessor
-     */
-    protected function _getRequestProcessor()
-    {
-        return $this->_objectManager->create('OrderCancelRequestProcessor');
+        return $this->requestBuilder->saveRequest();
     }
 }

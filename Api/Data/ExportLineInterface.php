@@ -117,90 +117,90 @@ interface ExportLineInterface
      *
      * @param integer $exportId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setExportId($exportId);
+    public function setExportId(int $exportId);
 
     /**
      * Set Result
      *
      * @param string $result
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setResult($result);
+    public function setResult(string $result);
 
     /**
      * Set Reference
      *
      * @param string $reference
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setReference($reference);
+    public function setReference(string $reference);
 
     /**
      * Set Operation
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setOperation($operation);
+    public function setOperation(string $operation);
 
     /**
      * Set Entity
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setEntity($entity);
+    public function setEntity(string $entity);
 
     /**
      * Set Message
      *
      * @param string $message
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setMessage($message);
+    public function setMessage(string $message);
 
     /**
      * Set Detail
      *
      * @param string $detail
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setDetail($detail);
+    public function setDetail(string $detail);
 
     /**
      * Set Additional Data
      *
      * @param string $additionalData
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setAdditionalData($additionalData);
+    public function setAdditionalData(string $additionalData);
 
     /**
      * Set Created Timestamp
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setCreatedAt($created);
+    public function setCreatedAt(string $created);
 
     /**
      * Set Processed Timestamp
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setProcessedAt($processed);
+    public function setProcessedAt(string $processed);
 
     /**
      * Checks whether this export line was successful

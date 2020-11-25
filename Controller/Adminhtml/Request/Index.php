@@ -2,26 +2,45 @@
 
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Request;
 
-class Index extends \RealtimeDespatch\OrderFlow\Controller\Adminhtml\Request
+use Magento\Backend\Model\View\Result\Page;
+use RealtimeDespatch\OrderFlow\Controller\Adminhtml\Request;
+
+class Index extends Request
 {
+    const REQUEST_TYPE_EXPORT = 'Export';
+    const REQUEST_LISTING_EXPORT = 'export_request_listing';
+    const REQUEST_LISTING_IMPORT = 'import_request_listing';
+
     /**
      * Request Grid
      *
-     * @return \Magento\Backend\Model\View\Result\Page
+     * @return Page
      */
     public function execute()
     {
-        $resultPage  = $this->_initAction();
+        $page = $this->getPage();
         $requestType = ucfirst($this->getRequest()->getParam('type'));
 
-        $resultPage->getConfig()->getTitle()->prepend(__($requestType. ' Requests'));
+        $page->getConfig()->getTitle()->prepend(__($requestType. ' Requests'));
+        $page->addBreadcrumb(__($requestType), __($requestType));
 
-        if ($requestType == 'Export') {
-            $resultPage->getLayout()->unsetChild('content', 'import_request_listing');
-        } else {
-            $resultPage->getLayout()->unsetChild('content', 'export_request_listing');
+        $page->getLayout()->unsetChild('content', $this->getListing($requestType));
+
+        return $page;
+    }
+
+    /**
+     * Listing Getter.
+     *
+     * @param string $requestType
+     * @return string
+     */
+    protected function getListing(string $requestType)
+    {
+        if ($requestType == self::REQUEST_TYPE_EXPORT) {
+            return self::REQUEST_LISTING_IMPORT;
         }
 
-        return $resultPage;
+        return self::REQUEST_LISTING_EXPORT;
     }
 }

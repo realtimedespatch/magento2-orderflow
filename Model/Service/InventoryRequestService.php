@@ -1,10 +1,17 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service;
 
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\Session\Generic;
+use Psr\Log\LoggerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\InventoryRequestManagementInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
 
 /**
  * Class InventoryRequestService
@@ -15,55 +22,56 @@ use RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface;
 class InventoryRequestService implements InventoryRequestManagementInterface
 {
     /**
-     * @var \Magento\Framework\Registry
+     * @var Generic
      */
-    protected $_registry;
+    protected $session;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
-    protected $_logger;
+    protected $logger;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @var RequestBuilderInterface
      */
-    protected $_builder;
+    protected $builder;
 
     /**
-     * @var \Magento\Framework\App\Request\Http
+     * @var Http
      */
-    protected $_httpRequest;
+    protected $httpRequest;
 
     /**
      * Constructor
      *
-     * @param \Magento\Framework\Registry $registry
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder
-     * @param \Magento\Framework\App\Request\Http $request
+     * @param Generic $session
+     * @param LoggerInterface $logger
+     * @param RequestBuilderInterface $builder
+     * @param Http $httpRequest
      */
     public function __construct(
-        \Magento\Framework\Registry $registry,
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder,
-        \Magento\Framework\App\Request\Http $httpRequest) {
-        $this->_registry = $registry;
-        $this->_logger = $logger;
-        $this->_builder = $builder;
-        $this->_httpRequest = $httpRequest;
+        Generic $session,
+        LoggerInterface $logger,
+        RequestBuilderInterface $builder,
+        Http $httpRequest
+    ) {
+        $this->session = $session;
+        $this->logger = $logger;
+        $this->builder = $builder;
+        $this->httpRequest = $httpRequest;
     }
 
     /**
      * Handles an inventory update request
      *
-     * @api
      * @param QuantityItemInterface[] $productQtys
      * @param SequenceItemInterface[] $productSeqs
      * @param integer $messageSeqId
      *
      * @return mixed
+     * @api
      */
-    public function update($productQtys, $productSeqs, $messageSeqId)
+    public function update(array $productQtys, array $productSeqs, int $messageSeqId)
     {
         try {
            $this->_update($productQtys, $productSeqs, $messageSeqId);
@@ -78,23 +86,23 @@ class InventoryRequestService implements InventoryRequestManagementInterface
     /**
      * Handles an inventory update request
      *
-     * @api
      * @param QuantityItemInterface[] $productQtys
      * @param SequenceItemInterface[] $productSeqs
-     * @param integer $messageSeqId
+     * @param string $messageSeqId
      *
      * @return void
+     * @api
      */
-    protected function _update($productQtys, $productSeqs, $messageSeqId)
+    protected function _update(array $productQtys, array $productSeqs, string $messageSeqId)
     {
-        $this->_builder->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_IMPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_INVENTORY,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_UPDATE,
+        $this->builder->setRequestData(
+            RequestInterface::TYPE_IMPORT,
+            RequestInterface::ENTITY_INVENTORY,
+            RequestInterface::OP_UPDATE,
             $messageSeqId
         );
 
-        $this->_builder->setRequestBody($this->_httpRequest->getContent());
+        $this->builder->setRequestBody($this->httpRequest->getContent());
 
         $productSeqsMap = [];
         foreach ($productSeqs as $productSeq) {
@@ -105,15 +113,18 @@ class InventoryRequestService implements InventoryRequestManagementInterface
             $body = (array) $productQty;
             $seq = $productSeqsMap[$productQty->getSku()];
             $body['lastOrderExported'] = $seq->getLastOrderExported();
-            $this->_builder->addRequestLine(json_encode($body), $seq->getSeq());
+            $this->builder->addRequestLine(json_encode($body), $seq->getSeq());
         }
 
-        $this->_builder->saveRequest();
+        $this->builder->saveRequest();
 
-        // Register request to capture response later.
-        $this->_registry->register(
-            'request_id',
-            $this->_builder->getRequest()->getId()
-        );
+        /**
+         * Register request to capture response later
+         *
+         * see RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\InventoryImport
+         *
+         * @noinspection PhpUndefinedMethodInspection
+         */
+        $this->session->setRequestId($this->builder->getRequest()->getId());
     }
 }

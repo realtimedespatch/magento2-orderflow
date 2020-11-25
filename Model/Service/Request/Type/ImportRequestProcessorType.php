@@ -3,31 +3,34 @@
 namespace RealtimeDespatch\OrderFlow\Model\Service\Request\Type;
 
 use \RealtimeDespatch\OrderFlow\Api\RequestProcessorTypeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Model\Service\Import\Importer;
 
+/**
+ * Import Request Processor.
+ *
+ * Processes an import request - see types under the RealtimeDespatch\OrderFlow\Model\Service\Import\Type namespace
+ */
 class ImportRequestProcessorType implements RequestProcessorTypeInterface
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\Service\Import\Importer
+     * @var Importer
      */
-    protected $_importer;
+    protected $importer;
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Model\Service\Import\Importer $importer
+     * @param Importer $importer
      */
-    public function __construct(\RealtimeDespatch\OrderFlow\Model\Service\Import\Importer $importer)
+    public function __construct(Importer $importer)
     {
-        $this->_importer = $importer;
+        $this->importer = $importer;
     }
 
     /**
-     * Processes an orderflow request.
-     *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return boolean
+     * @inheritDoc
      */
-    public function process(\RealtimeDespatch\OrderFlow\Model\Request $request)
+    public function process(RequestInterface $request)
     {
-        return $this->_importer->import($request);
+        return $this->importer->import($request);
     }
 }

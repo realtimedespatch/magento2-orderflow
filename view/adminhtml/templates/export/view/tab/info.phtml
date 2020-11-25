@@ -1,3 +1,4 @@
+<?php /* @var $block */ ?>
 <?php $_export = $block->getExport() ?>
 
 <section class="admin__page-section export-view-export-details">
@@ -42,7 +43,7 @@
                     </tr>
                     <tr>
                         <th><?php echo __('Processed') ?></th>
-                        <td><?php echo $block->formatDate($block->getOrderAdminDate($_export->getCreatedAt()), \IntlDateFormatter::MEDIUM, true); ?></td>
+                        <td><?php echo $block->formatDate($block->getOrderAdminDate($_export->getCreatedAt()), IntlDateFormatter::MEDIUM, true); ?></td>
                     </tr>
                 </table>
             </div>

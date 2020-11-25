@@ -2,111 +2,139 @@
 
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Product;
 
+use Exception;
+use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Product\Type;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Helper\Export\Product as ProductExportHelper;
+use RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor;
 
-class Export extends \Magento\Backend\App\Action
+/**
+ * Product Export Controller.
+ *
+ * Handles the request to queue a product for export to OrderFlow.
+ */
+class Export extends Action
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Export\Product
+     * @var ProductExportHelper
      */
-    protected $_exportHelper;
+    protected $helper;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @var RequestProcessor
      */
-    protected $_builder;
+    protected $requestProcessor;
 
     /**
-     * @var \Magento\Catalog\Model\ProductRepository
+     * @var RequestBuilderInterface
      */
-    protected $_repository;
+    protected $requestBuilder;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var ProductRepositoryInterface
      */
-    protected $_storeManager;
+    protected $productRepository;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
 
     /**
      * @param Context $context
-     * @param \RealtimeDespatch\OrderFlow\Helper\Export\Product $helper
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder
-     * @param \Magento\Catalog\Model\ProductRepository $repository
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param ProductExportHelper $helper
+     * @param RequestProcessor $requestProcessor
+     * @param RequestBuilderInterface $requestBuilder
+     * @param ProductRepositoryInterface $productRepository
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         Context $context,
-        \RealtimeDespatch\OrderFlow\Helper\Export\Product $helper,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder,
-        \Magento\Catalog\Model\ProductRepository $repository,
-        \Magento\Store\Model\StoreManagerInterface $storeManager)
-    {
-        $this->_exportHelper = $helper;
-        $this->_builder = $builder;
-        $this->_repository = $repository;
-        $this->_storeManager = $storeManager;
+        ProductExportHelper $helper,
+        RequestProcessor $requestProcessor,
+        RequestBuilderInterface $requestBuilder,
+        ProductRepositoryInterface $productRepository,
+        StoreManagerInterface $storeManager
+    ) {
+        $this->helper = $helper;
+        $this->requestProcessor = $requestProcessor;
+        $this->requestBuilder = $requestBuilder;
+        $this->productRepository = $productRepository;
+        $this->storeManager = $storeManager;
 
         parent::__construct($context);
     }
 
     /**
-     * Export Action
+     * Execute.
      *
-     * @return \Magento\Framework\Controller\ResultInterface
+     * @return ResultInterface
      */
     public function execute()
     {
         $resultRedirect = $this->resultRedirectFactory->create();
 
-        // Check whether product exports are enabled.
-        if ( ! $this->_exportHelper->isEnabled()) {
-            $this->messageManager->addError(__('Product exports are currently disabled. Please review the OrderFlow module configuration.'));
+        if (! $this->helper->isEnabled()) {
+            $this->messageManager->addErrorMessage(
+                __('Product exports are disabled. Please review the OrderFlow module configuration.')
+            );
+
             return $resultRedirect->setRefererUrl();
         }
 
         try {
-            $product = $this->_getProduct();
+            $product = $this->getProduct();
 
-            if ( ! $product) {
+            if (! $product) {
                 return $resultRedirect->setRefererUrl();
             }
 
-            if ($product->getTypeId() !== 'simple') {
-                $this->messageManager->addError(__('This product cannot be exported. OrderFlow only supports simple product types.'));
+            if ($product->getTypeId() !== Type::TYPE_SIMPLE) {
+                $this->messageManager->addErrorMessage(
+                    __('Only simple products can be exported.')
+                );
+
                 return $resultRedirect->setRefererUrl();
             }
 
-            $request = $this->_buildRequest($product);
-            $export  = $this->_getRequestProcessor()->process($request);
+            $request = $this->buildRequest($product);
+            $export  = $this->requestProcessor->process($request);
 
             if ($export->getFailures() || $export->getDuplicates()) {
-                $this->messageManager->addError(__('Product '.$product->getSku().' has failed to be queued for export to OrderFlow.'));
+                $this->messageManager->addErrorMessage(__('Product export failed.'));
             } else {
-                $this->messageManager->addSuccess(__('Product '.$product->getSku().' has been queued for export to OrderFlow.'));
+                $this->messageManager->addSuccessMessage(__('Product successfully queued for export.'));
             }
-        } catch (\Exception $e) {
-            $this->messageManager->addError($e->getMessage());
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage($e->getMessage());
         }
 
         return $resultRedirect->setRefererUrl();
     }
 
     /**
-     * Retrieves a product from the current request
+     * Product Getter.
      *
-     * @return \Magento\Sales\Api\Data\ProductInterface
+     * @return ProductInterface|boolean
      */
-    protected function _getProduct()
+    protected function getProduct()
     {
-        $id = $this->getRequest()->getParam('id');
+        $productId = $this->getRequest()->getParam('id');
 
         try {
-            $product = $this->_repository->getById($id);
-        } catch (NoSuchEntityException $e) {
-            $this->messageManager->addError(__('Product Not Found.'));
-            $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
-            return false;
-        } catch (InputException $e) {
-            $this->messageManager->addError(__('Product Not Found.'));
+            $product = $this->productRepository->getById($productId);
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage(
+                __('Product with ID: '.$productId.' cannot be retrieved.')
+            );
             $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
             return false;
         }
@@ -115,47 +143,38 @@ class Export extends \Magento\Backend\App\Action
     }
 
     /**
-     * Retrieves a product from the current request
+     * Build Export Request.
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @param ProductInterface $product
+     * @return RequestInterface
+     * @throws NoSuchEntityException
      */
-    protected function _buildRequest($product)
+    protected function buildRequest(ProductInterface $product)
     {
-        $operation = \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_UPDATE;
+        /** @noinspection PhpUndefinedMethodInspection */
+        $exportDate = $product->getOrderflowExportDate();
+        $operation = $exportDate ? RequestInterface::OP_UPDATE : RequestInterface::OP_CREATE;
 
-        if ( ! $product->getOrderflowExportDate()) {
-            $operation = \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_CREATE;
-        }
-
-        $this->_builder->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_PRODUCT,
+        $this->requestBuilder->setRequestData(
+            RequestInterface::TYPE_EXPORT,
+            RequestInterface::ENTITY_PRODUCT,
             $operation
         );
 
-        $this->_builder->setScopeId($this->_getWebsiteId());
-        $this->_builder->addRequestLine(json_encode(array('sku' => $product->getSku())));
+        $this->requestBuilder->setScopeId($this->getWebsiteId());
+        $this->requestBuilder->addRequestLine(json_encode(['sku' => $product->getSku()]));
 
-        return $this->_builder->saveRequest();
+        return $this->requestBuilder->saveRequest();
     }
 
     /**
-     * Retrieve the request processor instance.
-     *
-     * @return RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor
-     */
-    protected function _getRequestProcessor()
-    {
-        return $this->_objectManager->create('ProductCreateRequestProcessor');
-    }
-
-    /**
-     * Returns the current website ID.
+     * Website ID Getter.
      *
      * @return integer
+     * @throws NoSuchEntityException
      */
-    protected function _getWebsiteId()
+    protected function getWebsiteId()
     {
-        return $this->_storeManager->getStore($this->_request->getParam('store'))->getWebsiteId();
+        return $this->storeManager->getStore($this->_request->getParam('store'))->getWebsiteId();
     }
 }

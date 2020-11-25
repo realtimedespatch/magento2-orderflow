@@ -6,11 +6,21 @@ use Magento\Framework\Logger\Handler\Base;
 use Monolog\Logger;
 
 /**
- * Class OrderFlow
- * @package RealtimeDespatch\OrderFlow\Logger\Handler
+ * OrderFlow Log Handler.
  */
 class OrderFlow extends Base
 {
+    /**
+     * File Name.
+     *
+     * @var string
+     */
     protected $fileName = '/var/log/orderflow.log';
+
+    /**
+     * Logger Type.
+     *
+     * @var int
+     */
     protected $loggerType = Logger::DEBUG;
 }

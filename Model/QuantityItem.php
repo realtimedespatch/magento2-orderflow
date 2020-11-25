@@ -59,12 +59,12 @@ class QuantityItem implements QuantityItemInterface
     /**
      * Set the sku
      *
-     * @api
      * @param string $sku Product SKU
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface
+     * @return QuantityItemInterface
+     * @api
      */
-    public function setSku($sku)
+    public function setSku(string $sku)
     {
         $this->sku = $sku;
 
@@ -74,12 +74,12 @@ class QuantityItem implements QuantityItemInterface
     /**
      * Set the quantity
      *
-     * @api
-     * @param integer $qty Stock Quantity
+     * @param string $qty Stock Quantity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface
+     * @return QuantityItemInterface
+     * @api
      */
-    public function setQty($qty)
+    public function setQty(string $qty)
     {
         $this->qty = $qty;
 

@@ -2,9 +2,10 @@
 
 namespace RealtimeDespatch\OrderFlow\Model;
 
+use Magento\Framework\Model\AbstractModel;
 use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
 
-class Import extends \Magento\Framework\Model\AbstractModel implements ImportInterface
+class Import extends AbstractModel implements ImportInterface
 {
     /**
      * @inheritdoc
@@ -16,7 +17,7 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      */
     protected function _construct()
     {
-        $this->_init('RealtimeDespatch\OrderFlow\Model\ResourceModel\Import');
+        $this->_init(ResourceModel\Import::class);
     }
 
     /**
@@ -130,13 +131,23 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
     }
 
     /**
+     * Get Lines
+     *
+     * @return mixed
+     */
+    public function getLines()
+    {
+        return $this->getData(self::LINES);
+    }
+
+    /**
      * Set Request Id
      *
      * @param integer $requestId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setRequestId($requestId)
+    public function setRequestId(int $requestId)
     {
         return $this->setData(self::REQUEST_ID, $requestId);
     }
@@ -144,11 +155,11 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
     /**
      * Set Message Id
      *
-     * @param integer $messageId
+     * @param string $messageId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setMessageId($messageId)
+    public function setMessageId(string $messageId)
     {
         return $this->setData(self::MESSAGE_ID, $messageId);
     }
@@ -158,9 +169,9 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setEntity($entity)
+    public function setEntity(string $entity)
     {
         return $this->setData(self::ENTITY, $entity);
     }
@@ -170,9 +181,9 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setOperation($operation)
+    public function setOperation(string $operation)
     {
         return $this->setData(self::OPERATION, $operation);
     }
@@ -182,9 +193,9 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      *
      * @param integer $successes
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setSuccesses($successes)
+    public function setSuccesses(int $successes)
     {
         return $this->setData(self::SUCCESSES, $successes);
     }
@@ -194,9 +205,9 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      *
      * @param integer $duplicates
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setDuplicates($duplicates)
+    public function setDuplicates(int $duplicates)
     {
         return $this->setData(self::DUPLICATES, $duplicates);
     }
@@ -206,9 +217,9 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      *
      * @param integer $superseded
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setSuperseded($superseded)
+    public function setSuperseded(int $superseded)
     {
         return $this->setData(self::SUPERSEDED, $superseded);
     }
@@ -218,9 +229,9 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      *
      * @param integer $failures
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setFailures($failures)
+    public function setFailures(int $failures)
     {
         return $this->setData(self::FAILURES, $failures);
     }
@@ -230,9 +241,9 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setCreatedAt($created)
+    public function setCreatedAt(string $created)
     {
         return $this->setData(self::CREATED_AT, $created);
     }
@@ -242,10 +253,22 @@ class Import extends \Magento\Framework\Model\AbstractModel implements ImportInt
      *
      * @param string $viewed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setViewedAt($viewed)
+    public function setViewedAt(string $viewed)
     {
         return $this->setData(self::VIEWED_AT, $viewed);
+    }
+
+    /**
+     * Set Lines
+     *
+     * @param mixed $lines
+     *
+     * @return ImportInterface
+     */
+    public function setLines($lines)
+    {
+        return $this->setData(self::LINES, $lines);
     }
 }

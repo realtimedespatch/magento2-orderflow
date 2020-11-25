@@ -36,27 +36,27 @@ interface SequenceItemInterface
     /**
      * Set the sku
      *
-     * @api
      * @param $sku string The sku
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface
+     * @return SequenceItemInterface
+     * @api
      */
-    public function setSku($sku);
+    public function setSku(string $sku);
 
     /**
      * Set the sequence ID
      *
-     * @api
      * @param $seq string
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface
+     * @return SequenceItemInterface
+     * @api
      */
-    public function setSeq($seq);
+    public function setSeq(string $seq);
 
     /**
      * Set the last order exported timestamp
      *
-     * @api
      * @param $exported string
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface
+     * @return SequenceItemInterface
+     * @api
      */
-    public function setLastOrderExported($exported);
+    public function setLastOrderExported(string $exported);
 }

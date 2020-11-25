@@ -2,25 +2,27 @@
 
 namespace RealtimeDespatch\OrderFlow\Helper;
 
-use \SixBySix\RealtimeDespatch\Api\Credentials;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Store\Model\ScopeInterface;
+use SixBySix\RealtimeDespatch\Api\Credentials;
 
 /**
  * API Helper.
  */
-class Api extends \Magento\Framework\App\Helper\AbstractHelper
+class Api extends AbstractHelper
 {
     /**
      * Returns the API endpoint.
      *
      * @param integer|null $scopeId
      *
-     * @return boolean
+     * @return string
      */
     public function getEndpoint($scopeId = null)
     {
         return (string) $this->scopeConfig->getValue(
             'orderflow_api/settings/endpoint',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -36,7 +38,7 @@ class Api extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return (string) $this->scopeConfig->getValue(
             'orderflow_api/settings/username',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -52,7 +54,7 @@ class Api extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return (string) $this->scopeConfig->getValue(
             'orderflow_api/settings/password',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -62,13 +64,13 @@ class Api extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @param integer|null $scopeId
      *
-     * @return boolean
+     * @return string
      */
     public function getOrganisation($scopeId = null)
     {
         return (string) $this->scopeConfig->getValue(
             'orderflow_api/settings/organisation',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -78,13 +80,13 @@ class Api extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @param integer|null $scopeId
      *
-     * @return boolean
+     * @return string
      */
     public function getChannel($scopeId = null)
     {
         return (string) $this->scopeConfig->getValue(
             'orderflow_api/settings/channel',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -94,7 +96,7 @@ class Api extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @param integer|null $scopeId
      *
-     * @return \SixBySix\RealtimeDespatch\Api\Credentials
+     * @return Credentials
      */
     public function getCredentials($scopeId = null)
     {

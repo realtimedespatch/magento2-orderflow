@@ -2,6 +2,7 @@
 
 namespace RealtimeDespatch\OrderFlow\Ui\Component\Listing\Columns;
 
+use Magento\Framework\AuthorizationInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
@@ -23,7 +24,7 @@ class ExportActions extends Column
     private $editUrl;
 
     /**
-     * @var \Magento\Framework\AuthorizationInterface
+     * @var AuthorizationInterface
      */
     protected $auth;
 
@@ -31,7 +32,7 @@ class ExportActions extends Column
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
      * @param UrlInterface $urlBuilder
-     * @param \Magento\Framework\AuthorizationInterface $auth,
+     * @param AuthorizationInterface $auth,
      * @param array $components
      * @param array $data
      * @param string $editUrl
@@ -40,7 +41,7 @@ class ExportActions extends Column
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
         UrlInterface $urlBuilder,
-        \Magento\Framework\AuthorizationInterface $auth,
+        AuthorizationInterface $auth,
         array $components = [],
         array $data = [],
         $editUrl = self::IMPORT_URL_PATH_EDIT
@@ -64,14 +65,20 @@ class ExportActions extends Column
                 $name = $this->getData('name');
                 if (isset($item['export_id'])) {
                     $item[$name]['view_export'] = [
-                        'href'  => $this->urlBuilder->getUrl(self::IMPORT_URL_PATH_VIEW, ['export_id' => $item['export_id']]),
+                        'href'  => $this->urlBuilder->getUrl(
+                            self::IMPORT_URL_PATH_VIEW,
+                            ['export_id' => $item['export_id']]
+                        ),
                         'label' => __('View Export')
                     ];
                 }
 
                 if ($this->canViewRequest()) {
                     $item[$name]['view_request'] = [
-                        'href'  => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_VIEW, ['request_id' => $item['request_id']]),
+                        'href'  => $this->urlBuilder->getUrl(
+                            self::REQUEST_URL_PATH_VIEW,
+                            ['request_id' => $item['request_id']]
+                        ),
                         'label' => __('View Processed Request')
                     ];
                 }

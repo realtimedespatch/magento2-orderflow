@@ -16,5 +16,5 @@ interface ShipmentManagementInterface
      *
      * @return mixed
      */
-    public function createShipment($params);
+    public function createShipment(array $params);
 }

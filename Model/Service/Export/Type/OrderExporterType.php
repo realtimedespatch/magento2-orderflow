@@ -3,6 +3,7 @@
 namespace RealtimeDespatch\OrderFlow\Model\Service\Export\Type;
 
 use \RealtimeDespatch\OrderFlow\Model\Factory\OrderFlow\Service\OrderServiceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 
 class OrderExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Export\Type\ExporterType
 {
@@ -57,14 +58,9 @@ class OrderExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Export
     }
 
     /**
-     * Exports a request.
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function export(\RealtimeDespatch\OrderFlow\Model\Request $request)
+    public function export(RequestInterface $request)
     {
         $tx = $this->_objectManager->create('Magento\Framework\DB\Transaction');
         $export = $this->_createExport($request);

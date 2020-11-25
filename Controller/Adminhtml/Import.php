@@ -3,18 +3,14 @@
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml;
 
 use Magento\Backend\App\Action;
+use Magento\Backend\Model\View\Result\Page;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\View\Result\PageFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
 use RealtimeDespatch\OrderFlow\Api\ImportRepositoryInterface;
-use Magento\Framework\Exception\InputException;
-use Psr\Log\LoggerInterface;
 
-/**
- * Import Base Controller.
- *
- * @SuppressWarnings(PHPMD.NumberOfChildren)
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
-abstract class Import extends \Magento\Backend\App\Action
+abstract class Import extends Action
 {
     /**
      * {@inheritdoc}
@@ -27,41 +23,9 @@ abstract class Import extends \Magento\Backend\App\Action
     protected $_publicActions = ['view', 'index'];
 
     /**
-     * Core registry
-     *
-     * @var \Magento\Framework\Registry
+     * @var PageFactory
      */
-    protected $_coreRegistry = null;
-
-    /**
-     * @var \Magento\Framework\App\Response\Http\FileFactory
-     */
-    protected $_fileFactory;
-
-    /**
-     * @var \Magento\Framework\Translate\InlineInterface
-     */
-    protected $_translateInline;
-
-    /**
-     * @var \Magento\Framework\View\Result\PageFactory
-     */
-    protected $resultPageFactory;
-
-    /**
-     * @var \Magento\Framework\Controller\Result\JsonFactory
-     */
-    protected $resultJsonFactory;
-
-    /**
-     * @var \Magento\Framework\View\Result\LayoutFactory
-     */
-    protected $resultLayoutFactory;
-
-    /**
-     * @var \Magento\Framework\Controller\Result\RawFactory
-     */
-    protected $resultRawFactory;
+    protected $pageFactory;
 
     /**
      * @var ImportRepositoryInterface
@@ -69,82 +33,49 @@ abstract class Import extends \Magento\Backend\App\Action
     protected $importRepository;
 
     /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
      * @param Action\Context $context
-     * @param \Magento\Framework\Registry $coreRegistry
-     * @param \Magento\Framework\App\Response\Http\FileFactory $fileFactory
-     * @param \Magento\Framework\Translate\InlineInterface $translateInline
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-     * @param \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
-     * @param \Magento\Framework\View\Result\LayoutFactory $resultLayoutFactory
-     * @param \Magento\Framework\Controller\Result\RawFactory $resultRawFactory
-     * @param ImportRepositoryInterface $requestRepository
-     * @param LoggerInterface $logger
-     *
-     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
-     * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+     * @param PageFactory $pageFactory
+     * @param ImportRepositoryInterface $importRepository
      */
     public function __construct(
         Action\Context $context,
-        \Magento\Framework\Registry $coreRegistry,
-        \Magento\Framework\App\Response\Http\FileFactory $fileFactory,
-        \Magento\Framework\Translate\InlineInterface $translateInline,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
-        \Magento\Framework\View\Result\LayoutFactory $resultLayoutFactory,
-        \Magento\Framework\Controller\Result\RawFactory $resultRawFactory,
-        ImportRepositoryInterface $importRepository,
-        LoggerInterface $logger
-    ) {
-        $this->_coreRegistry = $coreRegistry;
-        $this->_fileFactory = $fileFactory;
-        $this->_translateInline = $translateInline;
-        $this->resultPageFactory = $resultPageFactory;
-        $this->resultJsonFactory = $resultJsonFactory;
-        $this->resultLayoutFactory = $resultLayoutFactory;
-        $this->resultRawFactory = $resultRawFactory;
-        $this->logger = $logger;
-        $this->importRepository = $importRepository;
+        PageFactory $pageFactory,
+        ImportRepositoryInterface $importRepository
+    )
+    {
         parent::__construct($context);
+
+        $this->pageFactory = $pageFactory;
+        $this->importRepository = $importRepository;
     }
 
     /**
-     * Init layout, menu and breadcrumb
+     * Page Getter.
      *
-     * @return \Magento\Backend\Model\View\Result\Page
+     * @return Page
      */
-    protected function _initAction()
+    protected function getPage()
     {
-        $resultPage = $this->resultPageFactory->create();
+        /* @var Page $resultPage */
+        $resultPage = $this->pageFactory->create();
         $resultPage->addBreadcrumb(__('Imports'), __('Imports'));
 
         return $resultPage;
     }
 
     /**
-     * Initialize import model instance
+     * Import Getter.
      *
-     * @return \Magento\Sales\Api\Data\ImportInterface|false
+     * @return ImportInterface
+     * @throws NoSuchEntityException|CouldNotSaveException
      */
-    protected function _initImport()
+    protected function getImport()
     {
-        $id = $this->getRequest()->getParam('import_id');
-        try {
-            $import = $this->importRepository->get($id);
-        } catch (NoSuchEntityException $e) {
-            $this->messageManager->addError(__('This import no longer exists.'));
-            $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
-            return false;
-        } catch (InputException $e) {
-            $this->messageManager->addError(__('This import no longer exists.'));
-            $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
-            return false;
-        }
-        $this->_coreRegistry->register('current_import', $import);
+        $importId = $this->getRequest()->getParam('import_id');
+        $import = $this->importRepository->get($importId);
+        $import->setViewedAt(date('Y-m-d H:i:s'));
+        $this->importRepository->save($import);
+
         return $import;
     }
 }

@@ -1,59 +1,79 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service\Export\Type;
 
-class OrderExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Export\Type\ExporterType
+use Exception;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DB\Transaction;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\OrderFactory;
+use Magento\Store\Model\ScopeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use Psr\Log\LoggerInterface;
+
+/**
+ * Order Export Exporter Type.
+ *
+ * Processes order export requests received from OrderFlow to ensure orders are marked as exported.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class OrderExportExporterType extends ExporterType
 {
     /* Exporter Type */
     const TYPE = 'Order';
 
     /**
-     * @var \Magento\Framework\DB\Transaction
+     * @var OrderFactory
      */
-    protected $_tx;
+    protected $orderFactory;
 
     /**
-     * @var \Magento\Sales\Api\Data\OrderInterface $repository
-     */
-    protected $_orderRepository;
-
-    /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @pparam \Magento\Sales\Api\Data\OrderInterface $orderRepository
+     * @param ScopeConfigInterface $config
+     * @param LoggerInterface $logger
+     * @param ExportInterfaceFactory $exportFactory
+     * @param ExportLineInterfaceFactory $exportLineFactory
+     * @param Transaction $transaction
+     * @param OrderFactory $orderFactory
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Sales\Api\Data\OrderInterface $orderRepository
+        ScopeConfigInterface $config,
+        LoggerInterface $logger,
+        ExportInterfaceFactory $exportFactory,
+        ExportLineInterfaceFactory $exportLineFactory,
+        Transaction $transaction,
+        OrderFactory $orderFactory
     ) {
-        parent::__construct($config, $logger, $objectManager);
-        $this->_orderRepository = $orderRepository;
-        $this->_tx = $this->_objectManager->create('Magento\Framework\DB\Transaction');
+        $this->orderFactory = $orderFactory;
+
+        parent::__construct(
+            $config,
+            $logger,
+            $exportFactory,
+            $exportLineFactory,
+            $transaction
+        );
     }
 
     /**
-     * Checks whether the export type is enabled.
-     *
-     * @api
-     * @return boolean
+     * @inheritDoc
      */
     public function isEnabled($scopeId = null)
     {
-        return $this->_config->getValue(
+        return $this->config->getValue(
             'orderflow_order_export/settings/is_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
 
     /**
-     * Returns the export type.
-     *
-     * @api
-     * @return string
+     * @inheritDoc
      */
     public function getType()
     {
@@ -61,71 +81,43 @@ class OrderExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\
     }
 
     /**
-     * Exports a request.
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function export(\RealtimeDespatch\OrderFlow\Model\Request $request)
-    {
-        $export = $this->_createExport($request);
-        $exportLines = array();
-
-        $this->_tx->addObject($export);
-        $this->_tx->addObject($request);
-
-        foreach ($request->getLines() as $requestLine) {
-            $exportLine = $this->_exportLine($export, $request, $requestLine);
-            $export->addLine($exportLine);
-            $this->_tx->addObject($requestLine);
-            $this->_tx->addObject($exportLine);
-        }
-
-        $request->setProcessedAt(date('Y-m-d H:i:s'));
-        $this->_tx->save();
-
-        return $export;
-    }
-
-    /**
-     * Exports a request line;
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
-     */
-    protected function _exportLine($export, $request, $requestLine)
-    {
+    protected function exportLine(
+        ExportInterface $export,
+        RequestInterface $request,
+        $requestLine
+    ) {
         $body = $requestLine->getBody();
         $incrementId = (string) $body->increment_id;
 
         try {
-            $order = $this->_orderRepository->loadByIncrementId($incrementId);
+            $order = $this->orderFactory->create()->loadByIncrementId($incrementId);
 
-            if ( ! $order->getId()) {
-                throw new \Exception('Order #'.$incrementId.' does not exist.');
+            if (! $order->getId()) {
+                throw new LocalizedException(__('Order #'.$incrementId.' does not exist.'));
             }
 
+            /** @noinspection PhpUndefinedMethodInspection */
             $order->setOrderflowExportStatus(__('Exported'));
+
+            /** @noinspection PhpUndefinedMethodInspection */
             $order->setOrderflowExportDate($request->getCreationTime());
-            $this->_tx->addObject($order);
+            $this->transaction->addObject($order);
 
             $requestLine->setResponse(__('Order successfully exported.'));
 
-            return $this->_createSuccessExportLine(
+            return $this->createSuccessExportLine(
                 $export,
                 $incrementId,
                 $request->getOperation(),
                 __('Order successfully exported.'),
                 $body
             );
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $requestLine->setResponse($ex->getMessage());
 
-            return $this->_createFailureExportLine(
+            return $this->createFailureExportLine(
                 $export,
                 $incrementId,
                 $request->getOperation(),

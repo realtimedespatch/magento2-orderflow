@@ -2,32 +2,37 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Service\Request\Type;
 
-use \RealtimeDespatch\OrderFlow\Api\RequestProcessorTypeInterface;
+use Magento\Framework\Exception\LocalizedException;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorTypeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter;
 
+/**
+ * Export Request Processor.
+ *
+ * Processes an export request - see types under the RealtimeDespatch\OrderFlow\Model\Service\Export\Type namespace
+ */
 class ExportRequestProcessorType implements RequestProcessorTypeInterface
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter
+     * @var Exporter
      */
-    protected $_exporter;
+    protected $exporter;
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter $exporter
+     * @param Exporter $exporter
      */
-    public function __construct(\RealtimeDespatch\OrderFlow\Model\Service\Export\Exporter $exporter)
+    public function __construct(Exporter $exporter)
     {
-        $this->_exporter = $exporter;
+        $this->exporter = $exporter;
     }
 
     /**
-     * Processes an orderflow request.
-     *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return boolean
+     * @inheritDoc
+     * @throws LocalizedException
      */
-    public function process(\RealtimeDespatch\OrderFlow\Model\Request $request)
+    public function process(RequestInterface $request)
     {
-        return $this->_exporter->export($request);
+        return $this->exporter->export($request);
     }
 }

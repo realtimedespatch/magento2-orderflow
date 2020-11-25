@@ -1,13 +1,25 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Request;
 
+use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Backend\Model\View\Result\Redirect;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Ui\Component\MassAction\Filter;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
 use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\CollectionFactory;
-use Magento\Framework\Controller\ResultFactory;
 
-class MassProcess extends \Magento\Backend\App\Action
+/**
+ * Mass Request Process Controller.
+ *
+ * Processes a batch of OrderFlow requests.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class MassProcess extends Action
 {
     /**
      * @var Filter
@@ -20,49 +32,49 @@ class MassProcess extends \Magento\Backend\App\Action
     protected $collectionFactory;
 
     /**
+     * @var RequestProcessorFactoryInterface
+     */
+    protected $requestProcessorFactory;
+
+    /**
      * @param Context $context
      * @param Filter $filter
      * @param CollectionFactory $collectionFactory
+     * @param RequestProcessorFactoryInterface $requestProcessorFactory
      */
-    public function __construct(Context $context, Filter $filter, CollectionFactory $collectionFactory)
-    {
+    public function __construct(
+        Context $context,
+        Filter $filter,
+        CollectionFactory $collectionFactory,
+        RequestProcessorFactoryInterface $requestProcessorFactory
+    ) {
+        parent::__construct($context);
+
         $this->filter = $filter;
         $this->collectionFactory = $collectionFactory;
-        parent::__construct($context);
+        $this->requestProcessorFactory = $requestProcessorFactory;
     }
 
     /**
-     * Execute action
+     * Execute.
      *
-     * @return \Magento\Backend\Model\View\Result\Redirect
-     * @throws \Magento\Framework\Exception\LocalizedException|\Exception
+     * @return Redirect
+     * @throws LocalizedException
      */
     public function execute()
     {
+        /** @noinspection PhpUndefinedMethodInspection */
         $collection = $this->filter->getCollection($this->collectionFactory->create());
         $collectionSize = $collection->getSize();
 
         foreach ($collection as $request) {
-            $this->_getProcessor($request->getEntity(), $request->getOperation())->process($request);
+            $this->requestProcessorFactory->get($request->getEntity(), $request->getOperation())->process($request);
         }
 
-        $this->messageManager->addSuccess(__('A total of %1 request(s) have been processed.', $collectionSize));
+        $this->messageManager->addSuccessMessage(__('A total of %1 request(s) have been processed.', $collectionSize));
 
-        /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
+        /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultRedirectFactory->create();
         return $resultRedirect->setRefererUrl();
-    }
-
-    /**
-     * Retrieve the processor instance.
-     *
-     * @param $type Processor Entity
-     * @param $type Processor Operation
-     *
-     * @return RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor
-     */
-    protected function _getProcessor($entity, $operation)
-    {
-        return $this->_objectManager->create($entity.$operation.'RequestProcessor');
     }
 }

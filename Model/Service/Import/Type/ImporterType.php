@@ -1,51 +1,138 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service\Import\Type;
 
+use Exception;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DB\Transaction;
+use Psr\Log\LoggerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\ImporterTypeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Model\Import;
+use RealtimeDespatch\OrderFlow\Model\ImportLine;
+use RealtimeDespatch\OrderFlow\Model\Request;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine\CollectionFactory as ImportLineCollectionFactory;
 
+/**
+ * Importer Type.
+ *
+ * Abstract Base Class for Importer Types.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
 abstract class ImporterType implements ImporterTypeInterface
 {
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var array
      */
-    protected $_config;
+    protected $processedIds = [];
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var ScopeConfigInterface
      */
-    protected $_logger;
+    protected $config;
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var LoggerInterface
      */
-    protected $_objectManager;
+    protected $logger;
 
     /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $cnfig
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\ObjectManagerInterface
+     * @var ImportInterfaceFactory
+     */
+    protected $importFactory;
+
+    /**
+     * @var ImportLineInterfaceFactory
+     */
+    protected $importLineFactory;
+
+    /**
+     * @var ImportLineCollectionFactory
+     */
+    protected $importLineCollectionFactory;
+
+    /**
+     * @var Transaction
+     */
+    protected $transaction;
+
+    /**
+     * @param ScopeConfigInterface $config
+     * @param LoggerInterface $logger
+     * @param ImportInterfaceFactory $importFactory
+     * @param ImportLineInterfaceFactory $importLineFactory
+     * @param ImportLineCollectionFactory $importLineCollectionFactory
+     * @param Transaction $transaction
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\ObjectManagerInterface $objectManager) {
-        $this->_config = $config;
-        $this->_logger = $logger;
-        $this->_objectManager = $objectManager;
+        ScopeConfigInterface $config,
+        LoggerInterface $logger,
+        ImportInterfaceFactory $importFactory,
+        ImportLineInterfaceFactory $importLineFactory,
+        ImportLineCollectionFactory $importLineCollectionFactory,
+        Transaction $transaction
+    ) {
+        $this->config = $config;
+        $this->logger = $logger;
+        $this->importFactory = $importFactory;
+        $this->importLineFactory = $importLineFactory;
+        $this->importLineCollectionFactory = $importLineCollectionFactory;
+        $this->transaction = $transaction;
     }
 
     /**
-     * Creates a new import.
-     *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request request
-     *
-     * @return \RealtimeDespatch\OrderFlow\Model\Import
+     * @inheritDoc
+     * @throws Exception
      */
-    protected function _createImport(\RealtimeDespatch\OrderFlow\Model\Request $request)
+    public function import(RequestInterface $request)
     {
-        $import = $this->_objectManager->create('RealtimeDespatch\OrderFlow\Model\Import');
+        $import = $this->createImport($request);
+
+        /* @var Import $import */
+        /* @var Request $request */
+        $this->transaction->addObject($import);
+        $this->transaction->addObject($request);
+
+        foreach ($request->getLines() as $requestLine) {
+            $importLine = $this->importLine($import, $request, $requestLine);
+            $importLine->setImport($import);
+            $this->transaction->addObject($importLine);
+            $this->transaction->addObject($requestLine);
+        }
+
+        $request->setProcessedAt(date('Y-m-d H:i:s'));
+        $this->transaction->save();
+    }
+
+    /**
+     * Import Request Line.
+     *
+     * @param ImportInterface $import
+     * @param RequestInterface $request
+     * @param $requestLine
+     * @return mixed
+     * @api
+     */
+    abstract protected function importLine(ImportInterface $import, RequestInterface $request, $requestLine);
+
+    /**
+     * Create Import From Request.
+     *
+     * @param RequestInterface $request
+     *
+     * @return ImportInterface
+     */
+    protected function createImport(RequestInterface $request)
+    {
+        /** @noinspection PhpUndefinedMethodInspection */
+        $import = $this->importFactory->create();
 
         $import->setRequestId($request->getId());
         $import->setMessageId($request->getMessageId());
@@ -60,21 +147,28 @@ abstract class ImporterType implements ImporterTypeInterface
     }
 
     /**
-     * Creates a success import line.
+     * Create Success Import Line.
      *
-     * @param $import
-     * @param $seqId
-     * @param $reference
-     * @param $message
-     * @param $data
+     * @param ImportInterface $import
+     * @param string $seqId
+     * @param string $reference
+     * @param string $operation
+     * @param string $message
+     * @param array $data
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\ImportLine
+     * @return ImportLineInterface
      */
-    protected function _createSuccessImportLine($import, $seqId, $reference, $operation, $message, $data = array())
-    {
+    protected function createSuccessImportLine(
+        ImportInterface $import,
+        string $seqId,
+        string $reference,
+        string $operation,
+        string $message,
+        array $data = []
+    ) {
         $import->setSuccesses($import->getSuccesses() + 1);
 
-        return $this->_createImportLine(
+        return $this->createImportLine(
             $seqId,
             ImportLineInterface::RESULT_SUCCESS,
             $reference,
@@ -85,21 +179,28 @@ abstract class ImporterType implements ImporterTypeInterface
     }
 
     /**
-     * Creates a duplicate import line.
+     * Create Duplicate Import Line.
      *
-     * @param $import
-     * @param $seqId
-     * @param $reference
-     * @param $message
-     * @param $data
+     * @param ImportInterface $import
+     * @param string $seqId
+     * @param string $reference
+     * @param string $operation
+     * @param string $message
+     * @param array $data
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\ImportLine
+     * @return ImportLineInterface
      */
-    protected function _createDuplicateImportLine($import, $seqId, $reference, $operation, $message, $data = array())
-    {
+    protected function createDuplicateImportLine(
+        ImportInterface $import,
+        string $seqId,
+        string $reference,
+        string $operation,
+        string $message,
+        array $data = []
+    ) {
         $import->setDuplicates($import->getDuplicates() + 1);
 
-        return $this->_createImportLine(
+        return $this->createImportLine(
             $seqId,
             ImportLineInterface::RESULT_DUPLICATE,
             $reference,
@@ -110,21 +211,28 @@ abstract class ImporterType implements ImporterTypeInterface
     }
 
     /**
-     * Creates a superseded import line.
+     * Create Superseded Import Line.
      *
-     * @param $import
-     * @param $seqId
-     * @param $reference
-     * @param $message
-     * @param $data
+     * @param ImportInterface $import
+     * @param string $seqId
+     * @param string $reference
+     * @param string $operation
+     * @param string $message
+     * @param array $data
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\ImportLine
+     * @return ImportLineInterface
      */
-    protected function _createSupersededImportLine($import, $seqId, $reference, $operation, $message, $data = array())
-    {
+    protected function createSupersededImportLine(
+        ImportInterface $import,
+        string $seqId,
+        string $reference,
+        string $operation,
+        string $message,
+        array $data = []
+    ) {
         $import->setSuccesses($import->getSuccesses() + 1);
 
-        return $this->_createImportLine(
+        return $this->createImportLine(
             $seqId,
             ImportLineInterface::RESULT_SUPERSEDED,
             $reference,
@@ -135,21 +243,28 @@ abstract class ImporterType implements ImporterTypeInterface
     }
 
     /**
-     * Creates a failure import line.
+     * Create Failure Import Line.
      *
-     * @param $import
-     * @param $seqId
-     * @param $reference
-     * @param $message
-     * @param $data
+     * @param ImportInterface $import
+     * @param string $seqId
+     * @param string $reference
+     * @param string $operation
+     * @param string $message
+     * @param array $data
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\ImportLine
+     * @return ImportLineInterface
      */
-    protected function _createFailureImportLine($import, $seqId, $reference, $operation, $message, $data = array())
-    {
+    protected function createFailureImportLine(
+        ImportInterface $import,
+        string $seqId,
+        string $reference,
+        string $operation,
+        string $message,
+        array $data = []
+    ) {
         $import->setFailures($import->getFailures() + 1);
 
-        return $this->_createImportLine(
+        return $this->createImportLine(
             $seqId,
             ImportLineInterface::RESULT_FAILURE,
             $reference,
@@ -160,22 +275,30 @@ abstract class ImporterType implements ImporterTypeInterface
     }
 
     /**
-     * Creates an import line.
+     * Create Import Line.
      *
-     * @param $seqId
-     * @param $result
-     * @param $reference
-     * @param $operation
-     * @param $message
+     * @param string $seqId
+     * @param string $result
+     * @param string $reference
+     * @param string $operation
+     * @param string $message
      * @param array $data
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\ImportLine
+     * @return ImportLineInterface
      */
-    protected function _createImportLine($seqId, $result, $reference, $operation, $message, $data = array())
-    {
-        $this->_processedIds[$seqId] = $seqId;
+    protected function createImportLine(
+        string $seqId,
+        string $result,
+        string $reference,
+        string $operation,
+        string $message,
+        array $data = []
+    ) {
+        $this->processedIds[$seqId] = $seqId;
 
-        $importLine = $this->_objectManager->create('RealtimeDespatch\OrderFlow\Model\ImportLine');
+        /** @noinspection PhpUndefinedMethodInspection */
+        $importLine = $this->importLineFactory->create();
+
         $importLine->setSequenceId($seqId);
         $importLine->setResult($result);
         $importLine->setReference($reference);
@@ -195,45 +318,52 @@ abstract class ImporterType implements ImporterTypeInterface
      *
      * @return boolean
      */
-    protected function _isDuplicateLine($seqId)
+    protected function isDuplicateLine(string $seqId)
     {
-        $model = $this->_objectManager->create('RealtimeDespatch\OrderFlow\Model\ImportLine')
-            ->getCollection()
+        /** @var ImportLine $duplicateLine */
+        $duplicateLine = $this
+            ->importLineCollectionFactory
+            ->create()
             ->addFieldToFilter('sequence_id', ['eq' => $seqId])
             ->addFieldToFilter('result', ['eq' => ImportLineInterface::RESULT_SUCCESS])
             ->setOrder('line_id', 'DESC')
             ->getFirstItem();
 
-        return ! is_null($model->getId());
+        if (!$duplicateLine) {
+            return false;
+        }
+
+        return $duplicateLine->getId() !== null;
     }
 
     /**
-     * Checks whether the import line hsa been superseded.
+     * Checks whether the import line has been superseded.
      *
      * @param integer $seqId
-     * @param string  $reference
+     * @param string $reference
      *
      * @return boolean
      */
-    protected function _isSuperseded($seqId, $reference)
+    protected function isSuperseded(int $seqId, string $reference)
     {
-        $supersedeLine = $this->_objectManager
-            ->create('RealtimeDespatch\OrderFlow\Model\ImportLine')
-            ->getCollection()
+        /** @var ImportLine $supersededLine */
+        $supersededLine = $this
+            ->importLineCollectionFactory
+            ->create()
             ->addFieldToFilter('entity', ['eq' => $this->getType()])
             ->addFieldToFilter('reference', ['eq' => $reference])
             ->addFieldToFilter('result', ['eq' => ImportLineInterface::RESULT_SUCCESS])
-            ->setOrder('sequence_id','DESC')
+            ->setOrder('sequence_id', 'DESC')
             ->getFirstItem();
 
-        if ( ! $supersedeLine) {
+        if (! $supersededLine) {
             return false;
         }
 
-        if ($seqId > $supersedeLine->getSequenceId()) {
+        if ($seqId > $supersededLine->getSequenceId()) {
             return false;
         }
 
-        return $supersedeLine->getSequenceId();
+        return $supersededLine->getSequenceId();
     }
 }

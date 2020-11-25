@@ -1,37 +1,48 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Cron\Log;
 
+use Psr\Log\LoggerInterface;
+use RealtimeDespatch\OrderFlow\Helper\Log\Cleaning;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\CollectionFactory;
+
+/**
+ * Request Log Cleaner.
+ *
+ * Cleanses export logs from the database for performance optimisation.
+ */
 class RequestLogCleaner
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
-    protected $_logger;
+    protected $logger;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\RequestFactory
+     * @var CollectionFactory
      */
-    protected $_factory;
+    protected $factory;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Log\Cleaning
+     * @var Cleaning
      */
-    protected $_helper;
+    protected $helper;
 
     /**
-     * RequestCron constructor.
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory
-     * @param \RealtimeDespatch\OrderFlow\Helper\Log\Cleaning $helper
+     * @param LoggerInterface $logger
+     * @param CollectionFactory $factory
+     * @param Cleaning $helper
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Model\RequestFactory $factory,
-        \RealtimeDespatch\OrderFlow\Helper\Log\Cleaning $helper) {
-        $this->_logger = $logger;
-        $this->_factory = $factory;
-        $this->_helper = $helper;
+        LoggerInterface $logger,
+        CollectionFactory $factory,
+        Cleaning $helper
+    ) {
+        $this->logger = $logger;
+        $this->factory = $factory;
+        $this->helper = $helper;
     }
 
     /**
@@ -41,15 +52,15 @@ class RequestLogCleaner
      */
     public function execute()
     {
-        if ( ! $this->_helper->isEnabled()) {
+        if (! $this->helper->isEnabled()) {
             return;
         }
 
-        $cutoff = date('Y-m-d', strtotime('-'.($this->_helper->getRequestLogDuration() - 1).' days'));
+        $cutoff = date('Y-m-d', strtotime('-'.($this->helper->getRequestLogDuration() - 1).' days'));
 
-        $this->_factory
+        /** @noinspection PhpUndefinedMethodInspection */
+        $this->factory
             ->create()
-            ->getCollection()
             ->addFieldToFilter('created_at', ['lteq' => $cutoff])
             ->walk('delete');
     }

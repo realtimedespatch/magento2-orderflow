@@ -2,34 +2,40 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Catalog;
 
+use Magento\Catalog\Model\Product;
+
 /**
  * Class ProductSave
- * @package RealtimeDespatch\OrderFlow\Plugin\Catalog
+ *
+ * Resets the export status if the product has been updated.
  */
 class ProductSave
 {
     const EXPORT_STATUS_PENDING = 'Pending';
 
     /**
-     * Resets the Export Status if a product has been updated.
+     * Resets the export status for a product that has been updated.
      *
-     * @param \Magento\Catalog\Model\Product $product
+     * This ensures the product is queued for export into OrderFlow.
+     *
+     * @param \Magento\Catalog\Model\ResourceModel\Product $resourceModel
+     * @param Product $product
+     * @return Product[]
+     * @SuppressWarnings("unused")
+     * @noinspection PhpUnusedParameterInspection
      */
-    public function beforeSave($resourceModel, $product)
-    {
-        // If the product has no changed data ignore.
-        if ( ! $product->isDataChanged()) {
-            return array($product);
+    public function beforeSave(
+        \Magento\Catalog\Model\ResourceModel\Product $resourceModel,
+        Product $product
+    ) {
+        // Ignore if the product has not changed, or the status has already been updated by a different listener
+        if ($product->isDataChanged() || $product->dataHasChangedFor('orderflow_export_status')) {
+            return [$product];
         }
 
-        // If a separate process has amended the export status ignore.
-        if ($product->dataHasChangedFor('orderflow_export_status')) {
-            return array($product);
-        }
-
-        // Set pending export status.
+        /** @noinspection PhpUndefinedMethodInspection */
         $product->setOrderflowExportStatus(self::EXPORT_STATUS_PENDING);
 
-        return array($product);
+        return [$product];
     }
 }

@@ -2,44 +2,36 @@
 
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Request;
 
-use Magento\Backend\App\Action;
-use Magento\Sales\Api\OrderManagementInterface;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\InputException;
-use Psr\Log\LoggerInterface;
+use Exception;
+use Magento\Backend\Model\View\Result\Page;
+use Magento\Framework\Controller\Result\Redirect;
+use RealtimeDespatch\OrderFlow\Controller\Adminhtml\Request;
 
-class View extends \RealtimeDespatch\OrderFlow\Controller\Adminhtml\Request
+class View extends Request
 {
     /**
-     * View request detail
+     * Execute.
      *
-     * @return \Magento\Backend\Model\View\Result\Page|\Magento\Backend\Model\View\Result\Redirect
+     * @return Page|Redirect
      */
     public function execute()
     {
-        $request = $this->_initRequest();
-        $resultRedirect = $this->resultRedirectFactory->create();
-
-        if ( ! $request) {
-            return $resultRedirect->setRefererUrl();
-        }
-
         try {
-            $resultPage = $this->_initAction();
-            $resultPage->getConfig()->getTitle()->prepend(sprintf($request->getType()." Request #%s", $request->getMessageId()));
+            $request = $this->getOrderFlowRequest();
 
-            if ($request->getType() == 'Import') {
-                $resultPage->getLayout()->unsetChild('lines', 'request_export_line_listing');
-            } else {
-                $resultPage->getLayout()->unsetChild('lines', 'request_import_line_listing');
+            if ( ! $request) {
+                return $this->resultRedirectFactory->create()->setRefererUrl();
             }
-        } catch (\Exception $e) {
-            $this->logger->critical($e);
-            $this->messageManager->addError(__('Exception occurred during request load'));
-            return $resultRedirect->setRefererUrl();
-        }
 
-        return $resultPage;
+            $page = $this->getPage();
+            $page->getConfig()
+                 ->getTitle()
+                 ->prepend(sprintf($request->getType()." Request #%s", $request->getMessageId()));
+
+            return $page;
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage(__($e->getMessage()));
+            return $this->resultRedirectFactory->create()->setRefererUrl();
+        }
     }
 }

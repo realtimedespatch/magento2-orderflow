@@ -2,10 +2,16 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Service;
 
+use DateTime;
+use Magento\Framework\Exception\CouldNotSaveException;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\OrderRequestManagementInterface;
+use RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder;
 
 /**
  * Class OrderRequestService
+ *
+ * Service Class for Processing Order Requests.
  *
  * @api
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -13,43 +19,49 @@ use RealtimeDespatch\OrderFlow\Api\OrderRequestManagementInterface;
 class OrderRequestService implements OrderRequestManagementInterface
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder
+     * @var RequestBuilder
      */
     protected $requestBuilder;
 
     /**
      * Constructor
      *
-     * @param \RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder $requestBuilder
+     * @param RequestBuilder $requestBuilder
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder $requestBuilder) {
+        RequestBuilder $requestBuilder
+    ) {
         $this->requestBuilder = $requestBuilder;
     }
 
     /**
      * Marks an order as exported.
      *
-     * @api
      * @param string $reference
      *
      * @return mixed
+     * @throws CouldNotSaveException
+     * @api
      */
-    public function export($reference)
+    public function export(string $reference)
     {
-        $date = new \DateTime;
+        $date = new DateTime;
         $received = $date->format("Y-m-d H:i:s");
 
         // Build the request.
         $this->requestBuilder->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_ORDER,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_EXPORT
+            RequestInterface::TYPE_EXPORT,
+            RequestInterface::ENTITY_ORDER,
+            RequestInterface::OP_EXPORT
         );
 
-        $this->requestBuilder->addRequestLine(json_encode(array('increment_id' => $reference)));
+        $this->requestBuilder->addRequestLine(json_encode(['increment_id' => $reference]));
         $this->requestBuilder->saveRequest();
 
-        return str_replace(' ','T', $received);
+        return str_replace(
+            ' ',
+            'T',
+            $received
+        );
     }
 }

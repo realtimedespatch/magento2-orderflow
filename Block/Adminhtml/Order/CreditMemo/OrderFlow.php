@@ -1,37 +1,48 @@
 <?php
 
+/** @noinspection PhpDeprecationInspection */
+
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Order\CreditMemo;
 
-class OrderFlow extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder
+use Magento\Backend\Block\Template\Context;
+use Magento\Framework\Registry;
+use Magento\Sales\Block\Adminhtml\Order\AbstractOrder;
+use Magento\Sales\Helper\Admin;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Creditmemo;
+use RealtimeDespatch\OrderFlow\Helper\Admin\Info;
+use RealtimeDespatch\OrderFlow\Helper\Api;
+
+class OrderFlow extends AbstractOrder
 {
     protected $_adminInfoHelper;
     protected $_apiHelper;
 
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Sales\Helper\Admin $adminHelper
-     * @param \RealtimeDespatch\OrderFlow\Helper\Admin\Info $adminInfoHelper
-     * @param \RealtimeDespatch\OrderFlow\Helper\Api $apiHelper
+     * @param Context $context
+     * @param Registry $registry
+     * @param Admin $adminHelper
+     * @param Info $adminInfoHelper
+     * @param Api $apiHelper
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Sales\Helper\Admin $adminHelper,
-        \RealtimeDespatch\OrderFlow\Helper\Admin\Info $adminInfoHelper,
-        \RealtimeDespatch\OrderFlow\Helper\Api $apiHelper,
+        Context $context,
+        Registry $registry,
+        Admin $adminHelper,
+        Info $adminInfoHelper,
+        Api $apiHelper,
         array $data = []
     ) {
         $this->_adminInfoHelper = $adminInfoHelper;
         $this->_apiHelper = $apiHelper;
-        parent::__construct($context, $registry, $adminHelper);
+        parent::__construct($context, $registry, $adminHelper, $data);
     }
 
     /**
      * Retrieve invoice order
      *
-     * @return \Magento\Sales\Model\Order
+     * @return Order
      */
     public function getOrder()
     {
@@ -41,7 +52,7 @@ class OrderFlow extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder
     /**
      * Retrieve creditmemo model instance
      *
-     * @return \Magento\Sales\Model\Order\Creditmemo
+     * @return Creditmemo
      */
     public function getCreditmemo()
     {
@@ -65,12 +76,11 @@ class OrderFlow extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder
      */
     public function getOrderFlowOrderUrl()
     {
-        $order = $this->getOrder();
-        $storeId = $this->getStoreId();
+        $storeId = $this->getOrder()->getStoreId();
 
         $url  = $this->_apiHelper->getEndpoint($storeId);
         $url .= 'despatch/order/referenceDetail.htm?externalReference=';
-        $url .= urlencode($order->getIncrementId());
+        $url .= urlencode($this->getOrder()->getIncrementId());
         $url .= '&channel='.urlencode($this->_apiHelper->getChannel($storeId));
 
         return $url;

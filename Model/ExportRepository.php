@@ -2,20 +2,20 @@
 
 namespace RealtimeDespatch\OrderFlow\Model;
 
-use Magento\Cms\Api\Data\ExportInterface;
-
+use Exception;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
 use RealtimeDespatch\OrderFlow\Api\ExportRepositoryInterface;
 use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export as ExportResource;
-
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\ExportLine\CollectionFactory as ExportLineCollectionFactory;
 
 /**
  * Repository class for @see ExportInterface
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class ExportRepository implements \RealtimeDespatch\OrderFlow\Api\ExportRepositoryInterface
+class ExportRepository implements ExportRepositoryInterface
 {
     /**
      * @var ExportResource
@@ -28,45 +28,41 @@ class ExportRepository implements \RealtimeDespatch\OrderFlow\Api\ExportReposito
     protected $exportFactory;
 
     /**
-     * @var ExportLineFactory
+     * @var ExportLineCollectionFactory
      */
-    protected $exportLineFactory;
+    protected $collectionFactory;
 
     /**
      * @param ExportResource $resource
      * @param ExportFactory $exportFactory
-     * @param RealtimeDespatch\OrderFlow\Model\ResourceModel\ExportLine\CollectionFactory
+     * @param ExportLineCollectionFactory $collectionFactory
      */
     public function __construct(
         ExportResource $resource,
         ExportFactory $exportFactory,
-        ExportLineFactory $exportLineFactory
+        ExportLineCollectionFactory $collectionFactory
     ) {
         $this->resource = $resource;
         $this->exportFactory = $exportFactory;
-        $this->exportLineFactory = $exportLineFactory;
+        $this->collectionFactory = $collectionFactory;
     }
 
     /**
-     * Load export data by given export ID.
-     *
-     * @param string $exportId
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @inheritDoc
      */
-    public function get($exportId)
+    public function get(int $exportId)
     {
         $export = $this->exportFactory->create();
         $this->resource->load($export, $exportId);
 
-        if ( ! $export->getId()) {
+        if (! $export->getId()) {
             throw new NoSuchEntityException(__('Export with id "%1" does not exist.', $exportId));
         }
 
-        $lines = $this->exportLineFactory
+        $lines = $this
+            ->collectionFactory
             ->create()
-            ->getCollection()
-            -> addFieldToSelect('*')
+            ->addFieldToSelect('*')
             ->addFieldToFilter('export_id', ['eq' => $export->getId()])
             ->loadData();
 
@@ -76,36 +72,34 @@ class ExportRepository implements \RealtimeDespatch\OrderFlow\Api\ExportReposito
     }
 
     /**
-     * Save Export
-     *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $export
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @inheritDoc
      * @throws CouldNotSaveException
      */
-    public function save(\RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $entity)
+    public function save(ExportInterface $entity)
     {
         try {
-            $this->resource->save($export);
-        } catch (\Exception $exception) {
+            /* @var Export $entity */
+            $this->resource->save($entity);
+        } catch (Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));
         }
-        return $export;
+
+        return $entity;
     }
 
     /**
-     * Delete Export
-     *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $export
-     * @return bool
+     * @inheritDoc
      * @throws CouldNotDeleteException
      */
-    public function delete(\RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $entity)
+    public function delete(ExportInterface $entity)
     {
         try {
-            $this->resource->delete($export);
-        } catch (\Exception $exception) {
+            /* @var Export $entity */
+            $this->resource->delete($entity);
+        } catch (Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
+
         return true;
     }
 }

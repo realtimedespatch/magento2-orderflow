@@ -2,59 +2,73 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Service\Import;
 
+use Exception;
+use Magento\Framework\Event\ManagerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use \RealtimeDespatch\OrderFlow\Api\ImporterTypeInterface;
 
+/**
+ * Importer Service.
+ *
+ * Processes an Import Request.
+ */
 class Importer
 {
-    /**
-     * @var \RealtimeDespatch\OrderFlow\Api\ImporterTypeInterface
-     */
-    public $_type;
+    /* Events */
+    const EVENT_SUCCESS = 'orderflow_export_success';
+    const EVENT_FAILURE = 'orderflow_exception';
 
     /**
-     * @var \Magento\Framework\Event\ManagerInterface
+     * @var ImporterTypeInterface
      */
-    protected $_eventManager;
+    public $type;
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Api\ImporterTypeInterface $type
-     * @param \Magento\Framework\Event\ManagerInterface $eventManager
+     * @var ManagerInterface
+     */
+    protected $eventManager;
+
+    /**
+     * @param ImporterTypeInterface $type
+     * @param ManagerInterface $eventManager
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Api\ImporterTypeInterface $type,
-        \Magento\Framework\Event\ManagerInterface $eventManager
-    )
-    {
-        $this->_type = $type;
-        $this->_eventManager = $eventManager;
+        ImporterTypeInterface $type,
+        ManagerInterface $eventManager
+    ) {
+        $this->type = $type;
+        $this->eventManager = $eventManager;
     }
 
     /**
-     * Imports a request.
+     * Processes an Import Request.
      *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
+     * @param RequestInterface $request
      *
-     * @return void
+     * @return boolean
      */
-    public function import(\RealtimeDespatch\OrderFlow\Model\Request $request)
+    public function import(RequestInterface $request)
     {
-        if ( ! $this->_type->isEnabled()) {
-            return;
+        if (! $this->type->isEnabled()) {
+            return false;
         }
 
         try {
-            $import = $this->_type->import($request);
+            $import = $this->type->import($request);
 
-            $this->_eventManager->dispatch(
-                'orderflow_import_success',
-                ['import' => $import, 'type' => $this->_type->getType()]
+            $this->eventManager->dispatch(
+                self::EVENT_SUCCESS,
+                ['import' => $import, 'type' => $this->type->getType()]
             );
-        }
-        catch (Exception $ex) {
-            $this->_eventManager->dispatch(
-                'orderflow_exception',
-                ['exception' => $ex, 'type' => $this->_type->getType(), 'process' => 'import']
+
+            return true;
+        } catch (Exception $ex) {
+            $this->eventManager->dispatch(
+                self::EVENT_FAILURE,
+                ['exception' => $ex, 'type' => $this->type->getType(), 'process' => 'import']
             );
+
+            return false;
         }
     }
 }

@@ -2,40 +2,48 @@
 
 namespace RealtimeDespatch\OrderFlow\Observer;
 
+use Exception;
+use Magento\Catalog\Model\ProductRepository;
+use Magento\Framework\DB\Transaction;
+use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class ProductExport implements ObserverInterface
 {
     /**
-     * @var \Magento\Framework\DB\Transaction
+     * @var Transaction
      */
-    protected $_tx;
+    protected $transaction;
 
     /**
-     * @var \Magento\Catalog\Model\ProductRepository
+     * @var ProductRepository
      */
-    protected $_repository;
+    protected $repository;
 
     /**
      * ProductExport constructor.
-     * @param \Magento\Framework\DB\Transaction $tx
-     * @param \Magento\Catalog\Model\ProductRepository $repository
+     * @param Transaction $transaction
+     * @param ProductRepository $repository
      */
-    public function __construct(\Magento\Framework\DB\Transaction $tx,
-        \Magento\Catalog\Model\ProductRepository $repository)
-    {
-        $this->_tx = $tx;
-        $this->_repository = $repository;
+    public function __construct(
+        Transaction $transaction,
+        ProductRepository $repository
+    ) {
+        $this->transaction = $transaction;
+        $this->repository = $repository;
     }
 
     /**
-     * Updates the export statuses for a set of product from an export report.
+     * Updates the status of each product that has been successfully integrated into OrderFlow.
      *
-     * @param \Magento\Framework\Event\Observer $observer
+     * @param Observer $observer
      *
      * @return void
+     * @throws Exception
+     * @throws Exception
      */
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    public function execute(Observer $observer)
     {
         $export = $observer->getData('export');
 
@@ -44,10 +52,10 @@ class ProductExport implements ObserverInterface
         }
 
         foreach ($export->getLines() as $exportLine) {
-            $this->_updateProductExportStatus($exportLine);
+            $this->updateProductExportStatus($exportLine);
         }
 
-        $this->_tx->save();
+        $this->transaction->save();
     }
 
     /**
@@ -55,15 +63,17 @@ class ProductExport implements ObserverInterface
      *
      * @param $exportLine
      *
-     * @return void
+     * @return false|void
      */
-    protected function _updateProductExportStatus($exportLine)
+    protected function updateProductExportStatus($exportLine)
     {
         try {
-            $product = $this->_repository->get($exportLine->getReference(), true, 0);
+            $product = $this->repository->get($exportLine->getReference(), true, 0);
+
+            /** @noinspection PhpUndefinedMethodInspection */
             $product->setOrderflowExportStatus($exportLine->getEntityExportStatus());
-            $this->_tx->addObject($product);
-        } catch (\Magento\Framework\Exception\NoSuchEntityException $ex) {
+            $this->transaction->addObject($product);
+        } catch (NoSuchEntityException $ex) {
             return false;
         }
     }

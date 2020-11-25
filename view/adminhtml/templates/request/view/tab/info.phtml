@@ -1,4 +1,5 @@
-<?php $_request = $block->getRequest() ?>
+<?php /* @var $block */ ?>
+<?php $_request = $block->getRtdRequest() ?>
 
 <section class="admin__page-section request-view-request-details">
     <div class="admin__page-section-title">
@@ -9,7 +10,7 @@
             <div class="admin__page-section-item-content">
                 <table class="admin__table-secondary request-information-table">
                     <tr>
-                        <th><?php echo __('Request ID') ?></th>
+                        <th><?php echo __('ID') ?></th>
                         <td><?php echo $_request->getMessageId(); ?></td>
                     </tr>
                     <?php if ($_request->isExport()): ?>

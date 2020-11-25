@@ -2,112 +2,138 @@
 
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Order;
 
+use Exception;
+use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Helper\Export\Order as OrderExportHelper;
+use RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor;
 
-class Export extends \Magento\Backend\App\Action
+/**
+ * Order Export Controller.
+ *
+ * Handles the request to queue an order for export to OrderFlow.
+ */
+class Export extends Action
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Export\Order
+     * @var OrderExportHelper
      */
-    protected $_exportHelper;
+    protected $helper;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @var RequestProcessor
      */
-    protected $_builder;
+    protected $requestProcessor;
 
     /**
-     * @var \Magento\Sales\Model\OrderRepository
+     * @var RequestBuilderInterface
      */
-    protected $_repository;
+    protected $requestBuilder;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var OrderRepositoryInterface
      */
-    protected $_storeManager;
+    protected $orderRepository;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
 
     /**
      * @param Context $context
-     * @param \RealtimeDespatch\OrderFlow\Helper\Export\Order $helper
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder
-     * @param \Magento\Sales\Model\OrderRepository $repository
-     *
+     * @param OrderExportHelper $helper
+     * @param RequestProcessor $requestProcessor
+     * @param RequestBuilderInterface $requestBuilder
+     * @param OrderRepositoryInterface $orderRepository
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         Context $context,
-        \RealtimeDespatch\OrderFlow\Helper\Export\Order $helper,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $builder,
-        \Magento\Sales\Model\OrderRepository $repository,
-        \Magento\Store\Model\StoreManagerInterface $storeManager)
-    {
-        $this->_exportHelper = $helper;
-        $this->_builder = $builder;
-        $this->_repository = $repository;
-        $this->_storeManager = $storeManager;
+        OrderExportHelper $helper,
+        RequestProcessor $requestProcessor,
+        RequestBuilderInterface $requestBuilder,
+        OrderRepositoryInterface $orderRepository,
+        StoreManagerInterface $storeManager
+    ) {
+        $this->helper = $helper;
+        $this->requestProcessor = $requestProcessor;
+        $this->requestBuilder = $requestBuilder;
+        $this->orderRepository = $orderRepository;
+        $this->storeManager = $storeManager;
 
         parent::__construct($context);
     }
 
     /**
-     * Export Action
+     * Execute.
      *
-     * @return \Magento\Framework\Controller\ResultInterface
+     * @return ResultInterface
      */
     public function execute()
     {
         $resultRedirect = $this->resultRedirectFactory->create();
 
-        // Check whether order exports are enabled.
-        if ( ! $this->_exportHelper->isEnabled()) {
-            $this->messageManager->addError(__('Order exports are currently disabled. Please review the OrderFlow module configuration.'));
+        if (! $this->helper->isEnabled()) {
+            $this->messageManager->addErrorMessage(
+                __('Order exports are disabled. Please review the OrderFlow module configuration.')
+            );
+
             return $resultRedirect->setRefererUrl();
         }
 
         try {
-            $order = $this->_getOrder();
+            $order = $this->getOrder();
 
-            if ( ! $order) {
+            if (! $order) {
                 return $resultRedirect->setRefererUrl();
             }
 
             if ($order->getIsVirtual()) {
-                $this->messageManager->addError(__('You cannot export a virtual order to OrderFlow.'));
+                $this->messageManager->addErrorMessage(
+                    __('Virtual orders cannot be exported.')
+                );
+
                 return $resultRedirect->setRefererUrl();
             }
 
-            $request = $this->_buildRequest($order);
-
-            $export = $this->_getRequestProcessor()->process($request);
+            $request = $this->buildRequest($order);
+            $export = $this->requestProcessor->process($request);
 
             if ($export->getFailures() || $export->getDuplicates()) {
-                $this->messageManager->addError(__('Order '.$order->getIncrementId().' has failed to be queued for export to OrderFlow.'));
+                $this->messageManager->addErrorMessage(__('Order export failed.'));
             } else {
-                $this->messageManager->addSuccess(__('Order '.$order->getIncrementId().' has been queued for export to OrderFlow.'));
+                $this->messageManager->addSuccessMessage(__('Order successfully queued for export.'));
             }
-        } catch (\Exception $e) {
-            $this->messageManager->addError($e->getMessage());
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage($e->getMessage());
         }
 
         return $resultRedirect->setRefererUrl();
     }
 
     /**
-     * Retrieves a order from the current request
+     * Order Getter.
      *
-     * @return \Magento\Sales\Api\Data\OrderInterface
+     * @return OrderInterface|boolean
      */
-    protected function _getOrder()
+    protected function getOrder()
     {
-        $id = $this->getRequest()->getParam('order_id');
+        $orderId = $this->getRequest()->getParam('order_id');
 
         try {
-            $order = $this->_repository->get($id);
-        } catch (NoSuchEntityException $e) {
-            $this->messageManager->addError(__('Order Not Found.'));
-            $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
-            return false;
-        } catch (InputException $e) {
-            $this->messageManager->addError(__('Order Not Found.'));
+            $order = $this->orderRepository->get($orderId);
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage(
+                __('Order with ID: '.$orderId.' cannot be retrieved.')
+            );
             $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
             return false;
         }
@@ -116,50 +142,42 @@ class Export extends \Magento\Backend\App\Action
     }
 
     /**
-     * Retrieves a order from the current request
+     * Build Export Request.
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @param OrderInterface $order
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
+     * @throws NoSuchEntityException
      */
-    protected function _buildRequest($order)
+    protected function buildRequest(OrderInterface $order)
     {
-        $this->_builder->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_ORDER,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_CREATE
+        $this->requestBuilder->setRequestData(
+            RequestInterface::TYPE_EXPORT,
+            RequestInterface::ENTITY_ORDER,
+            RequestInterface::OP_CREATE
         );
 
-        $this->_builder->setScopeId($this->_getWebsiteId($order));
-        $this->_builder->addRequestLine(
-            json_encode(array(
+        $this->requestBuilder->setScopeId($this->getWebsiteId($order));
+        $this->requestBuilder->addRequestLine(
+            json_encode([
                 'entity_id' => $order->getEntityId(),
                 'increment_id' => $order->getIncrementId(),
-            ))
+            ])
         );
 
-        return $this->_builder->saveRequest();
+        return $this->requestBuilder->saveRequest();
     }
 
     /**
-     * Retrieve the request processor instance.
+     * Website ID Getter.
      *
-     * @return RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor
-     */
-    protected function _getRequestProcessor()
-    {
-        return $this->_objectManager->create('OrderCreateRequestProcessor');
-    }
-
-    /**
-     * Returns the current website ID.
-     *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @param OrderInterface $order
      *
      * @return integer
+     * @throws NoSuchEntityException
      */
-    protected function _getWebsiteId($order)
+    protected function getWebsiteId(OrderInterface $order)
     {
-        return $this->_storeManager->getStore($order->getStoreId())->getWebsiteId();
+        return $this->storeManager->getStore($order->getStoreId())->getWebsiteId();
     }
 }

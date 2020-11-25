@@ -1,51 +1,127 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service\Export\Type;
 
+use Exception;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DB\Transaction;
+use Psr\Log\LoggerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\ExporterTypeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Model\Export;
+use RealtimeDespatch\OrderFlow\Model\ExportLine;
+use RealtimeDespatch\OrderFlow\Model\Request;
 
+/**
+ * Exporter Type.
+ *
+ * Abstract Base Class for Exporter Types.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
 abstract class ExporterType implements ExporterTypeInterface
 {
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
-    protected $_config;
+    protected $config;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
-    protected $_logger;
+    protected $logger;
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var ExportInterfaceFactory
      */
-    protected $_objectManager;
+    protected $exportFactory;
 
     /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $cnfig
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\ObjectManagerInterface
+     * @var ExportLineInterfaceFactory
+     */
+    protected $exportLineFactory;
+
+    /**
+     * @var Transaction
+     */
+    protected $transaction;
+
+    /**
+     * @param ScopeConfigInterface $config
+     * @param LoggerInterface $logger
+     * @param ExportInterfaceFactory $exportFactory
+     * @param ExportLineInterfaceFactory $exportLineFactory
+     * @param Transaction $transaction
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\ObjectManagerInterface $objectManager) {
-        $this->_config = $config;
-        $this->_logger = $logger;
-        $this->_objectManager = $objectManager;
+        ScopeConfigInterface $config,
+        LoggerInterface $logger,
+        ExportInterfaceFactory $exportFactory,
+        ExportLineInterfaceFactory $exportLineFactory,
+        Transaction $transaction
+    ) {
+        $this->config = $config;
+        $this->logger = $logger;
+        $this->exportFactory = $exportFactory;
+        $this->exportLineFactory = $exportLineFactory;
+        $this->transaction = $transaction;
     }
 
     /**
-     * Creates a new export.
-     *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request request
-     *
-     * @return \RealtimeDespatch\OrderFlow\Model\Export
+     * @inheritDoc
+     * @throws Exception
      */
-    protected function _createExport(\RealtimeDespatch\OrderFlow\Model\Request $request)
+    public function export(RequestInterface $request)
     {
-        $export = $this->_objectManager->create('RealtimeDespatch\OrderFlow\Model\Export');
+        $export = $this->createExport($request);
+
+        /* @var Export $export */
+        /* @var Request $request */
+        $this->transaction->addObject($export);
+        $this->transaction->addObject($request);
+
+        foreach ($request->getLines() as $requestLine) {
+            /* @var ExportLine $exportLine */
+            $exportLine = $this->exportLine($export, $request, $requestLine);
+            $export->addLine($exportLine);
+            $this->transaction->addObject($exportLine);
+            $this->transaction->addObject($requestLine);
+        }
+
+        $request->setProcessedAt(date('Y-m-d H:i:s'));
+        $this->transaction->save();
+
+        return $export;
+    }
+
+    /**
+     * Export Request Line.
+     *
+     * @param ExportInterface $export
+     * @param RequestInterface $request
+     * @param $requestLine
+     *
+     * @return mixed
+     */
+    abstract protected function exportLine(ExportInterface $export, RequestInterface $request, $requestLine);
+
+    /**
+     * Create Exports From Request.
+     *
+     * @param RequestInterface $request
+     *
+     * @return ExportInterface
+     */
+    protected function createExport(RequestInterface $request)
+    {
+        /** @noinspection PhpUndefinedMethodInspection */
+        $export = $this->exportFactory->create();
 
         $export->setRequestId($request->getId());
         $export->setMessageId($request->getMessageId());
@@ -60,20 +136,26 @@ abstract class ExporterType implements ExporterTypeInterface
     }
 
     /**
-     * Creates a success export line.
+     * Create Success Export Line.
      *
-     * @param $export
-     * @param $reference
-     * @param $message
-     * @param $data
+     * @param ExportInterface $export
+     * @param string $reference
+     * @param string $operation
+     * @param string $message
+     * @param object|null $data
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\ExportLine
+     * @return ExportLineInterface
      */
-    protected function _createSuccessExportLine($export, $reference, $operation, $message, $data = array())
-    {
+    protected function createSuccessExportLine(
+        ExportInterface $export,
+        string $reference,
+        string $operation,
+        string $message,
+        object $data = null
+    ) {
         $export->setSuccesses($export->getSuccesses() + 1);
 
-        return $this->_createExportLine(
+        return $this->createExportLine(
             ExportLineInterface::RESULT_SUCCESS,
             $reference,
             $operation,
@@ -83,20 +165,26 @@ abstract class ExporterType implements ExporterTypeInterface
     }
 
     /**
-     * Creates a failure export line.
+     * Create Failure Export Line.
      *
-     * @param $export
-     * @param $reference
-     * @param $message
-     * @param $data
+     * @param ExportInterface $export
+     * @param string $reference
+     * @param string $operation
+     * @param string $message
+     * @param object|null $data
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\ExportLine
+     * @return ExportLineInterface
      */
-    protected function _createFailureExportLine($export, $reference, $operation, $message, $data = array())
-    {
+    protected function createFailureExportLine(
+        ExportInterface $export,
+        string $reference,
+        string $operation,
+        string $message,
+        object $data = null
+    ) {
         $export->setFailures($export->getFailures() + 1);
 
-        return $this->_createExportLine(
+        return $this->createExportLine(
             ExportLineInterface::RESULT_FAILURE,
             $reference,
             $operation,
@@ -106,19 +194,26 @@ abstract class ExporterType implements ExporterTypeInterface
     }
 
     /**
-     * Creates an export line.
+     * Create Export Line.
      *
-     * @param $result
-     * @param $reference
-     * @param $operation
-     * @param $message
-     * @param array $data
+     * @param string $result
+     * @param string $reference
+     * @param string $operation
+     * @param string $message
+     * @param object|null $data
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\ExportLine
+     * @return ExportLineInterface
      */
-    protected function _createExportLine($result, $reference, $operation, $message, $data = array())
-    {
-        $exportLine = $this->_objectManager->create('RealtimeDespatch\OrderFlow\Model\ExportLine');
+    protected function createExportLine(
+        string $result,
+        string $reference,
+        string $operation,
+        string $message,
+        object $data = null
+    ) {
+        /** @noinspection PhpUndefinedMethodInspection */
+        $exportLine = $this->exportLineFactory->create();
+
         $exportLine->setResult($result);
         $exportLine->setReference($reference);
         $exportLine->setOperation($operation);

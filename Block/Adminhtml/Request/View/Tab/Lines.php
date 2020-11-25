@@ -2,10 +2,13 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab;
 
+use Magento\Backend\Block\Widget\Tab\TabInterface;
+use Magento\Framework\View\Element\Text\ListText;
+
 /**
  * Request Info Tab.
  */
-class Lines extends \Magento\Framework\View\Element\Text\ListText implements \Magento\Backend\Block\Widget\Tab\TabInterface
+class Lines extends ListText implements TabInterface
 {
     /**
      * {@inheritdoc}

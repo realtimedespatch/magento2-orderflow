@@ -2,9 +2,11 @@
 
 namespace RealtimeDespatch\OrderFlow\Api;
 
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+
 /**
- * Export repository interface.
- *
  * @api
  */
 interface ExportRepositoryInterface
@@ -12,24 +14,26 @@ interface ExportRepositoryInterface
     /**
      * Loads a specified export.
      *
-     * @param int $id The export ID.
-     * @return \Magento\Sales\Api\Data\ExportInterface Export interface.
+     * @param int $exportId The export ID.
+     * @return ExportInterface Export interface.
+     * @throws NoSuchEntityException
      */
-    public function get($id);
+    public function get(int $exportId);
 
     /**
      * Deletes a specified export.
      *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $entity The export ID.
+     * @param ExportInterface $entity The export ID.
      * @return bool
      */
-    public function delete(\RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $entity);
+    public function delete(ExportInterface $entity);
 
     /**
      * Performs persist operations for a specified export.
      *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $entity The export ID.
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface Export interface.
+     * @param ExportInterface $entity The export ID.
+     * @return ExportInterface Export interface.
+     * @throws CouldNotSaveException
      */
-    public function save(\RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $entity);
+    public function save(ExportInterface $entity);
 }

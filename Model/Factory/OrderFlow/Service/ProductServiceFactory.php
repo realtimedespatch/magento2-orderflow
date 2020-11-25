@@ -2,29 +2,30 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Factory\OrderFlow\Service;
 
-use \SixBySix\RealtimeDespatch\Gateway\Factory\DefaultGatewayFactory;
-use \SixBySix\RealtimeDespatch\Service\ProductService;
+use RealtimeDespatch\OrderFlow\Helper\Api;
+use SixBySix\RealtimeDespatch\Gateway\Factory\DefaultGatewayFactory;
+use SixBySix\RealtimeDespatch\Service\ProductService;
 
 /**
- * Class ProductService
- * @package RealtimeDespatch\OrderFlow\Model\Factory\OrderFlow\Service
+ * Product Service Factory.
+ *
+ * OrderFlow Product Service Factory.
  */
 class ProductServiceFactory
 {
     /**
      * API Helper.
      *
-     * @param RealtimeDespatch\OrderFlow\Helper\Api
+     * @param Api
      */
-    protected $_helper;
+    protected $helper;
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Helper\Api $helper
+     * @param Api $helper
      */
-    public function __construct(
-        \RealtimeDespatch\OrderFlow\Helper\Api $helper
-    ) {
-        $this->_helper = $helper;
+    public function __construct(Api $helper)
+    {
+        $this->helper = $helper;
     }
 
     /**
@@ -32,14 +33,13 @@ class ProductServiceFactory
      *
      * @param integer|null $scopeId
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\Factory\OrderFlow\Service\ProductService
+     * @return ProductService
      */
     public function getService($scopeId = null)
     {
-        $credentials = $this->_helper->getCredentials($scopeId);
+        $credentials = $this->helper->getCredentials($scopeId);
         $factory = new DefaultGatewayFactory();
-        $service = new ProductService($factory->create($credentials));
 
-        return $service;
+        return new ProductService($factory->create($credentials));
     }
 }

@@ -2,15 +2,22 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\View\Tab;
 
+use Magento\Backend\Block\Widget\Tab\TabInterface;
+use Magento\Framework\Exception\LocalizedException;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
+use RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\AbstractImport;
+
 /**
  * Import Info Tab.
  */
-class Lines extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\AbstractImport  implements \Magento\Backend\Block\Widget\Tab\TabInterface
+class Lines extends AbstractImport  implements TabInterface
 {
     /**
      * Retrieve source model instance
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
+     * @throws LocalizedException
+     * @throws LocalizedException
      */
     public function getSource()
     {

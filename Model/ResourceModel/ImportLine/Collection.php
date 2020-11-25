@@ -2,11 +2,10 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine;
 
-/**
- * Class Collection
- * @package RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine
- */
-class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
+use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
+use RealtimeDespatch\OrderFlow\Model\ImportLine;
+
+class Collection extends AbstractCollection
 {
     /**
      * @inheritdoc
@@ -18,6 +17,9 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
      */
     protected function _construct()
     {
-        $this->_init('RealtimeDespatch\OrderFlow\Model\ImportLine', 'RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine');
+        $this->_init(
+            ImportLine::class,
+            \RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine::class
+        );
     }
 }

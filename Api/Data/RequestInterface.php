@@ -112,18 +112,18 @@ interface RequestInterface
     /**
      * Adds a line to the request.
      *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface $line
+     * @param RequestLineInterface $line
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function addLine(\RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface $line);
+    public function addLine(RequestLineInterface $line);
 
     /**
      * Set Request Lines
      *
-     * @param array $lines
+     * @param mixed $lines
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
     public function setLines($lines);
 
@@ -132,81 +132,81 @@ interface RequestInterface
      *
      * @param string $messageId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setMessageId($messageId);
+    public function setMessageId(string $messageId);
 
     /**
      * Set Scope Id
      *
      * @param string $scopeId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setScopeId($scopeId);
+    public function setScopeId(string $scopeId);
 
     /**
      * Set type
      *
      * @param string $type
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setType($type);
+    public function setType(string $type);
 
     /**
      * Set entity
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setEntity($entity);
+    public function setEntity(string $entity);
 
     /**
      * Set operation
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setOperation($operation);
+    public function setOperation(string $operation);
 
     /**
      * Set request body
      *
      * @param string $requestBody
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setRequestBody($requestBody);
+    public function setRequestBody(string $requestBody);
 
     /**
      * Set response body
      *
      * @param string $responseBody
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setResponseBody($responseBody);
+    public function setResponseBody(string $responseBody);
 
     /**
      * Set created timestamp
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setCreatedAt($created);
+    public function setCreatedAt(string $created);
 
     /**
      * Set processed timestamp
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setProcessedAt($processed);
+    public function setProcessedAt(string $processed);
 
     /**
      * Checks whether the request can be processed.

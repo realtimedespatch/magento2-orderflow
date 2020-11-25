@@ -1,45 +1,55 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Builder;
 
+use Magento\Framework\Exception\CouldNotSaveException;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface;
+use RealtimeDespatch\OrderFlow\Model\Request;
+use RealtimeDespatch\OrderFlow\Model\RequestFactory;
+use RealtimeDespatch\OrderFlow\Model\RequestLineFactory;
 
 class RequestBuilder implements RequestBuilderInterface
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @var RequestInterface
      */
-    protected $_request;
+    protected $request;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\RequestFactory
+     * @var RequestFactory
      */
-    protected $_requestFactory;
+    protected $requestFactory;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\RequestLineFactory
+     * @var RequestLineFactory
      */
-    protected $_requestLineFactory;
+    protected $requestLineFactory;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface
+     * @var RequestRepositoryInterface
      */
-    protected $_requestRespository;
+    protected $requestRepository;
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory
-     * @param \RealtimeDespatch\OrderFlow\Model\RequestLineFactory $requestLineFactory
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface $requestRepository
+     * @param RequestFactory $requestFactory
+     * @param RequestLineFactory $requestLineFactory
+     * @param RequestRepositoryInterface $requestRepository
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory,
-        \RealtimeDespatch\OrderFlow\Model\RequestLineFactory $requestLineFactory,
-        \RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface $requestRepository
+        RequestFactory $requestFactory,
+        RequestLineFactory $requestLineFactory,
+        RequestRepositoryInterface $requestRepository
     ) {
-        $this->_requestFactory = $requestFactory;
-        $this->_requestLineFactory = $requestLineFactory;
-        $this->_requestRespository = $requestRepository;
-        $this->_request = $this->_requestFactory->create();
+        $this->requestFactory = $requestFactory;
+        $this->requestLineFactory = $requestLineFactory;
+        $this->requestRepository = $requestRepository;
+
+        /** @noinspection PhpUndefinedMethodInspection */
+        $this->request = $this->requestFactory->create();
     }
 
     /**
@@ -48,18 +58,18 @@ class RequestBuilder implements RequestBuilderInterface
      * @param string $type Request Type
      * @param string $entity Request Entity
      * @param string $operation Request Operation
-     * @param string $messageId Message Id
+     * @param null $messageId Message Id
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @return RequestBuilderInterface
      */
-    public function setRequestData($type, $entity, $operation, $messageId = null)
+    public function setRequestData(string $type, string $entity, string $operation, $messageId = null)
     {
-        $this->_request->setType($type);
-        $this->_request->setEntity($entity);
-        $this->_request->setOperation($operation);
+        $this->request->setType($type);
+        $this->request->setEntity($entity);
+        $this->request->setOperation($operation);
 
         if ($messageId) {
-            $this->_request->setMessageId($messageId);
+            $this->request->setMessageId($messageId);
         }
 
         return $this;
@@ -71,15 +81,16 @@ class RequestBuilder implements RequestBuilderInterface
      * @param string $body Request Line Body
      * @param string|null $sequenceId Sequence ID
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @return RequestBuilderInterface
      */
-    public function addRequestLine($body, $sequenceId = null)
+    public function addRequestLine(string $body, $sequenceId = null)
     {
-        $line = $this->_requestLineFactory->create();
+        /** @noinspection PhpUndefinedMethodInspection */
+        $line = $this->requestLineFactory->create();
 
         $line->setBody($body);
         $line->setSequenceId($sequenceId);
-        $this->_request->addLine($line);
+        $this->request->addLine($line);
 
         return $this;
     }
@@ -89,12 +100,14 @@ class RequestBuilder implements RequestBuilderInterface
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @return RequestBuilderInterface
      */
-    public function markProcessed($processed)
+    public function markProcessed(string $processed)
     {
-        $this->_request->setCreatedAt($processed);
-        $this->_request->setProcessedAt($processed);
+        $this->request->setCreatedAt($processed);
+        $this->request->setProcessedAt($processed);
+
+        return $this;
     }
 
     /**
@@ -102,11 +115,11 @@ class RequestBuilder implements RequestBuilderInterface
      *
      * @param string $body
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @return RequestBuilderInterface
      */
-    public function setRequestBody($body)
+    public function setRequestBody(string $body)
     {
-        $this->_request->setRequestBody($body);
+        $this->request->setRequestBody($body);
 
         return $this;
     }
@@ -116,11 +129,11 @@ class RequestBuilder implements RequestBuilderInterface
      *
      * @param string $body
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @return RequestBuilderInterface
      */
-    public function setResponseBody($body)
+    public function setResponseBody(string $body)
     {
-        $this->_request->setResponseBody($body);
+        $this->request->setResponseBody($body);
 
         return $this;
     }
@@ -130,11 +143,11 @@ class RequestBuilder implements RequestBuilderInterface
      *
      * @param string $scopeId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @return RequestBuilderInterface
      */
-    public function setScopeId($scopeId)
+    public function setScopeId(string $scopeId)
     {
-        $this->_request->setScopeId($scopeId);
+        $this->request->setScopeId($scopeId);
 
         return $this;
     }
@@ -142,11 +155,12 @@ class RequestBuilder implements RequestBuilderInterface
     /**
      * Resets the builder.
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @return RequestBuilderInterface
      */
     public function resetBuilder()
     {
-        $this->_request = $this->_requestFactory->create();
+        /** @noinspection PhpUndefinedMethodInspection */
+        $this->request = $this->requestFactory->create();
 
         return $this;
     }
@@ -154,20 +168,21 @@ class RequestBuilder implements RequestBuilderInterface
     /**
      * Returns a new request instance.
      *
-     * @return RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface|Request
      */
     public function getRequest()
     {
-        return $this->_request;
+        return $this->request;
     }
 
     /**
      * Returns a new request instance.
      *
-     * @return RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
+     * @throws CouldNotSaveException
      */
     public function saveRequest()
     {
-        return $this->_requestRespository->save($this->_request);
+        return $this->requestRepository->save($this->request);
     }
 }

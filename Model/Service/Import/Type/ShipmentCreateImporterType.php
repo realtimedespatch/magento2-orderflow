@@ -1,54 +1,81 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service\Import\Type;
 
+use Exception;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DB\Transaction;
+use Magento\Store\Model\ScopeInterface;
+use Psr\Log\LoggerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine\CollectionFactory as ImportLineCollectionFactory;
 use \RealtimeDespatch\OrderFlow\Model\Service\ShipmentService as ShipmentService;
 
-class ShipmentCreateImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Import\Type\ImporterType
+/**
+ * Shipment Create Importer Type.
+ *
+ * Processes queued shipment creation requests.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class ShipmentCreateImporterType extends ImporterType
 {
     /* Importer Type */
     const TYPE = 'Shipment';
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Service\ShipmentService
+     * @param ShipmentService
      */
-    protected $_shipper;
+    protected $shipper;
 
     /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \RealtimeDespatch\OrderFlow\Service\ShipmentService $shipper
+     * @param ScopeConfigInterface $config
+     * @param LoggerInterface $logger
+     * @param ImportInterfaceFactory $importFactory
+     * @param ImportLineInterfaceFactory $importLineFactory
+     * @param ImportLineCollectionFactory $importLineCollectionFactory
+     * @param Transaction $transaction
+     * @param ShipmentService $shipper
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
+        ScopeConfigInterface $config,
+        LoggerInterface $logger,
+        ImportInterfaceFactory $importFactory,
+        ImportLineInterfaceFactory $importLineFactory,
+        ImportLineCollectionFactory $importLineCollectionFactory,
+        Transaction $transaction,
         ShipmentService $shipper
     ) {
-        parent::__construct($config, $logger, $objectManager);
-        $this->_shipper = $shipper;
-    }
+        $this->shipper = $shipper;
 
-    /**
-     * Checks whether the import type is enabled.
-     *
-     * @api
-     * @return boolean
-     */
-    public function isEnabled()
-    {
-        return $this->_config->getValue(
-            'orderflow_inventory_import/settings/is_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+        parent::__construct(
+            $config,
+            $logger,
+            $importFactory,
+            $importLineFactory,
+            $importLineCollectionFactory,
+            $transaction
         );
     }
 
     /**
-     * Returns the import type.
-     *
-     * @api
-     * @return string
+     * @inheritDoc
+     */
+    public function isEnabled()
+    {
+        return $this->config->getValue(
+            'orderflow_inventory_import/settings/is_enabled',
+            ScopeInterface::SCOPE_WEBSITE
+        );
+    }
+
+    /**
+     * @inheritDoc
      */
     public function getType()
     {
@@ -56,53 +83,20 @@ class ShipmentCreateImporterType extends \RealtimeDespatch\OrderFlow\Model\Servi
     }
 
     /**
-     * Imports an orderflow request.
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function import(\RealtimeDespatch\OrderFlow\Model\Request $request)
-    {
-        $tx          = $this->_objectManager->create('Magento\Framework\DB\Transaction');
-        $import      = $this->_createImport($request);
-        $importLines = array();
-
-        $tx->addObject($import);
-        $tx->addObject($request);
-
-        foreach ($request->getLines() as $requestLine) {
-            $importLine = $this->_importLine($import, $request, $requestLine);
-            $importLine->setImport($import);
-            $tx->addObject($importLine);
-            $tx->addObject($requestLine);
-        }
-
-        $request->setProcessedAt(date('Y-m-d H:i:s'));
-
-        $tx->save();
-    }
-
-    /**
-     * Imports a request line;
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
-     */
-    protected function _importLine($import, $request, $requestLine)
-    {
+    protected function importLine(
+        ImportInterface $import,
+        RequestInterface $request,
+        $requestLine
+    ) {
         $seqId = $requestLine->getSequenceId();
+        $body = $requestLine->getBody();
+        $incrementId = (string) $body->orderIncrementId;
 
         try {
-            $body = $requestLine->getBody();
-            $incrementId = (string) $body->orderIncrementId;
-
-            // Check for a duplicate import line
-            if ($this->_isDuplicateLine($requestLine->getSequenceId())) {
-                return $this->_createDuplicateImportLine(
+            if ($this->isDuplicateLine($requestLine->getSequenceId())) {
+                return $this->createDuplicateImportLine(
                     $import,
                     $seqId,
                     $incrementId,
@@ -111,9 +105,8 @@ class ShipmentCreateImporterType extends \RealtimeDespatch\OrderFlow\Model\Servi
                 );
             }
 
-            // Check whether this import line has been superseded
-            if ($supersedeId = $this->_isSuperseded($seqId, $incrementId)) {
-                return $this->_createSupersededImportLine(
+            if ($supersedeId = $this->isSuperseded($seqId, $incrementId)) {
+                return $this->createSupersededImportLine(
                     $import,
                     $seqId,
                     $incrementId,
@@ -125,19 +118,18 @@ class ShipmentCreateImporterType extends \RealtimeDespatch\OrderFlow\Model\Servi
                 );
             }
 
-            // Create the shipment.
-            $inventory = $this->_shipper->createShipment($body);
+            $shipment = $this->shipper->createShipment($body);
 
-            return $this->_createSuccessImportLine(
+            return $this->createSuccessImportLine(
                 $import,
                 $seqId,
                 $incrementId,
                 $request->getOperation(),
                 __('Order '.$incrementId.' successfully shipped.'),
-                $inventory
+                $shipment->getData()
             );
-        } catch (\Exception $ex) {
-            return $this->_createFailureImportLine(
+        } catch (Exception $ex) {
+            return $this->createFailureImportLine(
                 $import,
                 $seqId,
                 $incrementId,

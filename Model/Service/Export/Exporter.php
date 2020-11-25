@@ -2,61 +2,88 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Service\Export;
 
-use \RealtimeDespatch\OrderFlow\Api\ExporterTypeInterface;
+use Exception;
+use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Exception\LocalizedException;
+use RealtimeDespatch\OrderFlow\Api\ExporterTypeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 
+/**
+ * Exporter Service.
+ *
+ * Processes an Export Request.
+ */
 class Exporter
 {
-    /**
-     * @var \RealtimeDespatch\OrderFlow\Api\ExporterTypeInterface
-     */
-    public $_type;
+    /* Event Names */
+    const EVENT_NAME_SUCCESS = 'orderflow_export_success';
+    const EVENT_NAME_FAILURE = 'orderflow_exception';
 
     /**
-     * @var \Magento\Framework\Event\ManagerInterface
+     * @var ExporterTypeInterface
      */
-    protected $_eventManager;
+    public $type;
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Api\ExporterTypeInterface $type
-     * @param \Magento\Framework\Event\ManagerInterface $eventManager
+     * @var ManagerInterface
+     */
+    protected $eventManager;
+
+    /**
+     * @param ExporterTypeInterface $type
+     * @param ManagerInterface $eventManager
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Api\ExporterTypeInterface $type,
-        \Magento\Framework\Event\ManagerInterface $eventManager
-    )
-    {
-        $this->_type = $type;
-        $this->_eventManager = $eventManager;
+        ExporterTypeInterface $type,
+        ManagerInterface $eventManager
+    ) {
+        $this->type = $type;
+        $this->eventManager = $eventManager;
     }
 
     /**
-     * Exports a request.
+     * Processes an Export Request.
      *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
+     * @param RequestInterface $request
      *
-     * @return void
+     * @return boolean
+     * @throws LocalizedException
      */
-    public function export(\RealtimeDespatch\OrderFlow\Model\Request $request)
+    public function export(RequestInterface $request)
     {
-        if ( ! $this->_type->isEnabled($request->getScopeId())) {
-            throw new \Exception($this->_type->getType().' exports are currently disabled. Please review your OrderFlow module configuration.');
+        if (! $this->type->isEnabled($request->getScopeId())) {
+            $this->throwDisabledException();
         }
 
         try {
-            $export = $this->_type->export($request);
+            $export = $this->type->export($request);
 
-            $this->_eventManager->dispatch(
-                'orderflow_export_success',
-                ['export' => $export, 'type' => $this->_type->getType()]
+            $this->eventManager->dispatch(
+                self::EVENT_NAME_SUCCESS,
+                ['export' => $export, 'type' => $this->type->getType()]
             );
 
-            return $export;
-        }
-        catch (Exception $ex) {
-            $this->_eventManager->dispatch(
-                'orderflow_exception',
-                ['exception' => $ex, 'type' => $this->_type->getType(), 'process' => 'export']
+            return true;
+        } catch (Exception $ex) {
+            $this->eventManager->dispatch(
+                self::EVENT_NAME_FAILURE,
+                ['exception' => $ex, 'type' => $this->type->getType(), 'process' => 'export']
             );
+
+            return false;
         }
+    }
+
+    /**
+     * Throws a Disabled Export Exception.
+     *
+     * @throws LocalizedException
+     */
+    protected function throwDisabledException()
+    {
+        $msg  = $this->type->getType();
+        $msg .= ' exports are currently disabled. Please review your OrderFlow module configuration.';
+
+        throw new LocalizedException(__($msg));
     }
 }

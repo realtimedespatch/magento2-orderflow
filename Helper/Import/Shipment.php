@@ -2,10 +2,14 @@
 
 namespace RealtimeDespatch\OrderFlow\Helper\Import;
 
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Store\Model\ScopeInterface;
+use RealtimeDespatch\OrderFlow\Api\ImportHelperInterface;
+
 /**
  * Shipment Import Helper.
  */
-class Shipment extends \Magento\Framework\App\Helper\AbstractHelper
+class Shipment extends AbstractHelper implements ImportHelperInterface
 {
     /**
      * Checks whether the import process is enabled.
@@ -16,20 +20,20 @@ class Shipment extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_shipment_import/settings/is_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
     }
 
     /**
      * Returns the maximum batch size for processing.
      *
-     * @return boolean
+     * @return integer
      */
     public function getBatchSize()
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_shipment_import/settings/batch_size',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+            ScopeInterface::SCOPE_WEBSITE
         );
     }
 }

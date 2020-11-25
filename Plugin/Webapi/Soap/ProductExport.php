@@ -2,39 +2,77 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap;
 
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Filesystem\DriverInterface;
+use Magento\Webapi\Controller\Soap\Request\Handler;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor;
+
+/**
+ * Product Export SOAP API Plugin
+ *
+ * Captures the details of a product export request.
+ *
+ * This occurs when OrderFlow makes a call to Magento to retrieve the details of a product.
+ */
 class ProductExport
 {
-    const OP_PRODUCT_EXPORT = 'catalogProductRepositoryV1Get';
+    /* API Operation */
+    const API_OPERATION = 'catalogProductRepositoryV1Get';
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var RequestProcessor
      */
-    protected $_objectManager;
+    protected $requestProcessor;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @var RequestBuilderInterface
      */
-    protected $_requestBuilder;
+    protected $requestBuilder;
 
     /**
-     * ProductExport constructor.
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
+     * @var DriverInterface
+     */
+    protected $driver;
+
+    /**
+     * @param RequestProcessor $requestProcessor
+     * @param RequestBuilderInterface $requestBuilder
+     * @param DriverInterface $driver
      */
     public function __construct(
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder)
-    {
-        $this->_objectManager = $objectManager;
-        $this->_requestBuilder = $requestBuilder;
+        RequestProcessor $requestProcessor,
+        RequestBuilderInterface $requestBuilder,
+        DriverInterface $driver
+    ) {
+        $this->requestProcessor = $requestProcessor;
+        $this->requestBuilder = $requestBuilder;
+        $this->driver = $driver;
     }
 
-    public function around__call(\Magento\Webapi\Controller\Soap\Request\Handler $soapServer, callable $proceed, $operation, $arguments)
-    {
+    /**
+     * Capture Product Export Request Details.
+     *
+     * @param Handler $soapServer
+     * @param callable $proceed
+     * @param $operation
+     * @param $arguments
+     * @return mixed
+     * @throws FileSystemException
+     * @noinspection PhpUnusedParameterInspection
+     */
+    public function around__call(
+        Handler $soapServer,
+        callable $proceed,
+        $operation,
+        $arguments
+    ) {
         $result = $proceed($operation, $arguments);
 
-        if ($this->_isProductExport($operation) && isset($arguments[0]->sku)) {
-            $this->_getRequestProcessor()->process($this->_buildProductExportRequest($result['result'], $arguments[0]->sku));
+        if ($this->isProductExportRequest($operation) && isset($result['result']) && isset($arguments[0]->sku)) {
+            $request = $this->buildProductExportRequest($result['result'], $arguments[0]->sku);
+            $this->requestProcessor->process($request);
         }
 
         return $result;
@@ -47,41 +85,32 @@ class ProductExport
      *
      * @return boolean
      */
-    protected function _isProductExport($operation)
+    protected function isProductExportRequest(string $operation)
     {
-        return $operation === self::OP_PRODUCT_EXPORT;
+        return $operation === self::API_OPERATION;
     }
 
     /**
-     * Builds an export request from the product SKU.
+     * Build Product Export Request.
      *
-     * @param string $response
+     * @param array $response
      * @param string $sku
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\Request
+     * @return RequestInterface
+     * @throws FileSystemException
      */
-    protected function _buildProductExportRequest($response, $sku)
+    protected function buildProductExportRequest(array $response, string $sku)
     {
-        $this->_requestBuilder->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_PRODUCT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_EXPORT
+        $this->requestBuilder->setRequestData(
+            RequestInterface::TYPE_EXPORT,
+            RequestInterface::ENTITY_PRODUCT,
+            RequestInterface::OP_EXPORT
         );
 
-        $this->_requestBuilder->setRequestBody(file_get_contents('php://input'));
-        $this->_requestBuilder->setResponseBody(json_encode($response));
-        $this->_requestBuilder->addRequestLine(json_encode(array('sku' => $sku)));
+        $this->requestBuilder->setRequestBody($this->driver->fileGetContents('php://input'));
+        $this->requestBuilder->setResponseBody(json_encode($response));
+        $this->requestBuilder->addRequestLine(json_encode(['sku' => $sku]));
 
-        return $this->_requestBuilder->saveRequest();
-    }
-
-    /**
-     * Retrieve the request processor instance.
-     *
-     * @return RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor
-     */
-    protected function _getRequestProcessor()
-    {
-        return $this->_objectManager->create('ProductExportRequestProcessor');
+        return $this->requestBuilder->saveRequest();
     }
 }

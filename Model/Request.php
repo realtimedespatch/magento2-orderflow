@@ -1,10 +1,26 @@
-<?php
+<?php /** @noinspection ALL */
 
 namespace RealtimeDespatch\OrderFlow\Model;
 
+use DOMDocument;
+use Exception;
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine\CollectionFactory as RequestLineCollectionFactory;
 
-class Request extends \Magento\Framework\Model\AbstractModel implements RequestInterface
+/**
+ * Class Request
+ *
+ * Representation of an API Request.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class Request extends AbstractModel implements RequestInterface
 {
     /**
      * Prefix of model events names
@@ -21,27 +37,28 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
     protected $_lines;
 
     /**
-     * @var RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine\CollectionFactory
+     * @var RequestLineCollectionFactory
      */
-    protected $_requestLineFactory;
+    protected $requestLineCollectionFactory;
 
     /**
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \RealtimeDespatch\OrderFlow\Model\RequestLineFactory $requestLineFactory
-     * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
+     * @param Context $context
+     * @param Registry $registry
+     * @param RequestLineCollectionFactory $requestLineCollectionFactory
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
      * @param array $data
      */
     public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \RealtimeDespatch\OrderFlow\Model\RequestLineFactory $requestLineFactory,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        Context $context,
+        Registry $registry,
+        RequestLineCollectionFactory $requestLineCollectionFactory,
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        $this->_requestLineFactory = $requestLineFactory;
+        $this->requestLineCollectionFactory = $requestLineCollectionFactory;
+
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
@@ -59,7 +76,7 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
     /**
      * Get ID
      *
-     * @return int|null
+     * @return int
      */
     public function getId()
     {
@@ -77,9 +94,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
             return $this->_lines;
         }
 
-        $this->_lines = $this->_requestLineFactory
+        $this->_lines = $this
+            ->requestLineCollectionFactory
             ->create()
-            ->getCollection()
             ->addFieldToSelect('*')
             ->addFieldToFilter('request_id', ['eq' => $this->getId()])
             ->loadData();
@@ -144,20 +161,17 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      */
     public function getRequestBody()
     {
-        if ( ! $this->getData(self::REQUEST_BODY)) {
+        if (! $this->getData(self::REQUEST_BODY)) {
             return $this->getProcessedAt() ?  __('Request Unavailable') : _('Pending');
         }
 
-        $xml = '';
-
         try {
-            $dom = new \DOMDocument;
+            $dom = new DOMDocument;
             $dom->preserveWhiteSpace = false;
             $dom->loadXML(gzinflate($this->getData(self::REQUEST_BODY)));
             $dom->formatOutput = true;
             $xml = $dom->saveXml();
-        }
-        catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $xml = __('Request Unavailable');
         }
 
@@ -171,20 +185,17 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      */
     public function getResponseBody()
     {
-        if ( ! $this->getData(self::RESPONSE_BODY)) {
+        if (! $this->getData(self::RESPONSE_BODY)) {
             return $this->getProcessedAt() ?  __('Response Unavailable') : _('Pending');
         }
 
-        $xml = '';
-
         try {
-            $dom = new \DOMDocument;
+            $dom = new DOMDocument;
             $dom->preserveWhiteSpace = false;
             $dom->loadXML(gzinflate($this->getData(self::RESPONSE_BODY)));
             $dom->formatOutput = true;
             $xml = $dom->saveXml();
-        }
-        catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $xml = gzinflate($this->getData(self::RESPONSE_BODY));
         }
 
@@ -214,22 +225,24 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
     /**
      * Adds a line to the request.
      *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface $line
+     * @param RequestLineInterface $line
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function addLine(\RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface $line)
+    public function addLine(RequestLineInterface $line)
     {
         $line->setRequest($this);
         $this->_lines[] = $line;
+
+        return $this;
     }
 
     /**
      * Set Request Lines
      *
-     * @param array $lines
+     * @param mixed $lines
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
     public function setLines($lines)
     {
@@ -243,9 +256,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $messageId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setMessageId($messageId)
+    public function setMessageId(string $messageId)
     {
         return $this->setData(self::MESSAGE_ID, $messageId);
     }
@@ -255,9 +268,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $scopeId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setScopeId($scopeId)
+    public function setScopeId(string $scopeId)
     {
         return $this->setData(self::SCOPE_ID, $scopeId);
     }
@@ -267,9 +280,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $type
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setType($type)
+    public function setType(string $type)
     {
         return $this->setData(self::TYPE, $type);
     }
@@ -279,9 +292,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setEntity($entity)
+    public function setEntity(string $entity)
     {
         return $this->setData(self::ENTITY, $entity);
     }
@@ -291,9 +304,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setOperation($operation)
+    public function setOperation(string $operation)
     {
         return $this->setData(self::OPERATION, $operation);
     }
@@ -303,9 +316,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $requestBody
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setRequestBody($requestBody)
+    public function setRequestBody(string $requestBody)
     {
         return $this->setData(self::REQUEST_BODY, gzdeflate($requestBody, 9));
     }
@@ -315,9 +328,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $responseBody
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setResponseBody($responseBody)
+    public function setResponseBody(string $responseBody)
     {
         return $this->setData(self::RESPONSE_BODY, gzdeflate($responseBody, 9));
     }
@@ -327,9 +340,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setCreatedAt($created)
+    public function setCreatedAt(string $created)
     {
         return $this->setData(self::CREATED_AT, $created);
     }
@@ -339,9 +352,9 @@ class Request extends \Magento\Framework\Model\AbstractModel implements RequestI
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
+     * @return RequestInterface
      */
-    public function setProcessedAt($processed)
+    public function setProcessedAt(string $processed)
     {
         foreach ($this->getLines() as $line) {
             $line->setProcessedAt($processed);

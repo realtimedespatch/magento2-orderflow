@@ -16,6 +16,7 @@ interface ImportInterface
     const FAILURES      = 'failures';
     const CREATED_AT    = 'created_at';
     const VIEWED_AT     = 'viewed_at';
+    const LINES         = 'lines';
 
     /* Request Operations */
     const OP_EXPORT = 'Export';
@@ -105,92 +106,107 @@ interface ImportInterface
     public function getViewedAt();
 
     /**
+     * Get Lines
+     *
+     * @return mixed
+     */
+    public function getLines();
+
+    /**
      * Set Request Id
      *
      * @param integer $requestId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setRequestId($requestId);
+    public function setRequestId(int $requestId);
 
     /**
      * Set Message Id
      *
-     * @param integer $messageId
+     * @param string $messageId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setMessageId($messageId);
+    public function setMessageId(string $messageId);
 
     /**
      * Set operation
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setOperation($operation);
+    public function setOperation(string $operation);
 
     /**
      * Set Entity Type
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setEntity($entity);
+    public function setEntity(string $entity);
 
     /**
      * Set Successes
      *
      * @param integer $successes
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setSuccesses($successes);
+    public function setSuccesses(int $successes);
 
     /**
      * Set Duplicates
      *
      * @param integer $duplicates
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setDuplicates($duplicates);
+    public function setDuplicates(int $duplicates);
 
     /**
      * Set Superseded
      *
      * @param integer $superseded
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setSuperseded($superseded);
+    public function setSuperseded(int $superseded);
 
     /**
      * Set Failures
      *
      * @param integer $failures
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setFailures($failures);
+    public function setFailures(int $failures);
 
     /**
      * Set Created Timestamp
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setCreatedAt($created);
+    public function setCreatedAt(string $created);
 
     /**
      * Set Viewed Timestamp
      *
      * @param string $viewed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @return ImportInterface
      */
-    public function setViewedAt($viewed);
+    public function setViewedAt(string $viewed);
+
+    /**
+     * Set Lines
+     *
+     * @param mixed $lines
+     * @return mixed
+     */
+    public function setLines($lines);
 }

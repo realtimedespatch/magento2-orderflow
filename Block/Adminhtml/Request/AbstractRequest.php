@@ -2,57 +2,75 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Request;
 
+use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Block\Widget;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Model\WebsiteFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface;
+
 /**
  * Adminhtml request abstract block
  */
-class AbstractRequest extends \Magento\Backend\Block\Widget
+class AbstractRequest extends Widget
 {
     /**
-     * Core registry
-     *
-     * @var \Magento\Framework\Registry
+     * @var \Magento\Framework\App\RequestInterface
      */
-    protected $_coreRegistry = null;
+    protected $request;
 
     /**
-     * @var Magento\Store\Model\WebsiteFactory
+     * @var RequestRepositoryInterface
      */
-    protected $_websiteFactory;
+    protected $requestRepository;
 
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Sales\Helper\Admin $adminHelper
+     * @var WebsiteFactory
+     */
+    protected $websiteFactory;
+
+    /**
+     * @var RequestInterface
+     */
+    protected $currentRequest;
+
+    /**
+     * @param Context $context
+     * @param \Magento\Framework\App\RequestInterface $request
+     * @param RequestRepositoryInterface $requestRepository
+     * @param WebsiteFactory $websiteFactory
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Store\Model\WebsiteFactory $websiteFactory,
+        Context $context,
+        \Magento\Framework\App\RequestInterface $request,
+        RequestRepositoryInterface $requestRepository,
+        WebsiteFactory $websiteFactory,
         array $data = []
     ) {
-        $this->_coreRegistry = $registry;
-        $this->_websiteFactory = $websiteFactory;
         parent::__construct($context, $data);
+
+        $this->request = $request;
+        $this->requestRepository = $requestRepository;
+        $this->websiteFactory = $websiteFactory;
     }
 
     /**
-     * Retrieve available request
+     * Request Getter.
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return RequestInterface
+     * @throws NoSuchEntityException
      */
-    public function getRequest()
+    public function getRtdRequest()
     {
-        if ($this->hasRequest()) {
-            return $this->getData('request');
+        if ($this->currentRequest) {
+            return $this->currentRequest;
         }
-        if ($this->_coreRegistry->registry('current_request')) {
-            return $this->_coreRegistry->registry('current_request');
-        }
-        if ($this->_coreRegistry->registry('request')) {
-            return $this->_coreRegistry->registry('request');
-        }
-        throw new \Magento\Framework\Exception\LocalizedException(__('Request Not Found.'));
+
+        $this->currentRequest = $this->requestRepository->get(
+            $this->request->getParam('request_id')
+        );
+
+        return $this->currentRequest;
     }
 }

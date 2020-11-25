@@ -2,12 +2,9 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Product\Attribute\Source;
 
-/**
- * Class ExportStatus
- * @package RealtimeDespatch\OrderFlow\Model\Product\Attribute\Source
- * @codeCoverageIgnore
- */
-class ExportStatus extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource
+use Magento\Eav\Model\Entity\Attribute\Source\AbstractSource;
+
+class ExportStatus extends AbstractSource
 {
     /**
      * @return array

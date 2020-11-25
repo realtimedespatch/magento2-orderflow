@@ -2,21 +2,11 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\View\Tab;
 
-/**
- * Import Info Tab.
- */
-class Info extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\AbstractImport implements \Magento\Backend\Block\Widget\Tab\TabInterface
-{
-    /**
-     * Retrieve source model instance
-     *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
-     */
-    public function getSource()
-    {
-        return $this->getImport();
-    }
+use Magento\Backend\Block\Widget\Tab\TabInterface;
+use RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\AbstractImport;
 
+class Info extends AbstractImport implements TabInterface
+{
     /**
      * {@inheritdoc}
      */
@@ -45,6 +35,14 @@ class Info extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\AbstractIm
      * {@inheritdoc}
      */
     public function isHidden()
+    {
+        return false;
+    }
+
+    /**
+     * Is Ajax Loaded.
+     */
+    public function isAjaxLoaded()
     {
         return false;
     }

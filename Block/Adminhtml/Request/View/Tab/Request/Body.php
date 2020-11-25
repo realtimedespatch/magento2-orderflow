@@ -2,21 +2,15 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab\Request;
 
+use Magento\Backend\Block\Widget\Tab\TabInterface;
+use Magento\Framework\Exception\LocalizedException;
+use RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractRequest;
+
 /**
  * Request Body Tab.
  */
-class Body extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractRequest implements \Magento\Backend\Block\Widget\Tab\TabInterface
+class Body extends AbstractRequest implements TabInterface
 {
-    /**
-     * Retrieve source model instance
-     *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
-     */
-    public function getSource()
-    {
-        return $this->getRequest();
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -38,7 +32,13 @@ class Body extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractR
      */
     public function canShowTab()
     {
-        return ! $this->getRequest()->isExport() || $this->getRequest()->getOperation() == 'Export';
+        try {
+            $request = $this->getRtdRequest();
+
+            return ! $request->isExport() || $request->getOperation() == 'Export';
+        } catch (LocalizedException $ex) {
+            return false;
+        }
     }
 
     /**
@@ -46,6 +46,20 @@ class Body extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractR
      */
     public function isHidden()
     {
-        return $this->getRequest()->isExport() && $this->getRequest()->getOperation() !== 'Export';
+        try {
+            $request = $this->getRtdRequest();
+
+            return $request->isExport() && $request->getOperation() !== 'Export';
+        } catch (LocalizedException $ex) {
+            return true;
+        }
+    }
+
+    /**
+     * Is Ajax Loaded.
+     */
+    public function isAjaxLoaded()
+    {
+        return false;
     }
 }

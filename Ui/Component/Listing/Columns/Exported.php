@@ -14,7 +14,7 @@ class Exported extends Date
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-                if ( ! isset($item[$this->getData('name')])) {
+                if (! isset($item[$this->getData('name')])) {
                     $item[$this->getData('name')] = __('Pending');
                 }
             }

@@ -1,48 +1,59 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Cron\Import;
 
-class InventoryUpdateImport extends \RealtimeDespatch\OrderFlow\Cron\Import\ImportCron
+use RealtimeDespatch\OrderFlow\Helper\Import\Inventory as InventoryImportHelper;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\CollectionFactory as RequestCollectionFactory;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
+
+/**
+ * Inventory Update Import Cron.
+ *
+ * Cron Job to Import New Inventory Updates to Magento.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class InventoryUpdateImport extends ImportCron
 {
     const ENTITY_INVENTORY = 'Inventory';
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Import\Inventory
+     * @var InventoryImportHelper
      */
-    protected $_helper;
+    protected $helper;
 
     /**
-     * InventoryImport constructor.
-     * @param \RealtimeDespatch\OrderFlow\Helper\Import\Inventory $helper
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param InventoryImportHelper $helper
+     * @param RequestCollectionFactory $requestCollectionFactory
+     * @param RequestProcessorFactoryInterface $requestProcessorFactory
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Helper\Import\Inventory $helper,
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory,
-        \Magento\Framework\ObjectManagerInterface $objectManager) {
-        $this->_helper = $helper;
-        parent::__construct($logger, $requestFactory, $objectManager);
+        InventoryImportHelper $helper,
+        RequestCollectionFactory $requestCollectionFactory,
+        RequestProcessorFactoryInterface $requestProcessorFactory
+    ) {
+        $this->helper = $helper;
+
+        parent::__construct(
+            $requestCollectionFactory,
+            $requestProcessorFactory
+        );
     }
 
     /**
-     * Returns the import entity type.
-     *
-     * @return \Magento\Framework\App\Helper\AbstractHelper
+     * @inheritDoc
      */
-    protected function _getHelper()
+    protected function getHelper()
     {
-        return $this->_helper;
+        return $this->helper;
     }
 
     /**
-     * Returns the import entity type.
-     *
-     * @return string
+     * @inheritDoc
      */
-    protected function _getEntityType()
+    protected function getEntityType()
     {
         return self::ENTITY_INVENTORY;
     }

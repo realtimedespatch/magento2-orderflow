@@ -2,46 +2,36 @@
 
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Export;
 
-use Magento\Backend\App\Action;
-use Magento\Sales\Api\OrderManagementInterface;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\InputException;
-use Psr\Log\LoggerInterface;
+use Exception;
+use Magento\Framework\Controller\Result\Redirect;
+use Magento\Framework\View\Result\Page;
+use RealtimeDespatch\OrderFlow\Controller\Adminhtml\Export;
 
-class View extends \RealtimeDespatch\OrderFlow\Controller\Adminhtml\Export
+class View extends Export
 {
     /**
-     * View export detail
+     * Execute.
      *
-     * @return \Magento\Backend\Model\View\Result\Page|\Magento\Backend\Model\View\Result\Redirect
+     * @return Page|Redirect
      */
     public function execute()
     {
-        $export = $this->_initExport();
-        $resultRedirect = $this->resultRedirectFactory->create();
-
-        if ( ! $export) {
-            return $resultRedirect->setRefererUrl();
-        }
-
-        $export->setViewedAt(date('Y-m-d H:i:s'))->save();
-
         try {
-            $resultPage = $this->_initAction();
-            $resultPage->getConfig()->getTitle()->prepend(sprintf($export->getEntity()." Export #%s", $export->getMessageId()));
+            $export = $this->getExport();
 
-            if ($export->getEntity() == 'Order') {
-                $resultPage->getLayout()->unsetChild('lines', 'product_export_line_listing');
-            } else {
-                $resultPage->getLayout()->unsetChild('lines', 'order_export_line_listing');
+            if ( ! $export) {
+                return $this->resultRedirectFactory->create()->setRefererUrl();
             }
-        } catch (\Exception $e) {
-            $this->logger->critical($e);
-            $this->messageManager->addError(__('Export Not Found'));
-            return $resultRedirect->setRefererUrl();
-        }
 
-        return $resultPage;
+            $page = $this->getPage();
+            $page->getConfig()
+                 ->getTitle()
+                 ->prepend(sprintf($export->getEntity()." Export #%s", $export->getMessageId()));
+
+            return $page;
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage(__($e->getMessage()));
+            return $this->resultRedirectFactory->create()->setRefererUrl();
+        }
     }
 }

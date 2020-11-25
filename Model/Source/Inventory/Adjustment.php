@@ -2,15 +2,15 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Source\Inventory;
 
+use Magento\Framework\Data\OptionSourceInterface;
+
 /**
- * Class Adjustment
- * @package RealtimeDespatch\OrderFlow\Model\Source\Inventory
- * @codeCoverageIgnore
+ * Inventory Adjustment Source Options.
  */
-class Adjustment implements \Magento\Framework\Option\ArrayInterface
+class Adjustment implements OptionSourceInterface
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function toOptionArray()
     {
@@ -22,7 +22,9 @@ class Adjustment implements \Magento\Framework\Option\ArrayInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Return Options as Array.
+     *
+     * @return array
      */
     public function toArray()
     {

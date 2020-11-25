@@ -2,11 +2,10 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\ResourceModel\Request;
 
-/**
- * Class Collection
- * @package RealtimeDespatch\OrderFlow\Model\ResourceModel\Request
- */
-class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
+use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
+use RealtimeDespatch\OrderFlow\Model\Request;
+
+class Collection extends AbstractCollection
 {
     /**
      * @inheritdoc
@@ -18,6 +17,9 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
      */
     protected function _construct()
     {
-        $this->_init('RealtimeDespatch\OrderFlow\Model\Request', 'RealtimeDespatch\OrderFlow\Model\ResourceModel\Request');
+        $this->_init(
+            Request::class,
+            \RealtimeDespatch\OrderFlow\Model\ResourceModel\Request::class
+        );
     }
 }

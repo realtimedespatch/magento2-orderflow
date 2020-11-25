@@ -2,68 +2,79 @@
 
 namespace RealtimeDespatch\OrderFlow\Cron\Export;
 
-class ProductCreateExport extends \RealtimeDespatch\OrderFlow\Cron\Export\ExportCron
+use Magento\Store\Model\ResourceModel\Website\CollectionFactory as WebsiteCollectionFactory;
+use Magento\Store\Model\Website;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
+use RealtimeDespatch\OrderFlow\Helper\Export\Product as ProductExportHelper;
+
+/**
+ * Product Create Export Cron.
+ *
+ * Cron Job to Export New Products to OrderFlow.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class ProductCreateExport extends ExportCron
 {
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Export\Product
+     * @var ProductExportHelper
      */
-    protected $_helper;
+    protected $helper;
 
     /**
-     * ProductExport constructor.
-     * @param \RealtimeDespatch\OrderFlow\Helper\Export\Product $helper
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \Magento\Store\Model\WebsiteFactory $websiteFactory
+     * @param ProductExportHelper $helper
+     * @param RequestBuilderInterface $requestBuilder
+     * @param RequestProcessorFactoryInterface $requestProcessorFactory
+     * @param WebsiteCollectionFactory $websiteCollectionFactory
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Helper\Export\Product $helper,
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Store\Model\WebsiteFactory $websiteFactory) {
-        $this->_helper = $helper;
-        parent::__construct($logger, $requestBuilder, $objectManager, $websiteFactory);
+        ProductExportHelper $helper,
+        RequestBuilderInterface $requestBuilder,
+        RequestProcessorFactoryInterface $requestProcessorFactory,
+        WebsiteCollectionFactory $websiteCollectionFactory
+    ) {
+        $this->helper = $helper;
+
+        parent::__construct(
+            $requestBuilder,
+            $requestProcessorFactory,
+            $websiteCollectionFactory
+        );
     }
 
     /**
-     * Returns the request set to process.
-     *
-     * @param \Magento\Store\Model\Website $website
-     *
-     * @return array
+     * @inheritDoc
      */
-    protected function _getRequest($website)
+    protected function getRequest(Website $website)
     {
-        $products = $this->_helper->getCreateableProducts($website);
+        $products = $this->helper->getCreateableProducts($website);
 
         if (count($products) == 0) {
             return null;
         }
 
-        $this->_requestBuilder->resetBuilder()->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_PRODUCT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_CREATE
+        $this->requestBuilder->resetBuilder()->setRequestData(
+            RequestInterface::TYPE_EXPORT,
+            RequestInterface::ENTITY_PRODUCT,
+            RequestInterface::OP_CREATE
         );
 
-        $this->_requestBuilder->setScopeId($website->getId());
+        $this->requestBuilder->setScopeId($website->getId());
 
         foreach ($products as $product) {
-            $this->_requestBuilder->addRequestLine(json_encode(array('sku' => $product->getSku())));
+            $this->requestBuilder->addRequestLine(json_encode(['sku' => $product->getSku()]));
         }
 
-        return $this->_requestBuilder->saveRequest();
+        return $this->requestBuilder->saveRequest();
     }
 
     /**
-     * Returns the import entity type.
-     *
-     * @return \Magento\Framework\App\Helper\AbstractHelper
+     * @inheritDoc
      */
-    protected function _getHelper()
+    protected function getExportHelper()
     {
-        return $this->_helper;
+        return $this->helper;
     }
 }

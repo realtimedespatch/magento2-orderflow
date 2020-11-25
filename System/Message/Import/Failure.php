@@ -2,50 +2,56 @@
 
 namespace RealtimeDespatch\OrderFlow\System\Message\Import;
 
+use Magento\Framework\AuthorizationInterface;
+use Magento\Framework\DataObject;
+use Magento\Framework\Notification\MessageInterface;
+use Magento\Framework\UrlInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Import\CollectionFactory as ImportCollectionFactory;
+
 /**
- * Class Failure
- * @package RealtimeDespatch\OrderFlow\System\Message\Import
+ * Import Failure Message.
+ *
+ * Encapsulates an import failure message.
  */
-class Failure implements \Magento\Framework\Notification\MessageInterface
+class Failure implements MessageInterface
 {
     const IDENTITY = 'ORDERFLOW_IMPORT_FAILURE';
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\ImportFactory
+     * @var ImportCollectionFactory
      */
-    protected  $_importFactory;
+    protected $collectionFactory;
 
     /**
-     * @var \Magento\Framework\AuthorizationInterface
+     * @var AuthorizationInterface
      */
-    protected $_authorization;
+    protected $authorization;
 
     /**
-     * @var \Magento\Framework\UrlInterface
+     * @var UrlInterface
      */
-    protected $_urlBuilder;
+    protected $urlBuilder;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
+     * @var ImportInterface
      */
-    protected $_unreadImport;
+    protected $unreadImport;
 
     /**
-     * Failure constructor.
-     * @param \RealtimeDespatch\OrderFlow\Model\ImportFactory $importFactory
-     * @param \Magento\Framework\AuthorizationInterface $authorization
-     * @param \Magento\Framework\UrlInterface $urlBuilder
+     * @param ImportCollectionFactory $collectionFactory
+     * @param AuthorizationInterface $authorization
+     * @param UrlInterface $urlBuilder
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Model\ImportFactory $importFactory,
-        \Magento\Framework\AuthorizationInterface $authorization,
-        \Magento\Framework\UrlInterface $urlBuilder
-    )
-    {
-        $this->_importFactory = $importFactory;
-        $this->_authorization = $authorization;
-        $this->_urlBuilder = $urlBuilder;
-        $this->_unreadImport = $this->_getLatestFailedImport();
+        ImportCollectionFactory $collectionFactory,
+        AuthorizationInterface $authorization,
+        UrlInterface $urlBuilder
+    ) {
+        $this->collectionFactory = $collectionFactory;
+        $this->authorization = $authorization;
+        $this->urlBuilder = $urlBuilder;
+        $this->unreadImport = $this->getLatestFailedImport();
     }
 
     /**
@@ -65,23 +71,23 @@ class Failure implements \Magento\Framework\Notification\MessageInterface
      */
     public function isDisplayed()
     {
-        if ( ! $this->_authorization->isAllowed('RealtimeDespatch_OrderFlow::orderflow_imports')) {
+        if (! $this->authorization->isAllowed('RealtimeDespatch_OrderFlow::orderflow_imports')) {
             return false;
         }
 
-        return $this->_unreadImport && $this->_unreadImport->getId();
+        return $this->unreadImport && $this->unreadImport->getId();
     }
 
     /**
      * Checks whether there is an unread import.
      *
-     * @return array
+     * @return DataObject
      */
-    protected function _getLatestFailedImport()
+    protected function getLatestFailedImport()
     {
-        return $this->_importFactory
+        return $this
+            ->collectionFactory
             ->create()
-            ->getCollection()
             ->addFieldToFilter('failures', ['gt' => 0])
             ->addFieldToFilter('viewed_at', ['null' => true])
             ->setOrder('created_at')
@@ -97,12 +103,12 @@ class Failure implements \Magento\Framework\Notification\MessageInterface
      */
     public function getText()
     {
-        $url = $this->_urlBuilder->getUrl(
+        $url = $this->urlBuilder->getUrl(
             'orderflow/import/view',
-            array('import_id' => $this->_unreadImport->getId())
+            ['import_id' => $this->unreadImport->getId()]
         );
 
-        return __('A recent OrderFlow import contains failures. <a href="%1">View Details</a>', $url);
+        return __('A recent OrderFlow import contains failures. <a href="'.$url.'">View Details</a>');
     }
 
     /**
@@ -112,6 +118,6 @@ class Failure implements \Magento\Framework\Notification\MessageInterface
      */
     public function getSeverity()
     {
-        return \Magento\Framework\Notification\MessageInterface::SEVERITY_MAJOR;
+        return MessageInterface::SEVERITY_MAJOR;
     }
 }

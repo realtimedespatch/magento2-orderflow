@@ -2,97 +2,126 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap;
 
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Filesystem\DriverInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Webapi\Controller\Soap\Request\Handler;
+use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+
+/**
+ * Order Export SOAP API Plugin
+ *
+ * Captures the details of an order export request.
+ *
+ * This occurs when OrderFlow makes a call to Magento to retrieve the details of an order.
+ */
 class OrderExport
 {
-    const OP_ORDER_EXPORT = 'salesOrderRepositoryV1Get';
+    /* API Operation */
+    const API_OPERATION = 'salesOrderRepositoryV1Get';
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
+     * @var RequestProcessor
      */
-    protected $_objectManager;
+    protected $requestProcessor;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface
+     * @var RequestBuilderInterface
      */
-    protected $_requestBuilder;
+    protected $requestBuilder;
 
     /**
-     * @var \Magento\Sales\Model\OrderRepository
+     * @var DriverInterface
      */
-    protected $_orderRepository;
+    protected $driver;
 
     /**
-     * OrderExport constructor.
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
-     * @param \Magento\Sales\Model\OrderRepository $orderRepository
+     * @var OrderRepositoryInterface
+     */
+    protected $orderRepository;
+
+    /**
+     * @param RequestProcessor $requestProcessor
+     * @param RequestBuilderInterface $requestBuilder
+     * @param DriverInterface $driver
+     * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder,
-        \Magento\Sales\Model\OrderRepository $orderRepository)
-    {
-        $this->_objectManager = $objectManager;
-        $this->_requestBuilder = $requestBuilder;
-        $this->_orderRepository = $orderRepository;
+        RequestProcessor $requestProcessor,
+        RequestBuilderInterface $requestBuilder,
+        DriverInterface $driver,
+        OrderRepositoryInterface $orderRepository
+    ) {
+        $this->requestProcessor = $requestProcessor;
+        $this->requestBuilder = $requestBuilder;
+        $this->driver = $driver;
+        $this->orderRepository = $orderRepository;
     }
 
-    public function around__call(\Magento\Webapi\Controller\Soap\Request\Handler $soapServer, callable $proceed, $operation, $arguments)
-    {
+    /**
+     * Capture Order Export Request Details.
+     *
+     * @param Handler $soapServer
+     * @param callable $proceed
+     * @param $operation
+     * @param $arguments
+     * @return mixed
+     * @throws FileSystemException
+     * @noinspection PhpUnusedParameterInspection
+     */
+    public function around__call(
+        Handler $soapServer,
+        callable $proceed,
+        $operation,
+        $arguments
+    ) {
         $result = $proceed($operation, $arguments);
 
-        if ($this->_isOrderExport($operation) && isset($arguments[0]->id)) {
-            $this->_getRequestProcessor()->process($this->_buildOrderExportRequest($result['result'], $arguments[0]->id));
+        if ($this->isOrderExportRequest($operation) && isset($result['result']) && isset($arguments[0]->id)) {
+            $request = $this->buildOrderExportRequest($result['result'], $arguments[0]->id);
+            $this->requestProcessor->process($request);
         }
 
         return $result;
     }
 
     /**
-     * Checks whether this is a order export request.
+     * Checks whether this is an order export request.
      *
      * @param string $operation
      *
      * @return boolean
      */
-    protected function _isOrderExport($operation)
+    protected function isOrderExportRequest(string $operation)
     {
-        return $operation === self::OP_ORDER_EXPORT;
+        return $operation === self::API_OPERATION;
     }
 
     /**
      * Builds an export request from the order ID.
      *
-     * @param string $response
-     * @param string $id
+     * @param array $response
+     * @param string $orderId
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\Request
+     * @return RequestInterface
+     * @throws FileSystemException
      */
-    protected function _buildOrderExportRequest($response, $id)
+    protected function buildOrderExportRequest(array $response, string $orderId)
     {
-        $this->_requestBuilder->setRequestData(
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::ENTITY_ORDER,
-            \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_EXPORT
+        $this->requestBuilder->setRequestData(
+            RequestInterface::TYPE_EXPORT,
+            RequestInterface::ENTITY_ORDER,
+            RequestInterface::OP_EXPORT
         );
 
-        // It annoying we have to load the order again, but the Magento API truncates the increment Id.
-        $order = $this->_orderRepository->get($id);
+        $order = $this->orderRepository->get($orderId);
 
-        $this->_requestBuilder->setRequestBody(file_get_contents('php://input'));
-        $this->_requestBuilder->setResponseBody(json_encode($response));
-        $this->_requestBuilder->addRequestLine(json_encode(array('increment_id' => $order->getIncrementId())));
+        $this->requestBuilder->setRequestBody($this->driver->fileGetContents('php://input'));
+        $this->requestBuilder->setResponseBody(json_encode($response));
+        $this->requestBuilder->addRequestLine(json_encode(['increment_id' => $order->getIncrementId()]));
 
-        return $this->_requestBuilder->saveRequest();
-    }
-
-    /**
-     * Retrieve the request processor instance.
-     *
-     * @return RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor
-     */
-    protected function _getRequestProcessor()
-    {
-        return $this->_objectManager->create('OrderExportRequestProcessor');
+        return $this->requestBuilder->saveRequest();
     }
 }

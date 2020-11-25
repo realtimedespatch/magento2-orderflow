@@ -1,14 +1,21 @@
-<?php
+<?php /** @noinspection PhpDeprecationInspection */
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Product\Edit\Info;
 
+use Magento\Backend\Block\Template;
+use Magento\Backend\Block\Template\Context;
+use Magento\Catalog\Model\Product;
+use Magento\Framework\App\Request\Http;
+use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Registry;
+use RealtimeDespatch\OrderFlow\Helper\Admin\Info;
+use RealtimeDespatch\OrderFlow\Helper\Api;
 
 /**
  * Class OrderFlow
  * @package RealtimeDespatch\OrderFlow\Block\Adminhtml\Product\Edit\Info
  */
-class OrderFlow extends \Magento\Backend\Block\Template
+class OrderFlow extends Template
 {
     /**
      * Core registry
@@ -18,42 +25,42 @@ class OrderFlow extends \Magento\Backend\Block\Template
     protected $_coreRegistry;
 
     /**
-     * @var \Magento\Framework\Message\ManagerInterface
+     * @var ManagerInterface
      */
     protected $_messageManager;
 
     /**
-     * @var \Magento\Framework\App\Request\Http
+     * @var Http
      */
     protected $_request;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Admin\Info
+     * @var Info
      */
     protected $_adminInfoHelper;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Helper\Api
+     * @var Api
      */
     protected $_apiHelper;
 
     /**
      * OrderFlow constructor.
-     * @param \Magento\Backend\Block\Template\Context $context
+     * @param Context $context
      * @param Registry $registry,
-     * @param \Magento\Framework\App\Request\Http $request
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
-     * @param \RealtimeDespatch\OrderFlow\Helper\Admin\Info $adminInfoHelper
-     * @param \RealtimeDespatch\OrderFlow\Helper\Api $apiHelper
+     * @param Http $request
+     * @param ManagerInterface $messageManager
+     * @param Info $adminInfoHelper
+     * @param Api $apiHelper
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
+        Context $context,
         Registry $registry,
-        \Magento\Framework\App\Request\Http $request,
-        \Magento\Framework\Message\ManagerInterface $messageManager,
-        \RealtimeDespatch\OrderFlow\Helper\Admin\Info $adminInfoHelper,
-        \RealtimeDespatch\OrderFlow\Helper\Api $apiHelper,
+        Http $request,
+        ManagerInterface $messageManager,
+        Info $adminInfoHelper,
+        Api $apiHelper,
         array $data = [])
     {
         $this->_messageManager = $messageManager;
@@ -77,11 +84,11 @@ class OrderFlow extends \Magento\Backend\Block\Template
     /**
      * Retrieve product object from object if not from registry
      *
-     * @return \Magento\Catalog\Model\Product
+     * @return Product
      */
     public function getProduct()
     {
-        if ( ! $this->getData('product') instanceof \Magento\Catalog\Model\Product) {
+        if ( ! $this->getData('product') instanceof Product) {
             $this->setData('product', $this->_coreRegistry->registry('product'));
         }
         return $this->getData('product');

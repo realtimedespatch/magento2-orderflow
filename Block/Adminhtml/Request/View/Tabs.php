@@ -2,6 +2,13 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View;
 
+use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Model\Auth\Session;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Json\EncoderInterface;
+use Magento\Framework\Registry;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+
 /**
  * Request View Tabs
  */
@@ -10,22 +17,22 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs
     /**
      * Core registry
      *
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $_coreRegistry = null;
 
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Json\EncoderInterface $jsonEncoder
-     * @param \Magento\Backend\Model\Auth\Session $authSession
-     * @param \Magento\Framework\Registry $registry
+     * @param Context $context
+     * @param EncoderInterface $jsonEncoder
+     * @param Session $authSession
+     * @param Registry $registry
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Json\EncoderInterface $jsonEncoder,
-        \Magento\Backend\Model\Auth\Session $authSession,
-        \Magento\Framework\Registry $registry,
+        Context $context,
+        EncoderInterface $jsonEncoder,
+        Session $authSession,
+        Registry $registry,
         array $data = []
     ) {
         $this->_coreRegistry = $registry;
@@ -35,12 +42,12 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs
     /**
      * Retrieve available request
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return RequestInterface
+     * @throws LocalizedException
      */
     public function getRequest()
     {
-        if ($this->hasRequest()) {
+        if ($this->getData('request')) {
             return $this->getData('request');
         }
         if ($this->_coreRegistry->registry('current_request')) {
@@ -49,7 +56,7 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs
         if ($this->_coreRegistry->registry('request')) {
             return $this->_coreRegistry->registry('request');
         }
-        throw new \Magento\Framework\Exception\LocalizedException(__('Request Not Found.'));
+        throw new LocalizedException(__('Request Not Found.'));
     }
 
     /**
@@ -60,8 +67,11 @@ class Tabs extends \Magento\Backend\Block\Widget\Tabs
     protected function _construct()
     {
         parent::_construct();
+
+        /** @noinspection PhpUndefinedMethodInspection */
         $this->setId('orderflow_request_view_tabs');
-        $this->setDestElementId('orderflow_request_view');
+        /** @noinspection PhpUndefinedMethodInspection */
         $this->setTitle(__('Request View'));
+        $this->setDestElementId('orderflow_request_view');
     }
 }

@@ -1,39 +1,8 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceContainer name="admin.scope.col.wrap" htmlClass="admin__old" />
         <referenceContainer name="content">
-            <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View" name="orderflow_request_view"/>
+            <uiComponent name="request_form"/>
         </referenceContainer>
-        <referenceContainer name="left">
-            <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tabs" name="orderflow_request_tabs">
-                <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab\Info" name="request_tab_info" template="request/view/tab/info.phtml" />
-                <action method="addTab">
-                    <argument name="name" xsi:type="string">request_info</argument>
-                    <argument name="block" xsi:type="string">request_tab_info</argument>
-                </action>
-                <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab\Lines" name="orderflow_request_line.grid.container"/>
-                <action method="addTab">
-                    <argument name="name" xsi:type="string">request_lines</argument>
-                    <argument name="block" xsi:type="string">orderflow_request_line.grid.container</argument>
-                </action>
-                <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab\Request\Body" name="request_tab_request_body" template="request/view/tab/request/body.phtml" />
-                <action method="addTab">
-                    <argument name="name" xsi:type="string">request_request_body</argument>
-                    <argument name="block" xsi:type="string">request_tab_request_body</argument>
-                </action>
-                <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab\Response\Body" name="request_tab_response_body" template="request/view/tab/response/body.phtml" />
-                <action method="addTab">
-                    <argument name="name" xsi:type="string">request_reponse_body</argument>
-                    <argument name="block" xsi:type="string">request_tab_response_body</argument>
-                </action>
-            </block>
-        </referenceContainer>
-        <referenceBlock name="orderflow_request_line.grid.container">
-            <block class="Magento\Framework\View\Element\Text\ListText" name="lines">
-                <uiComponent name="request_import_line_listing"/>
-                <uiComponent name="request_export_line_listing"/>
-            </block>
-        </referenceBlock>
     </body>
 </page>

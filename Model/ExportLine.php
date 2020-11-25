@@ -2,9 +2,10 @@
 
 namespace RealtimeDespatch\OrderFlow\Model;
 
+use Magento\Framework\Model\AbstractModel;
 use RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface;
 
-class ExportLine extends \Magento\Framework\Model\AbstractModel implements ExportLineInterface
+class ExportLine extends AbstractModel implements ExportLineInterface
 {
     /**
      * @inheritdoc
@@ -16,7 +17,7 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      */
     protected function _construct()
     {
-        $this->_init('RealtimeDespatch\OrderFlow\Model\ResourceModel\ExportLine');
+        $this->_init(ResourceModel\ExportLine::class);
     }
 
     /**
@@ -134,9 +135,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param integer $exportId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setExportId($exportId)
+    public function setExportId(int $exportId)
     {
         return $this->setData(self::IMPORT_ID, $exportId);
     }
@@ -146,9 +147,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $result
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setResult($result)
+    public function setResult(string $result)
     {
         return $this->setData(self::RESULT, $result);
     }
@@ -158,9 +159,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $reference
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setReference($reference)
+    public function setReference(string $reference)
     {
         return $this->setData(self::REFERENCE, $reference);
     }
@@ -170,9 +171,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setOperation($operation)
+    public function setOperation(string $operation)
     {
         return $this->setData(self::OPERATION, $operation);
     }
@@ -182,9 +183,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setEntity($entity)
+    public function setEntity(string $entity)
     {
         return $this->setData(self::ENTITY, $entity);
     }
@@ -194,9 +195,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $message
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setMessage($message)
+    public function setMessage(string $message)
     {
         return $this->setData(self::MESSAGE, $message);
     }
@@ -206,9 +207,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $detail
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setDetail($detail)
+    public function setDetail(string $detail)
     {
         return $this->setData(self::DETAIL, $detail);
     }
@@ -218,9 +219,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $additionalData
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setAdditionalData($additionalData)
+    public function setAdditionalData(string $additionalData)
     {
         return $this->setData(self::ADDITIONAL_DATA, $additionalData);
     }
@@ -230,9 +231,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setCreatedAt($created)
+    public function setCreatedAt(string $created)
     {
         return $this->setData(self::CREATED_AT, $created);
     }
@@ -242,9 +243,9 @@ class ExportLine extends \Magento\Framework\Model\AbstractModel implements Expor
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface
+     * @return ExportLineInterface
      */
-    public function setProcessedAt($processed)
+    public function setProcessedAt(string $processed)
     {
         return $this->setData(self::PROCESSED_AT, $processed);
     }

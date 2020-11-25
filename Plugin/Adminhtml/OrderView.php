@@ -2,30 +2,32 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Adminhtml;
 
+use Magento\Framework\AuthorizationInterface;
+use Magento\Sales\Block\Adminhtml\Order\View;
+
 /**
- * Class OrderView
- * @package RealtimeDespatch\OrderFlow\Plugin\Adminhtml
+ * Adds an Export Button to Order View.
  */
 class OrderView
 {
     /**
-     * @var \Magento\Framework\AuthorizationInterface
+     * @var AuthorizationInterface
      */
     protected $_auth;
 
     /**
      * OrderView constructor.
-     * @param \Magento\Framework\AuthorizationInterface $auth
+     * @param AuthorizationInterface $auth
      */
-    public function __construct(\Magento\Framework\AuthorizationInterface $auth)
+    public function __construct(AuthorizationInterface $auth)
     {
         $this->_auth = $auth;
     }
 
     /**
-     * @param \Magento\Sales\Block\Adminhtml\Order\View $view
+     * @param View $view
      */
-    public function beforeSetLayout(\Magento\Sales\Block\Adminhtml\Order\View $view)
+    public function beforeSetLayout(View $view)
     {
         if ( ! $this->_auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_orders')) {
             return;
@@ -39,7 +41,7 @@ class OrderView
             [
                 'label' => __('Export'),
                 'class' => 'export',
-                'id' => 'order-view-export-button',
+                'id' => 'orderflow-order-view-export-button',
                 'onclick' => "confirmSetLocation('{$message}', '{$exportUrl}')"
             ]
         );

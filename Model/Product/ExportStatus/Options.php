@@ -1,36 +1,24 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: tbirch
- * Date: 22/03/17
- * Time: 10:50
- */
 
 namespace RealtimeDespatch\OrderFlow\Model\Product\ExportStatus;
 
+use Magento\Framework\Data\OptionSourceInterface;
 
-class Options implements \Magento\Framework\Data\OptionSourceInterface
+/**
+ * Export Status Options.
+ */
+class Options implements OptionSourceInterface
 {
     /**
-     * Return array of options as value-label pairs
-     *
-     * @return array Format: array(array('value' => '<value>', 'label' => '<label>'), ...)
+     * @return array
      */
     public function toOptionArray()
     {
-        return array(
-            array(
-                'value' => 'Pending', 'label' => 'Pending',
-            ),
-            array(
-                'value' => 'Queued', 'label' => 'Queued',
-            ),
-            array(
-                'value' => 'Exported', 'label' => 'Exported',
-            ),
-            array(
-                'value' => 'Failed', 'label' => 'Failed',
-            ),
-        );
+        return [
+            ['value' => 'Pending', 'label' => 'Pending'],
+            ['value' => 'Queued', 'label' => 'Queued'],
+            ['value' => 'Exported', 'label' => 'Exported'],
+            ['value' => 'Failed', 'label' => 'Failed']
+        ];
     }
 }

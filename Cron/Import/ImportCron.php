@@ -1,97 +1,92 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Cron\Import;
 
+use RealtimeDespatch\OrderFlow\Api\ImportHelperInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Collection;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\CollectionFactory as RequestCollectionFactory;
+use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
+
+/**
+ * Import Cron.
+ *
+ * Abstract Base Class for the Import Cron Jobs.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
 abstract class ImportCron
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var RequestCollectionFactory
      */
-    protected $_logger;
+    protected $requestCollectionFactory;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\RequestFactory
+     * @var RequestProcessorFactoryInterface
      */
-    protected $_requestFactory;
+    protected $requestProcessorFactory;
 
     /**
-     * @var \Magento\Framework\ObjectManagerInterface
-     */
-    protected $_objectManager;
-
-    /**
-     * ImportCron constructor.
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param RequestCollectionFactory $requestCollectionFactory
+     * @param RequestProcessorFactoryInterface $requestProcessorFactory
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger,
-        \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory,
-        \Magento\Framework\ObjectManagerInterface $objectManager) {
-        $this->_logger = $logger;
-        $this->_requestFactory = $requestFactory;
-        $this->_objectManager = $objectManager;
+        RequestCollectionFactory $requestCollectionFactory,
+        RequestProcessorFactoryInterface $requestProcessorFactory
+    ) {
+        $this->requestCollectionFactory = $requestCollectionFactory;
+        $this->requestProcessorFactory = $requestProcessorFactory;
     }
 
     /**
-     * Executes the inventory import job
+     * Execute Cron.
      *
      * @return $this|void
      */
     public function execute()
     {
-        if ( ! $this->_getHelper()->isEnabled()) {
+        if (! $this->getHelper()->isEnabled()) {
             return;
         }
 
-        foreach ($this->_getImportableRequests() as $request) {
-            $this->_getProcessor($request->getEntity(), $request->getOperation())->process($request);
+        foreach ($this->getImportableRequests() as $request) {
+            $requestProcessor = $this->requestProcessorFactory->get($request->getEntity(), $request->getOperation());
+            $requestProcessor->process($request);
         }
     }
 
     /**
-     * Returns the requests that are ready to process.
+     * Importable Requests Getter.
      *
-     * @return array
+     * @return Collection
      */
-    protected function _getImportableRequests()
+    protected function getImportableRequests()
     {
-        return $this->_requestFactory
+        /** @noinspection PhpUndefinedMethodInspection */
+        return $this
+            ->requestCollectionFactory
             ->create()
-            ->getCollection()
             ->addFieldToFilter('type', ['eq' => 'Import'])
-            ->addFieldToFilter('entity', ['eq' => $this->_getEntityType()])
+            ->addFieldToFilter('entity', ['eq' => $this->getEntityType()])
             ->addFieldToFilter('processed_at', ['null' => true])
-            ->setOrder('message_id','ASC')
-            ->setPageSize($this->_getHelper()->getBatchSize())
+            ->setOrder('message_id', 'ASC')
+            ->setPageSize($this->getHelper()->getBatchSize())
             ->setCurPage(1);
     }
 
     /**
-     * Retrieve the request processor instance.
+     * Helper Getter.
      *
-     * @param string $entity Entity Type
-     * @param string $operation Operation Type
-     *
-     * @return RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor
+     * @return ImportHelperInterface
      */
-    protected function _getProcessor($entity, $operation)
-    {
-        return $this->_objectManager->create($entity.$operation.'RequestProcessor');
-    }
+    abstract protected function getHelper();
 
     /**
-     * Returns the appropriate cron helper.
-     *
-     * @return \Magento\Framework\App\Helper\AbstractHelper
-     */
-    protected abstract function _getHelper();
-
-    /**
-     * Returns the import entity type.
+     * Entity Type Getter.
      *
      * @return string
      */
-    protected abstract function _getEntityType();
+    abstract protected function getEntityType();
 }

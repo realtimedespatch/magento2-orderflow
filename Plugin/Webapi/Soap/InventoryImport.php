@@ -2,53 +2,83 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap;
 
+use Magento\Framework\Session\Generic;
+use Magento\Webapi\Controller\Soap\Request\Handler;
+use RealtimeDespatch\OrderFlow\Model\RequestFactory;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request as RequestResource;
+
 /**
- * Class InventoryImport
- * @package RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap
+ * Inventory Import SOAP API Plugin
+ *
+ * Captures the details of an inventory update request.
+ *
+ * This occurs when OrderFlow makes a call to Magento to update inventory.
  */
 class InventoryImport
 {
     const OP_SHIPMENT_IMPORT = 'realtimeDespatchOrderFlowInventoryRequestManagementV1Update';
 
     /**
-     * @var \Magento\Framework\Registry
+     * @var Generic
      */
-    protected $_registry;
+    protected $session;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\RequestFactory
+     * @var RequestFactory
      */
-    protected $_requestFactory;
+    protected $requestFactory;
 
     /**
-     * @param \Magento\Framework\Registry $registry
-     * @param \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory
+     * @var RequestResource
+     */
+    protected $requestResource;
+
+    /**
+     * @param Generic $session
+     * @param RequestFactory $requestFactory
+     * @param RequestResource $requestResource
      */
     public function __construct(
-        \Magento\Framework\Registry $registry,
-        \RealtimeDespatch\OrderFlow\Model\RequestFactory $requestFactory)
-    {
-        $this->_registry = $registry;
-        $this->_requestFactory = $requestFactory;
+        Generic $session,
+        RequestFactory $requestFactory,
+        RequestResource $requestResource
+    ) {
+        $this->session = $session;
+        $this->requestFactory = $requestFactory;
+        $this->requestResource = $requestResource;
     }
 
     /**
      * Plugin for the SOAP Request Handler.
      *
-     * @param \Magento\Webapi\Controller\Soap\Request\Handler $soapServer
+     * @param Handler $soapServer
      * @param callable $proceed
-     * @param string $operation
-     * @param array $arguments
+     * @param mixed $operation
+     * @param mixed $arguments
      *
      * @return mixed
+     * @noinspection PhpUnusedParameterInspection
      */
-    public function around__call(\Magento\Webapi\Controller\Soap\Request\Handler $soapServer, callable $proceed, $operation, $arguments)
-    {
+    public function around__call(
+        Handler $soapServer,
+        callable $proceed,
+        $operation,
+        $arguments
+    ) {
         $result = $proceed($operation, $arguments);
-        $requestId = $this->_registry->registry('request_id');
 
-        if ($this->_isInventoryImport($operation) && $requestId) {
-            $this->_requestFactory->create()->load($requestId)->setResponseBody(json_encode($result['result']))->save();
+        /* @noinspection PhpUndefinedMethodInspection */
+        $requestId = $this->session->getRequestId();
+
+        if ($this->isInventoryImport($operation) && $requestId) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $request = $this->requestResource->load(
+                $this->requestFactory->create(),
+                $requestId
+            );
+
+            /** @noinspection PhpUndefinedMethodInspection */
+            $request->setResponseBody(json_encode($result['result']))->save();
         }
 
         return $result;
@@ -61,7 +91,7 @@ class InventoryImport
      *
      * @return boolean
      */
-    protected function _isInventoryImport($operation)
+    protected function isInventoryImport(string $operation)
     {
         return $operation === self::OP_SHIPMENT_IMPORT;
     }

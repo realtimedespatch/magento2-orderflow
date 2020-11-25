@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">request_form.request_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Request Information</item>
+        <item name="reverseMetadataMerge" xsi:type="boolean">true</item>
+    </argument>
+    <settings>
+        <layout>
+            <navContainerName>left</navContainerName>
+            <type>tabs</type>
+        </layout>
+        <deps>
+            <dep>request_form.request_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="request_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <dataProvider class="RealtimeDespatch\OrderFlow\Model\Request\DataProvider" name="request_form_data_source">
+            <settings>
+                <requestFieldName>request_id</requestFieldName>
+                <primaryFieldName>request_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <htmlContent name="request_form_tab_details">
+        <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab\Info"
+               name="request_form_tab_details"
+               template="RealtimeDespatch_OrderFlow::request/view/tab/info.phtml">
+            <arguments>
+                <argument name="sort_order" xsi:type="number">10</argument>
+                <argument name="tab_label" xsi:type="string" translate="true">Information</argument>
+            </arguments>
+        </block>
+    </htmlContent>
+    <fieldset name="request_line_listing">
+        <settings>
+            <label translate="true">Request Lines</label>
+        </settings>
+        <insertListing class="\RealtimeDespatch\OrderFlow\Ui\Component\Container\RequestLineListing" name="request_line_listing">
+            <settings>
+                <autoRender>true</autoRender>
+                <dataScope>request_import_line_listing</dataScope>
+                <ns>request_import_line_listing</ns>
+            </settings>
+        </insertListing>
+    </fieldset>
+    <htmlContent name="request_form_tab_request_body">
+        <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab\Request\Body"
+               name="request_form_tab_request_body"
+               template="RealtimeDespatch_OrderFlow::request/view/tab/request/body.phtml">
+            <arguments>
+                <argument name="sort_order" xsi:type="number">30</argument>
+                <argument name="tab_label" xsi:type="string" translate="true">Request Body</argument>
+            </arguments>
+        </block>
+    </htmlContent>
+    <htmlContent name="request_form_tab_response_body">
+        <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab\Response\Body"
+               name="request_form_tab_response_body"
+               template="RealtimeDespatch_OrderFlow::request/view/tab/response/body.phtml">
+            <arguments>
+                <argument name="sort_order" xsi:type="number">40</argument>
+                <argument name="tab_label" xsi:type="string" translate="true">Response Body</argument>
+            </arguments>
+        </block>
+    </htmlContent>
+</form>

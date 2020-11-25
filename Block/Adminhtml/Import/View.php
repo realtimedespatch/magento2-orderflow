@@ -2,12 +2,18 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Import;
 
+use Magento\Backend\Block\Widget\Context;
+use Magento\Backend\Block\Widget\Form\Container;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Registry;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
+
 /**
  * Adminhtml import view
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class View extends \Magento\Backend\Block\Widget\Form\Container
+class View extends Container
 {
     /**
      * Block group
@@ -19,19 +25,19 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
     /**
      * Core registry
      *
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $_coreRegistry = null;
 
     /**
      * @param Context $context
+     * @param Registry $registry
      * @param array $data
-     * @param \Magento\Framework\Registry $registry
      */
     public function __construct(
-        \Magento\Backend\Block\Widget\Context $context,
-        array $data = [],
-        \Magento\Framework\Registry $registry
+        Context $context,
+        Registry $registry,
+        array $data = []
     ) {
         $this->_coreRegistry = $registry;
         parent::__construct($context, $data);
@@ -44,6 +50,8 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @throws LocalizedException
+     * @throws LocalizedException
      */
     protected function _construct()
     {
@@ -76,6 +84,8 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
         $this->buttonList->remove('delete');
         $this->buttonList->remove('reset');
         $this->buttonList->remove('save');
+
+        /** @noinspection PhpUndefinedMethodInspection */
         $this->setId('orderflow_import_view');
     }
 
@@ -83,6 +93,8 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
      * Get URL for back (reset) button
      *
      * @return string
+     * @throws LocalizedException
+     * @throws LocalizedException
      */
     public function getBackUrl()
     {
@@ -92,12 +104,12 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
     /**
      * Retrieve available import
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return ImportInterface
+     * @throws LocalizedException
      */
     public function getImport()
     {
-        if ($this->hasImport()) {
+        if ($this->getData('import')) {
             return $this->getData('import');
         }
         if ($this->_coreRegistry->registry('current_import')) {
@@ -106,7 +118,7 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
         if ($this->_coreRegistry->registry('import')) {
             return $this->_coreRegistry->registry('import');
         }
-        throw new \Magento\Framework\Exception\LocalizedException(__('Import Not Found.'));
+        throw new LocalizedException(__('Import Not Found.'));
     }
 
     /**

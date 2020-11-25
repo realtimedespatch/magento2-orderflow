@@ -5,7 +5,6 @@ namespace RealtimeDespatch\OrderFlow\Model\Config\Source;
 /**
  * Log Duration Source Model.
  *
- * @package RealtimeDespatch\OrderFlow\Model\Config\Source
  * @codeCoverageIgnore
  */
 class Duration

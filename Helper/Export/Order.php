@@ -2,29 +2,38 @@
 
 namespace RealtimeDespatch\OrderFlow\Helper\Export;
 
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Sales\Model\ResourceModel\Order\Collection;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\Website;
+use RealtimeDespatch\OrderFlow\Api\ExportHelperInterface;
+
 /**
  * Order Export Helper.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
-class Order extends \Magento\Framework\App\Helper\AbstractHelper
+class Order extends AbstractHelper implements ExportHelperInterface
 {
     const STATUS_PENDING = 'Pending';
     const STATUS_QUEUED = 'Queued';
 
     /**
-     * @var \Mage\Sales\Model\OrderFactory
+     * @var OrderCollectionFactory
      */
-    protected $_orderFactory;
+    protected $orderCollectionFactory;
 
     /**
-     * @param \Magento\Framework\App\Helper\Context $context
-     * @param \Mage\Sales\Model\OrderFactory $orderFactory
+     * @param Context $context
+     * @param OrderCollectionFactory $orderCollectionFactory
      */
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Sales\Model\OrderFactory $orderFactory
-    )
-    {
-        $this->_orderFactory = $orderFactory;
+        Context $context,
+        OrderCollectionFactory $orderCollectionFactory
+    ) {
+        $this->orderCollectionFactory = $orderCollectionFactory;
         parent::__construct($context);
     }
 
@@ -39,7 +48,7 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_order_export/settings/is_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -49,13 +58,13 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @param integer|null $scopeId
      *
-     * @return boolean
+     * @return int
      */
     public function getBatchSize($scopeId = null)
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_order_export/settings/batch_size',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -71,7 +80,7 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $statuses = $this->scopeConfig->getValue(
             'orderflow_order_export/settings/exportable_status',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
 
@@ -87,10 +96,10 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @return boolean
      */
-    public function canExport($orderStatus, $exportStatus, $scopeId = null)
+    public function canExport(string $orderStatus, string $exportStatus, $scopeId = null)
     {
         // If the order is not in an exportable order status return false;
-        if ( ! in_array($orderStatus, $this->getExportableOrderStatuses($scopeId))) {
+        if (! in_array($orderStatus, $this->getExportableOrderStatuses($scopeId))) {
             return false;
         }
 
@@ -100,15 +109,15 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * Returns a collection of createable orders.
      *
-     * @param \Magento\Store\Model\Website $website
+     * @param Website $website
      *
-     * @return array
+     * @return Collection
      */
-    public function getCreateableOrders($website)
+    public function getCreateableOrders(Website $website)
     {
-        return $this->_orderFactory
+        return $this
+            ->orderCollectionFactory
             ->create()
-            ->getCollection()
             ->addFieldToFilter('store_id', ['in' => $website->getStoreIds()])
             ->addFieldToFilter('status', ['in' => $this->getExportableOrderStatuses($website->getId())])
             ->addFieldToFilter('is_virtual', ['eq' => 0])

@@ -1,32 +1,49 @@
 <?php
 
+/** @noinspection PhpDeprecationInspection */
+
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Order\View\Tab;
 
-class OrderFlow extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implements
-    \Magento\Backend\Block\Widget\Tab\TabInterface
+use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Block\Widget\Tab\TabInterface;
+use Magento\Framework\Registry;
+use Magento\Sales\Block\Adminhtml\Order\AbstractOrder;
+use Magento\Sales\Helper\Admin;
+use Magento\Sales\Model\Order;
+use RealtimeDespatch\OrderFlow\Helper\Admin\Info;
+use RealtimeDespatch\OrderFlow\Helper\Api;
+
+class OrderFlow extends AbstractOrder implements TabInterface
 {
-    protected $_adminInfoHelper;
-    protected $_apiHelper;
+    /**
+     * @var Info
+     */
+    protected $adminInfoHelper;
 
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Sales\Helper\Admin $adminHelper
-     * @param \RealtimeDespatch\OrderFlow\Helper\Admin\Info $adminInfoHelper
-     * @param \RealtimeDespatch\OrderFlow\Helper\Api $apiHelper
+     * @var Api
+     */
+    protected $apiHelper;
+
+    /**
+     * @param Context $context
+     * @param Registry $registry
+     * @param Admin $adminHelper
+     * @param Info $adminInfoHelper
+     * @param Api $apiHelper
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Sales\Helper\Admin $adminHelper,
-        \RealtimeDespatch\OrderFlow\Helper\Admin\Info $adminInfoHelper,
-        \RealtimeDespatch\OrderFlow\Helper\Api $apiHelper,
+        Context $context,
+        Registry $registry,
+        Admin $adminHelper,
+        Info $adminInfoHelper,
+        Api $apiHelper,
         array $data = []
     ) {
-        $this->_adminInfoHelper = $adminInfoHelper;
-        $this->_apiHelper = $apiHelper;
-        parent::__construct($context, $registry, $adminHelper);
+        $this->adminInfoHelper = $adminInfoHelper;
+        $this->apiHelper = $apiHelper;
+        parent::__construct($context, $registry, $adminHelper, $data);
     }
 
     /**
@@ -36,16 +53,17 @@ class OrderFlow extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder imple
      */
     public function canDisplayAdminInfo()
     {
-        return $this->_adminInfoHelper->isEnabled();
+        return $this->adminInfoHelper->isEnabled();
     }
 
     /**
      * Retrieve order model instance
      *
-     * @return \Magento\Sales\Model\Order
+     * @return Order
      */
     public function getOrder()
     {
+        /** @noinspection PhpDeprecatedMethodInspection */
         return $this->_coreRegistry->registry('current_order');
     }
 
@@ -56,13 +74,12 @@ class OrderFlow extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder imple
      */
     public function getOrderFlowOrderUrl()
     {
-        $order = $this->getOrder();
-        $storeId = $this->getStoreId();
+        $storeId = $this->getOrder()->getStoreId();
 
-        $url  = $this->_apiHelper->getEndpoint($storeId);
+        $url  = $this->apiHelper->getEndpoint($storeId);
         $url .= 'despatch/order/referenceDetail.htm?externalReference=';
-        $url .= urlencode($order->getIncrementId());
-        $url .= '&channel='.urlencode($this->_apiHelper->getChannel($storeId));
+        $url .= urlencode($this->getOrder()->getIncrementId());
+        $url .= '&channel='.urlencode($this->apiHelper->getChannel($storeId));
 
         return $url;
     }

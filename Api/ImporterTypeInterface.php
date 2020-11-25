@@ -2,15 +2,19 @@
 
 namespace RealtimeDespatch\OrderFlow\Api;
 
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+
 /**
  * Importer Type Interface.
+ *
+ * Defines the methods available for an importer type.
  *
  * @api
  */
 interface ImporterTypeInterface
 {
     /**
-     * Checks whether the import type is enabled
+     * Enabled Getter.
      *
      * @api
      * @return boolean
@@ -18,7 +22,7 @@ interface ImporterTypeInterface
     public function isEnabled();
 
     /**
-     * Returns the import type
+     * Importer Type Getter.
      *
      * @api
      * @return string
@@ -26,12 +30,12 @@ interface ImporterTypeInterface
     public function getType();
 
     /**
-     * Imports an orderflow request.
+     * Process Import Request.
      *
      * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
+     * @param RequestInterface $request $request
      *
      * @return mixed
      */
-    public function import(\RealtimeDespatch\OrderFlow\Model\Request $request);
+    public function import(RequestInterface $request);
 }

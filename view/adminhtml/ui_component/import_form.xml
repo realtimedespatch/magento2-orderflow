@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">import_form.import_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Import Information</item>
+        <item name="reverseMetadataMerge" xsi:type="boolean">true</item>
+    </argument>
+    <settings>
+        <layout>
+            <navContainerName>left</navContainerName>
+            <type>tabs</type>
+        </layout>
+        <deps>
+            <dep>import_form.import_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="import_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <dataProvider class="RealtimeDespatch\OrderFlow\Model\Import\DataProvider" name="import_form_data_source">
+            <settings>
+                <requestFieldName>import_id</requestFieldName>
+                <primaryFieldName>import_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <htmlContent name="import_form_tab_details">
+        <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\View\Tab\Info"
+               name="import_form_tab_details"
+               template="RealtimeDespatch_OrderFlow::import/view/tab/info.phtml">
+            <arguments>
+                <argument name="sort_order" xsi:type="number">10</argument>
+                <argument name="tab_label" xsi:type="string" translate="true">Information</argument>
+            </arguments>
+        </block>
+    </htmlContent>
+    <fieldset name="import_line_listing">
+        <settings>
+            <label translate="true">Import Lines</label>
+        </settings>
+        <insertListing class="\RealtimeDespatch\OrderFlow\Ui\Component\Container\ImportLineListing" name="import_line_listing">
+            <settings>
+                <autoRender>true</autoRender>
+                <dataScope>inventory_import_line_listing</dataScope>
+                <ns>inventory_import_line_listing</ns>
+            </settings>
+        </insertListing>
+
+        <htmlContent name="import_form_inventory_info">
+            <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Import\View\InventoryInfo"
+                   name="import_form_inventory_info"
+                   template="RealtimeDespatch_OrderFlow::import/view/inventory/info.phtml">
+            </block>
+        </htmlContent>
+    </fieldset>
+</form>

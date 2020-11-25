@@ -12,10 +12,10 @@ interface OrderRequestManagementInterface
     /**
      * Marks an order as exported.
      *
-     * @api
      * @param string $reference
      *
      * @return mixed
+     * @api
      */
-    public function export($reference);
+    public function export(string $reference);
 }

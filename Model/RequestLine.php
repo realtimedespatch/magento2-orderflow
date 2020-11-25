@@ -2,23 +2,24 @@
 
 namespace RealtimeDespatch\OrderFlow\Model;
 
+use Magento\Framework\Model\AbstractModel;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface;
 
-class RequestLine extends \Magento\Framework\Model\AbstractModel implements RequestLineInterface
+class RequestLine extends AbstractModel implements RequestLineInterface
 {
     /**
      * Prefix of model events names
      *
      * @var string
      */
-    protected $_eventPrefix = 'rtd_request_line';
+    protected $_eventPrefix = 'rtdrequest_line';
 
     /**
      * Linked Request.
      *
-     * @var RealtimeDespatch\OrderFlow\Model\Request
+     * @var Request
      */
-    protected $_request;
+    protected $request;
 
     /**
      * Initialize resource model
@@ -27,7 +28,7 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      */
     protected function _construct()
     {
-        $this->_init('RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine');
+        $this->_init(ResourceModel\RequestLine::class);
     }
 
     /**
@@ -43,11 +44,11 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
     /**
      * Get Request
      *
-     * @return \RealtimeDespatch\OrderFlow\Model\Request|null
+     * @return Request
      */
     public function getRequest()
     {
-        return $this->_request;
+        return $this->request;
     }
 
     /**
@@ -125,25 +126,25 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      *
      * @param string $messageId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setMessageId($messageId)
+    public function setMessageId(string $messageId)
     {
-        return $this->setData(self::MESSAGE_ID, $id);
+        return $this->setData(self::MESSAGE_ID, $messageId);
     }
 
     /**
      * Set request
      *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
+     * @param Request $request
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return Request
      */
-    public function setRequest($request)
+    public function setRequest(Request $request)
     {
         $this->setType($request->getEntity());
 
-        return $this->_request = $request;
+        return $this->request = $request;
     }
 
     /**
@@ -151,9 +152,9 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      *
      * @param string $requestId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setRequestId($requestId)
+    public function setRequestId(string $requestId)
     {
         return $this->setData(self::REQUEST_ID, $requestId);
     }
@@ -163,9 +164,9 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      *
      * @param string $sequenceId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setSequenceId($sequenceId)
+    public function setSequenceId(string $sequenceId)
     {
         return $this->setData(self::SEQUENCE_ID, $sequenceId);
     }
@@ -175,20 +176,21 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      *
      * @param string $type
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setType($type)
+    public function setType(string $type)
     {
         return $this->setData(self::TYPE, $type);
     }
+
     /**
      * Set response
      *
      * @param string $response
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setResponse($response)
+    public function setResponse(string $response)
     {
         return $this->setData(self::RESPONSE, $response);
     }
@@ -198,9 +200,9 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      *
      * @param string $body
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setBody($body)
+    public function setBody(string $body)
     {
         return $this->setData(self::BODY, $body);
     }
@@ -210,9 +212,9 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setCreatedAt($created)
+    public function setCreatedAt(string $created)
     {
         return $this->setData(self::CREATED_AT, $created);
     }
@@ -222,9 +224,9 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
+     * @return RequestLineInterface
      */
-    public function setProcessedAt($processed)
+    public function setProcessedAt(string $processed)
     {
         return $this->setData(self::PROCESSED_AT, $processed);
     }

@@ -2,46 +2,36 @@
 
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Import;
 
-use Magento\Backend\App\Action;
-use Magento\Sales\Api\OrderManagementInterface;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\InputException;
-use Psr\Log\LoggerInterface;
+use Exception;
+use Magento\Backend\Model\View\Result\Page;
+use Magento\Framework\Controller\Result\Redirect;
+use RealtimeDespatch\OrderFlow\Controller\Adminhtml\Import;
 
-class View extends \RealtimeDespatch\OrderFlow\Controller\Adminhtml\Import
+class View extends Import
 {
     /**
-     * View import detail
+     * Execute.
      *
-     * @return \Magento\Backend\Model\View\Result\Page|\Magento\Backend\Model\View\Result\Redirect
+     * @return Page|Redirect
      */
     public function execute()
     {
-        $import = $this->_initImport();
-        $resultRedirect = $this->resultRedirectFactory->create();
-
-        if ( ! $import) {
-            return $resultRedirect->setRefererUrl();
-        }
-
-        $import->setViewedAt(date('Y-m-d H:i:s'))->save();
-
         try {
-            $resultPage = $this->_initAction();
-            $resultPage->getConfig()->getTitle()->prepend(sprintf($import->getEntity()." Import #%s", $import->getMessageId()));
+            $import = $this->getImport();
 
-            if ($import->getEntity() == 'Inventory') {
-                $resultPage->getLayout()->unsetChild('lines', 'shipment_import_line_listing');
-            } else {
-                $resultPage->getLayout()->unsetChild('lines', 'inventory_import_line_listing');
+            if ( ! $import) {
+                return $this->resultRedirectFactory->create()->setRefererUrl();
             }
-        } catch (\Exception $e) {
-            $this->logger->critical($e);
-            $this->messageManager->addError(__($e->getMessage()));
-            return $resultRedirect->setRefererUrl();
-        }
 
-        return $resultPage;
+            $page = $this->getPage();
+            $page->getConfig()
+                 ->getTitle()
+                 ->prepend(sprintf($import->getEntity()." Import #%s", $import->getMessageId()));
+
+            return $page;
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage(__($e->getMessage()));
+            return $this->resultRedirectFactory->create()->setRefererUrl();
+        }
     }
 }

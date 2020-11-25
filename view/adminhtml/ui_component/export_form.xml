@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">export_form.export_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Export Information</item>
+        <item name="reverseMetadataMerge" xsi:type="boolean">true</item>
+    </argument>
+    <settings>
+        <layout>
+            <navContainerName>left</navContainerName>
+            <type>tabs</type>
+        </layout>
+        <deps>
+            <dep>export_form.export_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="export_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <dataProvider class="RealtimeDespatch\OrderFlow\Model\Export\DataProvider" name="export_form_data_source">
+            <settings>
+                <requestFieldName>export_id</requestFieldName>
+                <primaryFieldName>export_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <htmlContent name="export_form_tab_details">
+        <block class="RealtimeDespatch\OrderFlow\Block\Adminhtml\Export\View\Tab\Info"
+               name="export_form_tab_details"
+               template="RealtimeDespatch_OrderFlow::export/view/tab/info.phtml">
+            <arguments>
+                <argument name="sort_order" xsi:type="number">10</argument>
+                <argument name="tab_label" xsi:type="string" translate="true">Information</argument>
+            </arguments>
+        </block>
+    </htmlContent>
+    <fieldset name="export_line_listing">
+        <settings>
+            <label translate="true">Export Lines</label>
+        </settings>
+        <insertListing class="\RealtimeDespatch\OrderFlow\Ui\Component\Container\ExportLineListing" name="export_line_listing">
+            <settings>
+                <autoRender>true</autoRender>
+                <dataScope>product_export_line_listing</dataScope>
+                <ns>product_export_line_listing</ns>
+            </settings>
+        </insertListing>
+    </fieldset>
+</form>

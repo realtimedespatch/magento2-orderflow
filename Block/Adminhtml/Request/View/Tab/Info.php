@@ -2,21 +2,14 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab;
 
+use Magento\Backend\Block\Widget\Tab\TabInterface;
+use RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractRequest;
+
 /**
  * Request Info Tab.
  */
-class Info extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractRequest implements \Magento\Backend\Block\Widget\Tab\TabInterface
+class Info extends AbstractRequest implements TabInterface
 {
-    /**
-     * Retrieve source model instance
-     *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface
-     */
-    public function getSource()
-    {
-        return $this->getRequest();
-    }
-
     /**
      * Returns the associated website name.
      *
@@ -24,25 +17,17 @@ class Info extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractR
      */
     public function getWebsiteName()
     {
-        if ( ! $this->getRequest()->getScopeId()) {
+        /** @noinspection PhpUndefinedMethodInspection */
+        if (! $this->getRequest()->getScopeId()) {
             return 'OrderFlow';
         }
 
-        $website = $this->_websiteFactory
+        /** @noinspection PhpUndefinedMethodInspection */
+        $website = $this->websiteFactory
                         ->create()
                         ->load($this->getRequest()->getScopeId());
 
         return $website->getName();
-    }
-
-    /**
-     * Get items html
-     *
-     * @return string
-     */
-    public function getItemsHtml()
-    {
-        return $this->getChildHtml('request_items');
     }
 
     /**
@@ -73,6 +58,14 @@ class Info extends \RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractR
      * {@inheritdoc}
      */
     public function isHidden()
+    {
+        return false;
+    }
+
+    /**
+     * Is Ajax Loaded.
+     */
+    public function isAjaxLoaded()
     {
         return false;
     }

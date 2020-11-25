@@ -2,17 +2,27 @@
 
 namespace RealtimeDespatch\OrderFlow\Api;
 
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+
 /**
  * Request Processor Type Interface.
+ *
+ * Defines the methods available for a request type processor.
+ *
+ * There are two types of requests:
+ *
+ * 1. Imports from OrderFlow to Magento
+ * 2. Exports from Magento to OrderFlow
  */
 interface RequestProcessorTypeInterface
 {
     /**
-     * Processes an orderflow request.
+     * Process API Request.
      *
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
+     * @param RequestInterface $request
      *
-     * @return boolean
+     * @return ExportInterface
      */
-    public function process(\RealtimeDespatch\OrderFlow\Model\Request $request);
+    public function process(RequestInterface $request);
 }

@@ -2,9 +2,11 @@
 
 namespace RealtimeDespatch\OrderFlow\Model;
 
+use Magento\Framework\Model\AbstractModel;
 use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface;
 
-class Export extends \Magento\Framework\Model\AbstractModel implements ExportInterface
+class Export extends AbstractModel implements ExportInterface
 {
     /**
      * @inheritdoc
@@ -16,15 +18,15 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @var array
      */
-    protected $_lines;
+    protected $lines;
 
     /**
      * @inheritdoc
      */
     protected function _construct()
     {
-        $this->_init('RealtimeDespatch\OrderFlow\Model\ResourceModel\Export');
-        $this->_lines = array();
+        $this->_init(ResourceModel\Export::class);
+        $this->lines = [];
     }
 
     /**
@@ -54,7 +56,7 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      */
     public function getLines()
     {
-        return $this->_lines;
+        return $this->lines;
     }
 
     /**
@@ -162,9 +164,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param integer $requestId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setRequestId($requestId)
+    public function setRequestId(int $requestId)
     {
         return $this->setData(self::REQUEST_ID, $requestId);
     }
@@ -172,26 +174,29 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
     /**
      * Adds a line to the export.
      *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface $line
+     * @param ExportLineInterface $line
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function addLine(\RealtimeDespatch\OrderFlow\Api\Data\ExportLineInterface $line)
+    public function addLine(ExportLineInterface $line)
     {
-        $line->setExport($this);
-        $this->_lines[] = $line;
+        /* @var ExportLine $line */
+        $line->setData('export', $this); // phpcs:ignore
+        $this->lines[] = $line;
+
+        return $this;
     }
 
     /**
      * Set Export Lines.
      *
-     * @param array $lines
+     * @param mixed $lines
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
     public function setLines($lines)
     {
-        $this->_lines = $lines;
+        $this->lines = $lines;
 
         return $this;
     }
@@ -199,11 +204,11 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
     /**
      * Set Message Id
      *
-     * @param integer $messageId
+     * @param string $messageId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setMessageId($messageId)
+    public function setMessageId(string $messageId)
     {
         return $this->setData(self::MESSAGE_ID, $messageId);
     }
@@ -213,9 +218,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param integer $scopeId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setScopeId($scopeId)
+    public function setScopeId(int $scopeId)
     {
         return $this->setData(self::SCOPE_ID, $scopeId);
     }
@@ -225,9 +230,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setEntity($entity)
+    public function setEntity(string $entity)
     {
         return $this->setData(self::ENTITY, $entity);
     }
@@ -237,9 +242,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setOperation($operation)
+    public function setOperation(string $operation)
     {
         return $this->setData(self::OPERATION, $operation);
     }
@@ -249,9 +254,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param integer $successes
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setSuccesses($successes)
+    public function setSuccesses(int $successes)
     {
         return $this->setData(self::SUCCESSES, $successes);
     }
@@ -261,9 +266,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param integer $duplicates
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setDuplicates($duplicates)
+    public function setDuplicates(int $duplicates)
     {
         return $this->setData(self::DUPLICATES, $duplicates);
     }
@@ -273,9 +278,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param integer $superseded
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setSuperseded($superseded)
+    public function setSuperseded(int $superseded)
     {
         return $this->setData(self::SUPERSEDED, $superseded);
     }
@@ -285,9 +290,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param integer $failures
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setFailures($failures)
+    public function setFailures(int $failures)
     {
         return $this->setData(self::FAILURES, $failures);
     }
@@ -297,9 +302,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setCreatedAt($created)
+    public function setCreatedAt(string $created)
     {
         return $this->setData(self::CREATED_AT, $created);
     }
@@ -309,9 +314,9 @@ class Export extends \Magento\Framework\Model\AbstractModel implements ExportInt
      *
      * @param string $viewed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ExportInterface
+     * @return ExportInterface
      */
-    public function setViewedAt($viewed)
+    public function setViewedAt(string $viewed)
     {
         return $this->setData(self::VIEWED_AT, $viewed);
     }

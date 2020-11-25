@@ -1,9 +1,16 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Setup;
 
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Eav\Setup\EavSetup;
 use Magento\Eav\Setup\EavSetupFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Setup\SalesSetup;
 use Magento\Sales\Setup\SalesSetupFactory;
 use Magento\Framework\Setup\InstallDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
@@ -11,6 +18,8 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Catalog\Api\Data\ProductAttributeInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use RealtimeDespatch\OrderFlow\Model\Product\Attribute\Source\ExportStatus;
+use Zend_Validate_Exception;
 
 /**
  * @codeCoverageIgnore
@@ -50,15 +59,15 @@ class InstallData implements InstallDataInterface
      *
      * @param EavSetupFactory $eavSetupFactory
      * @param SalesSetupFactory $salesSetupFactory
-     * @param Magento\Framework\App\ResourceConnection $resource
+     * @param ResourceConnection $resource
      * @param CollectionFactory $collectionFactory
      */
     public function __construct(
         EavSetupFactory $eavSetupFactory,
         SalesSetupFactory $salesSetupFactory,
         ResourceConnection $resource,
-        CollectionFactory $collectionFactory)
-    {
+        CollectionFactory $collectionFactory
+    ) {
         $this->eavSetupFactory = $eavSetupFactory;
         $this->salesSetupFactory = $salesSetupFactory;
         $this->resource = $resource;
@@ -68,13 +77,16 @@ class InstallData implements InstallDataInterface
     /**
      * {@inheritdoc}
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @throws LocalizedException|Zend_Validate_Exception
      */
     public function install(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
         /** @var EavSetup $eavSetup */
+        /** @noinspection PhpUndefinedMethodInspection */
         $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
 
-        /** @var \Magento\Sales\Setup\SalesSetup $salesSetup */
+        /** @var SalesSetup $salesSetup */
+        /** @noinspection PhpUndefinedMethodInspection */
         $salesSetup = $this->salesSetupFactory->create(['setup' => $setup]);
 
         //Schedule Design Update tab
@@ -87,7 +99,7 @@ class InstallData implements InstallDataInterface
 
         // Product Exported Attribute
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'orderflow_export_status',
             [
                 'type' => 'varchar',
@@ -96,8 +108,8 @@ class InstallData implements InstallDataInterface
                 'label' => 'Export Status',
                 'input' => 'select',
                 'class' => '',
-                'source' => '\RealtimeDespatch\OrderFlow\Model\Product\Attribute\Source\ExportStatus',
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
+                'source' => ExportStatus::class,
+                'global' => Attribute::SCOPE_GLOBAL,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -124,7 +136,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'orderflow_export_date',
             [
                 'type' => 'datetime',
@@ -134,7 +146,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => '',
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
+                'global' => Attribute::SCOPE_GLOBAL,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -152,21 +164,20 @@ class InstallData implements InstallDataInterface
 
         // Order Exported Attribute
         $salesSetup->addAttribute(
-            \Magento\Sales\Model\Order::ENTITY,
+            Order::ENTITY,
             'orderflow_export_date',
             ['type' => 'datetime', 'visible' => true, 'required' => false]
         );
 
         $salesSetup->addAttribute(
-            \Magento\Sales\Model\Order::ENTITY,
+            Order::ENTITY,
             'orderflow_export_status',
             ['type' => 'text', 'visible' => true, 'required' => false]
         );
 
-
         // Custom OrderFlow Product Attributes
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'barcode',
             [
                 'type' => 'varchar',
@@ -176,7 +187,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
+                'global' => Attribute::SCOPE_GLOBAL,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -195,7 +206,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'weight_units',
             [
                 'type' => 'varchar',
@@ -205,7 +216,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
+                'global' => Attribute::SCOPE_GLOBAL,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -224,7 +235,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'length',
             [
                 'type' => 'decimal',
@@ -234,7 +245,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_WEBSITE,
+                'global' => Attribute::SCOPE_WEBSITE,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -253,7 +264,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'width',
             [
                 'type' => 'decimal',
@@ -263,7 +274,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_WEBSITE,
+                'global' => Attribute::SCOPE_WEBSITE,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -282,7 +293,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'height',
             [
                 'type' => 'decimal',
@@ -292,7 +303,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_WEBSITE,
+                'global' => Attribute::SCOPE_WEBSITE,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -311,7 +322,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'area',
             [
                 'type' => 'decimal',
@@ -321,7 +332,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_WEBSITE,
+                'global' => Attribute::SCOPE_WEBSITE,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -340,7 +351,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'volume',
             [
                 'type' => 'decimal',
@@ -350,7 +361,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_WEBSITE,
+                'global' => Attribute::SCOPE_WEBSITE,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -369,7 +380,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'storage_types',
             [
                 'type' => 'varchar',
@@ -379,7 +390,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_WEBSITE,
+                'global' => Attribute::SCOPE_WEBSITE,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
@@ -398,7 +409,7 @@ class InstallData implements InstallDataInterface
         );
 
         $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
+            Product::ENTITY,
             'tax_code',
             [
                 'type' => 'varchar',
@@ -408,7 +419,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'text',
                 'class' => '',
                 'source' => null,
-                'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_WEBSITE,
+                'global' => Attribute::SCOPE_WEBSITE,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,

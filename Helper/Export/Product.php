@@ -2,26 +2,36 @@
 
 namespace RealtimeDespatch\OrderFlow\Helper\Export;
 
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\Website;
+use RealtimeDespatch\OrderFlow\Api\ExportHelperInterface;
+
 /**
  * Product Export Helper.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
-class Product extends \Magento\Framework\App\Helper\AbstractHelper
+class Product extends AbstractHelper implements ExportHelperInterface
 {
     /**
-     * @var \Magento\Catalog\Model\ProductFactory
+     * @var CollectionFactory
      */
-    protected $_productFactory;
+    protected $productCollectionFactory;
 
     /**
-     * @param \Magento\Framework\App\Helper\Context $context
-     * @param \Magento\Catalog\Model\ProductFactory $productFactory
+     * @param Context $context
+     * @param CollectionFactory $productCollectionFactory
      */
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Catalog\Model\ProductFactory $productFactory
-    )
-    {
-        $this->_productFactory = $productFactory;
+        Context $context,
+        CollectionFactory $productCollectionFactory
+    ) {
+        $this->productCollectionFactory = $productCollectionFactory;
+
         parent::__construct($context);
     }
 
@@ -36,7 +46,7 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_product_export/settings/is_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            ScopeInterface::SCOPE_STORE,
             $scopeId
         );
     }
@@ -46,13 +56,13 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @param integer|null $scopeId
      *
-     * @return boolean
+     * @return int
      */
     public function getBatchSize($scopeId = null)
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_product_export/settings/batch_size',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -62,13 +72,13 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @param integer|null $scopeId
      *
-     * @return boolean
+     * @return int
      */
     public function getStoreId($scopeId = null)
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_product_export/settings/store_id',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            ScopeInterface::SCOPE_WEBSITE,
             $scopeId
         );
     }
@@ -76,49 +86,46 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * Returns a collection of creatable products.
      *
-     * @param \Magento\Store\Model\Website $website
+     * @param Website $website
      *
-     * @return array
+     * @return Collection
      */
-    public function getCreateableProducts($website)
+    public function getCreateableProducts(Website $website)
     {
-        $products =  $this->_productFactory
+        return $this->productCollectionFactory
             ->create()
-            ->getCollection()
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('type_id', ['eq' => 'simple'])
             ->addAttributeToFilter('orderflow_export_date', ['null' => true])
-            ->addAttributeToFilter([
-                ['attribute' => 'orderflow_export_status', 'null' => true],
-                ['attribute' => 'orderflow_export_status', array('neq' => ['Queued'])],
-            ],
-            '',
-            'left')
+            ->addAttributeToFilter(
+                [
+                    ['attribute' => 'orderflow_export_status', 'null' => true],
+                    ['attribute' => 'orderflow_export_status', ['neq' => ['Queued']]],
+                ],
+                '',
+                'left'
+            )
             ->setStore($this->getStoreId($website->getId()))
             ->setPage(1, $this->getBatchSize($website->getId()));
-
-        return $products;
     }
 
     /**
      * Returns a collection of updateable products.
      *
-     * @param \Magento\Store\Model\Website $website
+     * @param Website $website
      *
-     * @return array
+     * @return Collection
      */
-    public function getUpdateableProducts($website)
+    public function getUpdateableProducts(Website $website)
     {
-        $products =  $this->_productFactory
+        return $this
+            ->productCollectionFactory
             ->create()
-            ->getCollection()
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('type_id', ['eq' => 'simple'])
             ->addAttributeToFilter('orderflow_export_date', ['notnull' => true])
             ->addFieldToFilter('orderflow_export_status', ['eq' => 'Pending'])
             ->setStore($this->getStoreId($website->getId()))
             ->setPage(1, $this->getBatchSize($website->getId()));
-
-        return $products;
     }
 }

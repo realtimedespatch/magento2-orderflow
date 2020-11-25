@@ -2,40 +2,47 @@
 
 namespace RealtimeDespatch\OrderFlow\Observer;
 
+use Exception;
+use Magento\Framework\DB\Transaction;
+use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Sales\Api\Data\OrderInterface;
 
 class OrderExport implements ObserverInterface
 {
     /**
-     * @var \Magento\Framework\DB\Transaction
+     * @var Transaction
      */
-    protected $_tx;
+    protected $transaction;
 
     /**
-     * @var \Magento\Sales\Api\Data\OrderInterface
+     * @var OrderInterface
      */
-    protected $_repository;
+    protected $repository;
 
     /**
-     * OrderExport constructor.
-     * @param \Magento\Framework\DB\Transaction $tx
-     * @param \Magento\Sales\Api\Data\OrderInterface $repository
+     * @param Transaction $transaction
+     * @param OrderInterface $repository
      */
-    public function __construct(\Magento\Framework\DB\Transaction $tx,
-        \Magento\Sales\Api\Data\OrderInterface $repository)
-    {
-        $this->_tx = $tx;
-        $this->_repository = $repository;
+    public function __construct(
+        Transaction $transaction,
+        OrderInterface $repository
+    ) {
+        $this->transaction = $transaction;
+        $this->repository = $repository;
     }
 
     /**
      * Updates the export statuses for a set of order from an export report.
      *
-     * @param \Magento\Framework\Event\Observer $observer
+     * @param Observer $observer
      *
      * @return void
+     * @throws Exception
+     * @throws Exception
      */
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    public function execute(Observer $observer)
     {
         $export = $observer->getData('export');
 
@@ -44,20 +51,20 @@ class OrderExport implements ObserverInterface
         }
 
         foreach ($export->getLines() as $exportLine) {
-            $this->_updateOrderExportStatus($exportLine);
+            $this->updateOrderExportStatus($exportLine);
         }
 
-        $this->_tx->save();
+        $this->transaction->save();
     }
 
     /**
-     * Updates the export status for a single order from an export line.
+     * Updates the status of each order that has been successfully integrated into OrderFlow.
      *
      * @param $exportLine
      *
-     * @return void
+     * @return false|void
      */
-    protected function _updateOrderExportStatus($exportLine)
+    protected function updateOrderExportStatus($exportLine)
     {
         try {
             // Ignore failed cancellations.
@@ -65,15 +72,15 @@ class OrderExport implements ObserverInterface
                 return false;
             }
 
-            $order = $this->_repository->loadByIncrementId($exportLine->getReference());
+            $order = $this->repository->loadByIncrementId($exportLine->getReference());
 
             if ( ! $order->getId()) {
                 return false;
             }
 
             $order->setOrderflowExportStatus($exportLine->getEntityExportStatus(), true, 0);
-            $this->_tx->addObject($order);
-        } catch (\Magento\Framework\Exception\NoSuchEntityException $ex) {
+            $this->transaction->addObject($order);
+        } catch (NoSuchEntityException $ex) {
             return false;
         }
     }

@@ -2,10 +2,12 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View;
 
+use Magento\Backend\Block\Template;
+
 /**
  * Adminhtml orderflow request view plane
  */
-class Form extends \Magento\Backend\Block\Template
+class Form extends Template
 {
     /**
      * Template

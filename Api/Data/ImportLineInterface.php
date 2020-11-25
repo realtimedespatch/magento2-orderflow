@@ -105,88 +105,88 @@ interface ImportLineInterface
      *
      * @param integer $importId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setImportId($importId);
+    public function setImportId(int $importId);
 
     /**
      * Set Sequence Id
      *
-     * @param integer $sequenceId
+     * @param string $sequenceId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setSequenceId($sequenceId);
+    public function setSequenceId(string $sequenceId);
 
     /**
      * Set Result
      *
      * @param string $result
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setResult($result);
+    public function setResult(string $result);
 
     /**
      * Set Reference
      *
      * @param string $reference
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setReference($reference);
+    public function setReference(string $reference);
 
     /**
      * Set Operation
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setOperation($operation);
+    public function setOperation(string $operation);
 
     /**
      * Set Entity
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setEntity($entity);
+    public function setEntity(string $entity);
 
     /**
      * Set Message
      *
      * @param string $message
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setMessage($message);
+    public function setMessage(string $message);
 
     /**
      * Set Additional Data
      *
      * @param string $additionalData
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setAdditionalData($additionalData);
+    public function setAdditionalData(string $additionalData);
 
     /**
      * Set Created Timestamp
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setCreatedAt($created);
+    public function setCreatedAt(string $created);
 
     /**
      * Set Processed Timestamp
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setProcessedAt($processed);
+    public function setProcessedAt(string $processed);
 }

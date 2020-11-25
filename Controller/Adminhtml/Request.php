@@ -3,18 +3,13 @@
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml;
 
 use Magento\Backend\App\Action;
-use RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface;
+use Magento\Backend\Model\View\Result\Page;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\InputException;
-use Psr\Log\LoggerInterface;
+use Magento\Framework\View\Result\PageFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface;
 
-/**
- * Request Base Controller.
- *
- * @SuppressWarnings(PHPMD.NumberOfChildren)
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
-abstract class Request extends \Magento\Backend\App\Action
+abstract class Request extends Action
 {
     /**
      * {@inheritdoc}
@@ -27,41 +22,9 @@ abstract class Request extends \Magento\Backend\App\Action
     protected $_publicActions = ['view', 'index'];
 
     /**
-     * Core registry
-     *
-     * @var \Magento\Framework\Registry
+     * @var PageFactory
      */
-    protected $_coreRegistry = null;
-
-    /**
-     * @var \Magento\Framework\App\Response\Http\FileFactory
-     */
-    protected $_fileFactory;
-
-    /**
-     * @var \Magento\Framework\Translate\InlineInterface
-     */
-    protected $_translateInline;
-
-    /**
-     * @var \Magento\Framework\View\Result\PageFactory
-     */
-    protected $resultPageFactory;
-
-    /**
-     * @var \Magento\Framework\Controller\Result\JsonFactory
-     */
-    protected $resultJsonFactory;
-
-    /**
-     * @var \Magento\Framework\View\Result\LayoutFactory
-     */
-    protected $resultLayoutFactory;
-
-    /**
-     * @var \Magento\Framework\Controller\Result\RawFactory
-     */
-    protected $resultRawFactory;
+    protected $pageFactory;
 
     /**
      * @var RequestRepositoryInterface
@@ -69,82 +32,46 @@ abstract class Request extends \Magento\Backend\App\Action
     protected $requestRepository;
 
     /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
      * @param Action\Context $context
-     * @param \Magento\Framework\Registry $coreRegistry
-     * @param \Magento\Framework\App\Response\Http\FileFactory $fileFactory
-     * @param \Magento\Framework\Translate\InlineInterface $translateInline
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-     * @param \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
-     * @param \Magento\Framework\View\Result\LayoutFactory $resultLayoutFactory
-     * @param \Magento\Framework\Controller\Result\RawFactory $resultRawFactory
+     * @param PageFactory $pageFactory
      * @param RequestRepositoryInterface $requestRepository
-     * @param LoggerInterface $logger
-     *
-     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
-     * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
      */
     public function __construct(
         Action\Context $context,
-        \Magento\Framework\Registry $coreRegistry,
-        \Magento\Framework\App\Response\Http\FileFactory $fileFactory,
-        \Magento\Framework\Translate\InlineInterface $translateInline,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
-        \Magento\Framework\View\Result\LayoutFactory $resultLayoutFactory,
-        \Magento\Framework\Controller\Result\RawFactory $resultRawFactory,
-        RequestRepositoryInterface $requestRepository,
-        LoggerInterface $logger
-    ) {
-        $this->_coreRegistry = $coreRegistry;
-        $this->_fileFactory = $fileFactory;
-        $this->_translateInline = $translateInline;
-        $this->resultPageFactory = $resultPageFactory;
-        $this->resultJsonFactory = $resultJsonFactory;
-        $this->resultLayoutFactory = $resultLayoutFactory;
-        $this->resultRawFactory = $resultRawFactory;
-        $this->requestRepository = $requestRepository;
-        $this->logger = $logger;
+        PageFactory $pageFactory,
+        RequestRepositoryInterface $requestRepository
+    )
+    {
         parent::__construct($context);
+
+        $this->pageFactory = $pageFactory;
+        $this->requestRepository = $requestRepository;
     }
 
     /**
-     * Init layout, menu and breadcrumb
+     * Page Getter.
      *
-     * @return \Magento\Backend\Model\View\Result\Page
+     * @return Page
      */
-    protected function _initAction()
+    protected function getPage()
     {
-        $resultPage = $this->resultPageFactory->create();
+        /* @var Page $resultPage */
+        $resultPage = $this->pageFactory->create();
         $resultPage->addBreadcrumb(__('Requests'), __('Requests'));
 
         return $resultPage;
     }
 
     /**
-     * Initialize request model instance
+     * Request Getter.
      *
-     * @return \Magento\Sales\Api\Data\RequestInterface|false
+     * @return RequestInterface
+     * @throws NoSuchEntityException
      */
-    protected function _initRequest()
+    protected function getOrderFlowRequest()
     {
-        $id = $this->getRequest()->getParam('request_id');
-        try {
-            $request = $this->requestRepository->get($id);
-        } catch (NoSuchEntityException $e) {
-            $this->messageManager->addError(__('This request no longer exists.'));
-            $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
-            return false;
-        } catch (InputException $e) {
-            $this->messageManager->addError(__('This request no longer exists.'));
-            $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
-            return false;
-        }
-        $this->_coreRegistry->register('current_request', $request);
-        return $request;
+        return $this->requestRepository->get(
+            $this->getRequest()->getParam('request_id')
+        );
     }
 }

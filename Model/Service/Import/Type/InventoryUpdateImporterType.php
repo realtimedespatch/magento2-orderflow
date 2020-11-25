@@ -1,54 +1,81 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
+
 namespace RealtimeDespatch\OrderFlow\Model\Service\Import\Type;
 
- use \RealtimeDespatch\OrderFlow\Helper\Stock as StockHelper;
+use Exception;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\DB\Transaction;
+use Magento\Store\Model\ScopeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+use RealtimeDespatch\OrderFlow\Helper\Stock as StockHelper;
+use Psr\Log\LoggerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterfaceFactory;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine\CollectionFactory as ImportLineCollectionFactory;
 
-class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Import\Type\ImporterType
+/**
+ * Inventory Updated Importer Type.
+ *
+ * Processes queued inventory update requests.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
+ */
+class InventoryUpdateImporterType extends ImporterType
 {
     /* Importer Type */
     const TYPE = 'Inventory';
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Helper\StockUpdater
+     * @var StockHelper
      */
-    protected $_stockHelper;
+    protected $stockHelper;
 
     /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \RealtimeDespatch\OrderFlow\Helper\Stock $stockHelper
+     * @param ScopeConfigInterface $config
+     * @param LoggerInterface $logger
+     * @param ImportInterfaceFactory $importFactory
+     * @param ImportLineInterfaceFactory $importLineFactory
+     * @param ImportLineCollectionFactory $importLineCollectionFactory
+     * @param StockHelper $stockHelper
+     * @param Transaction $transaction
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        StockHelper $stockHelper
+        ScopeConfigInterface $config,
+        LoggerInterface $logger,
+        ImportInterfaceFactory $importFactory,
+        ImportLineInterfaceFactory $importLineFactory,
+        ImportLineCollectionFactory $importLineCollectionFactory,
+        StockHelper $stockHelper,
+        Transaction $transaction
     ) {
-        parent::__construct($config, $logger, $objectManager);
-        $this->_stockHelper = $stockHelper;
-    }
+        $this->stockHelper = $stockHelper;
 
-    /**
-     * Checks whether the import type is enabled.
-     *
-     * @api
-     * @return boolean
-     */
-    public function isEnabled()
-    {
-        return $this->_config->getValue(
-            'orderflow_inventory_import/settings/is_enabled',
-            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
+        parent::__construct(
+            $config,
+            $logger,
+            $importFactory,
+            $importLineFactory,
+            $importLineCollectionFactory,
+            $transaction
         );
     }
 
     /**
-     * Returns the import type.
-     *
-     * @api
-     * @return string
+     * @inheritDoc
+     */
+    public function isEnabled()
+    {
+        return $this->config->getValue(
+            'orderflow_inventory_import/settings/is_enabled',
+            ScopeInterface::SCOPE_WEBSITE
+        );
+    }
+
+    /**
+     * @inheritDoc
      */
     public function getType()
     {
@@ -56,56 +83,22 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
     }
 
     /**
-     * Imports a request.
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function import(\RealtimeDespatch\OrderFlow\Model\Request $request)
-    {
-        $tx          = $this->_objectManager->create('Magento\Framework\DB\Transaction');
-        $import      = $this->_createImport($request);
-        $importLines = array();
-
-        $tx->addObject($import);
-        $tx->addObject($request);
-
-        foreach ($request->getLines() as $requestLine) {
-            $importLine = $this->_importLine($import, $request, $requestLine);
-            $importLine->setImport($import);
-            $tx->addObject($importLine);
-            $tx->addObject($requestLine);
-        }
-
-        $request->setProcessedAt(date('Y-m-d H:i:s'));
-
-        $tx->save();
-    }
-
-    /**
-     * Imports a request line;
-     *
-     * @api
-     * @param \RealtimeDespatch\OrderFlow\Model\Request $request
-     *
-     * @return mixed
-     */
-    protected function _importLine($import, $request, $requestLine)
-    {
+    protected function importLine(
+        ImportInterface $import,
+        RequestInterface $request,
+        $requestLine
+    ) {
         $seqId = $requestLine->getSequenceId();
+        $body = $requestLine->getBody();
 
         try {
-            // Retrieve inventory parameters
-            $body = $requestLine->getBody();
             $sku  = (string) $body->sku;
             $unitsReceived = (integer) $body->qty;
-            $lastOrderExported = isset($body->lastOrderExported) ? new \DateTime($body->lastOrderExported) : new \DateTime;
 
-            // Check for a duplicate import line
-            if ($this->_isDuplicateLine($requestLine->getSequenceId())) {
-                return $this->_createDuplicateImportLine(
+            if ($this->isDuplicateLine($requestLine->getSequenceId())) {
+                return $this->createDuplicateImportLine(
                     $import,
                     $seqId,
                     $sku,
@@ -114,9 +107,8 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
                 );
             }
 
-            // Check whether this import line has been superseded
-            if ($supersedeId = $this->_isSuperseded($seqId, $sku)) {
-                return $this->_createSupersededImportLine(
+            if ($supersedeId = $this->isSuperseded($seqId, $sku)) {
+                return $this->createSupersededImportLine(
                     $import,
                     $seqId,
                     $sku,
@@ -129,10 +121,9 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
                 );
             }
 
-            // Update the product's inventory
-            $inventory = $this->_stockHelper->updateProductStock($sku, $unitsReceived, $lastOrderExported);
+            $inventory = $this->stockHelper->updateProductStock($sku, $unitsReceived);
 
-            return $this->_createSuccessImportLine(
+            return $this->createSuccessImportLine(
                 $import,
                 $seqId,
                 $sku,
@@ -140,8 +131,8 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
                 __('Product Quantity Successfully Updated to ').$inventory->unitsCalculated,
                 $inventory
             );
-        } catch (\Exception $ex) {
-            return $this->_createFailureImportLine(
+        } catch (Exception $ex) {
+            return $this->createFailureImportLine(
                 $import,
                 $seqId,
                 $sku,

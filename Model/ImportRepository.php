@@ -2,11 +2,11 @@
 
 namespace RealtimeDespatch\OrderFlow\Model;
 
-use Magento\Cms\Api\Data\ImportInterface;
-
+use Exception;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
 use RealtimeDespatch\OrderFlow\Api\ImportRepositoryInterface;
 use RealtimeDespatch\OrderFlow\Model\ResourceModel\Import as ImportResource;
-
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine\CollectionFactory as ImportLineCollectionFactory;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -14,8 +14,9 @@ use Magento\Framework\Exception\NoSuchEntityException;
 /**
  * Repository class for @see ImportInterface
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
-class ImportRepository implements \RealtimeDespatch\OrderFlow\Api\ImportRepositoryInterface
+class ImportRepository implements ImportRepositoryInterface
 {
     /**
      * @var ImportResource
@@ -28,45 +29,41 @@ class ImportRepository implements \RealtimeDespatch\OrderFlow\Api\ImportReposito
     protected $importFactory;
 
     /**
-     * @var ImportLineFactory
+     * @var ImportLineCollectionFactory
      */
-    protected $importLineFactory;
+    protected $importLineCollectionFactory;
 
     /**
      * @param ImportResource $resource
      * @param ImportFactory $importFactory
-     * @param RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine\CollectionFactory
+     * @param ImportLineCollectionFactory $importLineCollectionFactory
      */
     public function __construct(
         ImportResource $resource,
         ImportFactory $importFactory,
-        ImportLineFactory $importLineFactory
+        ImportLineCollectionFactory $importLineCollectionFactory
     ) {
         $this->resource = $resource;
         $this->importFactory = $importFactory;
-        $this->importLineFactory = $importLineFactory;
+        $this->importLineCollectionFactory = $importLineCollectionFactory;
     }
 
     /**
-     * Load import data by given import ID.
-     *
-     * @param string $importId
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @inheritDoc
      */
-    public function get($importId)
+    public function get(int $importId)
     {
         $import = $this->importFactory->create();
         $this->resource->load($import, $importId);
 
-        if ( ! $import->getId()) {
+        if (! $import->getId()) {
             throw new NoSuchEntityException(__('Import with id "%1" does not exist.', $importId));
         }
 
-        $lines = $this->importLineFactory
+        $lines = $this
+            ->importLineCollectionFactory
             ->create()
-            ->getCollection()
-            -> addFieldToSelect('*')
+            ->addFieldToSelect('*')
             ->addFieldToFilter('import_id', ['eq' => $import->getId()])
             ->loadData();
 
@@ -76,34 +73,28 @@ class ImportRepository implements \RealtimeDespatch\OrderFlow\Api\ImportReposito
     }
 
     /**
-     * Save Import
-     *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface $import
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
-     * @throws CouldNotSaveException
+     * @inheritDoc
      */
-    public function save(\RealtimeDespatch\OrderFlow\Api\Data\ImportInterface $entity)
+    public function save(ImportInterface $entity)
     {
         try {
-            $this->resource->save($import);
-        } catch (\Exception $exception) {
+            /* @var Import $entity */
+            $this->resource->save($entity);
+        } catch (Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));
         }
-        return $import;
+        return $entity;
     }
 
     /**
-     * Delete Import
-     *
-     * @param \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface $import
-     * @return bool
-     * @throws CouldNotDeleteException
+     * @inheritDoc
      */
-    public function delete(\RealtimeDespatch\OrderFlow\Api\Data\ImportInterface $entity)
+    public function delete(ImportInterface $entity)
     {
         try {
-            $this->resource->delete($import);
-        } catch (\Exception $exception) {
+            /* @var Import $entity */
+            $this->resource->delete($entity);
+        } catch (Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
         return true;

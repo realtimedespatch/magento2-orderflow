@@ -2,10 +2,13 @@
 
 namespace RealtimeDespatch\OrderFlow\Ui\Component\Listing\Columns;
 
+use Magento\Framework\AuthorizationInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 use Magento\Framework\UrlInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Import;
 
 class RequestImportActions extends Column
 {
@@ -24,12 +27,12 @@ class RequestImportActions extends Column
     private $editUrl;
 
     /**
-     * @var \RealtimeDespatch\OrderFlow\Model\ResourceModel\Import
+     * @var Import
      */
     protected $resourceModel;
 
     /**
-     * @var \Magento\Framework\AuthorizationInterface
+     * @var AuthorizationInterface
      */
     protected $auth;
 
@@ -37,8 +40,8 @@ class RequestImportActions extends Column
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
      * @param UrlInterface $urlBuilder
-     * @param \Magento\Framework\AuthorizationInterface $auth
-     * @param \RealtimeDespatch\OrderFlow\Model\ResourceModel\Import $resourceModel
+     * @param AuthorizationInterface $auth
+     * @param Import $resourceModel
      * @param array $components
      * @param array $data
      * @param string $editUrl
@@ -47,8 +50,8 @@ class RequestImportActions extends Column
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
         UrlInterface $urlBuilder,
-        \Magento\Framework\AuthorizationInterface $auth,
-        \RealtimeDespatch\OrderFlow\Model\ResourceModel\Import $resourceModel,
+        AuthorizationInterface $auth,
+        Import $resourceModel,
         array $components = [],
         array $data = [],
         $editUrl = self::REQUEST_URL_PATH_EDIT
@@ -70,16 +73,16 @@ class RequestImportActions extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-                $name = $this->getData('name');
+                $importName = $this->getData('name');
                 if (isset($item['request_id'])) {
-                    $item[$name]['view'] = [
+                    $item[$importName]['view'] = [
                         'href'  => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_VIEW, ['request_id' => $item['request_id']]),
                         'label' => __('View Request')
                     ];
                 }
 
                 if (isset($item['processed_at']) && $item['processed_at'] == 'Pending') {
-                    $item[$name]['process'] = [
+                    $item[$importName]['process'] = [
                         'href' => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_PROCESS, ['request_id' => $item['request_id']]),
                         'label' => __('Process'),
                         'confirm' => [
@@ -92,7 +95,7 @@ class RequestImportActions extends Column
                 $importId = $this->resourceModel->getIdByRequestId($item['request_id']);
 
                 if ($importId && $this->canViewImport($item['entity'])) {
-                    $item[$name]['view_import'] = [
+                    $item[$importName]['view_import'] = [
                         'href'  => $this->urlBuilder->getUrl(self::EXPORT_URL_PATH_VIEW, ['import_id' => $importId]),
                         'label' => __('View Import Report')
                     ];
@@ -110,13 +113,13 @@ class RequestImportActions extends Column
      *
      * @return bool
      */
-    public function canViewImport($entity)
+    public function canViewImport(string $entity)
     {
-        if ($entity == \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface::ENTITY_INVENTORY) {
+        if ($entity == ImportInterface::ENTITY_INVENTORY) {
             return $this->auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_imports_inventory');
         }
 
-        if ($entity == \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface::ENTITY_SHIPMENT) {
+        if ($entity == ImportInterface::ENTITY_SHIPMENT) {
             return $this->auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_imports_shipments');
         }
 

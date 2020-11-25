@@ -28,18 +28,18 @@ interface QuantityItemInterface
     /**
      * Set the sku
      *
-     * @api
      * @param $sku string The sku
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface
+     * @return QuantityItemInterface
+     * @api
      */
-    public function setSku($sku);
+    public function setSku(string $sku);
 
     /**
      * Set the quantity
      *
-     * @api
      * @param $qty string
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface
+     * @return QuantityItemInterface
+     * @api
      */
-    public function setQty($qty);
+    public function setQty(string $qty);
 }

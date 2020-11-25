@@ -2,12 +2,20 @@
 
 namespace RealtimeDespatch\OrderFlow\Controller\Adminhtml\Product;
 
-use Magento\Framework\Controller\ResultFactory;
+use Exception;
+use Magento\Backend\App\Action\Context;
+use Magento\Backend\Model\View\Result\Redirect;
+use Magento\Catalog\Controller\Adminhtml\Product;
+use Magento\Catalog\Controller\Adminhtml\Product\Builder;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\DB\Transaction;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Ui\Component\MassAction\Filter;
 
-class MassReset extends \Magento\Catalog\Controller\Adminhtml\Product
+class MassReset extends Product
 {
     /**
-     * Massactions filter
+     * Mass Actions Filter
      *
      * @var Filter
      */
@@ -19,31 +27,34 @@ class MassReset extends \Magento\Catalog\Controller\Adminhtml\Product
     protected $collectionFactory;
 
     /**
-     * @var \Magento\Framework\DB\Transaction
+     * @var Transaction
      */
-    protected $_tx;
+    protected $transaction;
 
     /**
      * @param Context $context
      * @param Builder $productBuilder
      * @param Filter $filter
      * @param CollectionFactory $collectionFactory
+     * @param Transaction $transaction
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \Magento\Catalog\Controller\Adminhtml\Product\Builder $productBuilder,
-        \Magento\Ui\Component\MassAction\Filter $filter,
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory,
-        \Magento\Framework\DB\Transaction $tx
+        Context $context,
+        Builder $productBuilder,
+        Filter $filter,
+        CollectionFactory $collectionFactory,
+        Transaction $transaction
     ) {
         $this->filter = $filter;
         $this->collectionFactory = $collectionFactory;
-        $this->_tx = $tx;
+        $this->transaction = $transaction;
         parent::__construct($context, $productBuilder);
     }
 
     /**
-     * @return \Magento\Backend\Model\View\Result\Redirect
+     * @return Redirect
+     * @throws LocalizedException
+     * @throws LocalizedException
      */
     public function execute()
     {
@@ -51,18 +62,24 @@ class MassReset extends \Magento\Catalog\Controller\Adminhtml\Product
         $collectionSize = $collection->getSize();
 
         foreach ($collection->getItems() as $product) {
+            /* @var \Magento\Catalog\Model\Product $product */
+            /** @noinspection PhpUndefinedMethodInspection */
             $product->setOrderflowExportStatus('Pending');
-            $this->_tx->addObject($product);
+            $this->transaction->addObject($product);
         }
 
         try {
-            $this->_tx->save();
-            $this->messageManager->addSuccess(__('A total of %1 product(s) have had their OrderFlow export status reset.', $collectionSize));
-        } catch (\Exception $ex) {
-            $this->messageManager->addError(__('OrderFlow Export Status reset failed: '.$ex->getMessage()));
+            $this->transaction->save();
+            $this->messageManager->addSuccessMessage(
+                __('A total of %1 product(s) have had their OrderFlow export status reset.', $collectionSize)
+            );
+        } catch (Exception $ex) {
+            $this->messageManager->addErrorMessage(
+                __('OrderFlow Export Status reset failed: '.$ex->getMessage())
+            );
         }
 
-        /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
+        /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultRedirectFactory->create();
         return $resultRedirect->setRefererUrl();
     }

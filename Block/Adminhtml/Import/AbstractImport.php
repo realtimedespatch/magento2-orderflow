@@ -2,50 +2,64 @@
 
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Import;
 
-/**
- * Adminhtml import abstract block
- */
-class AbstractImport extends \Magento\Backend\Block\Widget
+use Magento\Backend\Block\Template\Context;
+use Magento\Backend\Block\Widget;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
+use RealtimeDespatch\OrderFlow\Api\ImportRepositoryInterface;
+
+class AbstractImport extends Widget
 {
     /**
-     * Core registry
-     *
-     * @var \Magento\Framework\Registry
+     * @var RequestInterface
      */
-    protected $_coreRegistry = null;
+    protected $request;
 
     /**
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Sales\Helper\Admin $adminHelper
+     * @var ImportRepositoryInterface
+     */
+    protected $importRepository;
+
+    /**
+     * @var ImportInterface
+     */
+    protected $currentImport;
+
+    /**
+     * @param Context $context
+     * @param RequestInterface $request
+     * @param ImportRepositoryInterface $importRepository
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        \Magento\Framework\Registry $registry,
+        Context $context,
+        RequestInterface $request,
+        ImportRepositoryInterface $importRepository,
         array $data = []
     ) {
-        $this->_coreRegistry = $registry;
         parent::__construct($context, $data);
+
+        $this->request = $request;
+        $this->importRepository = $importRepository;
     }
 
     /**
-     * Retrieve available import
+     * Import Getter.
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return ImportInterface
+     * @throws NoSuchEntityException
      */
     public function getImport()
     {
-        if ($this->hasImport()) {
-            return $this->getData('import');
+        if ($this->currentImport) {
+            return $this->currentImport;
         }
-        if ($this->_coreRegistry->registry('current_import')) {
-            return $this->_coreRegistry->registry('current_import');
-        }
-        if ($this->_coreRegistry->registry('import')) {
-            return $this->_coreRegistry->registry('import');
-        }
-        throw new \Magento\Framework\Exception\LocalizedException(__('Import Not Found.'));
+
+        $this->currentImport = $this->importRepository->get(
+            $this->request->getParam('import_id')
+        );
+
+        return $this->currentImport;
     }
 }

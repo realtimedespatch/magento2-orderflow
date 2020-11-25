@@ -2,9 +2,10 @@
 
 namespace RealtimeDespatch\OrderFlow\Model;
 
+use Magento\Framework\Model\AbstractModel;
 use RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface;
 
-class ImportLine extends \Magento\Framework\Model\AbstractModel implements ImportLineInterface
+class ImportLine extends AbstractModel implements ImportLineInterface
 {
     /**
      * @inheritdoc
@@ -16,7 +17,7 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      */
     protected function _construct()
     {
-        $this->_init('RealtimeDespatch\OrderFlow\Model\ResourceModel\ImportLine');
+        $this->_init(ResourceModel\ImportLine::class);
     }
 
     /**
@@ -134,9 +135,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param integer $importId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setImportId($importId)
+    public function setImportId(int $importId)
     {
         return $this->setData(self::IMPORT_ID, $importId);
     }
@@ -144,11 +145,11 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
     /**
      * Set Sequence Id
      *
-     * @param integer $sequenceId
+     * @param string $sequenceId
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setSequenceId($sequenceId)
+    public function setSequenceId(string $sequenceId)
     {
         return $this->setData(self::SEQUENCE_ID, $sequenceId);
     }
@@ -158,9 +159,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param string $result
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setResult($result)
+    public function setResult(string $result)
     {
         return $this->setData(self::RESULT, $result);
     }
@@ -170,9 +171,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param string $reference
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setReference($reference)
+    public function setReference(string $reference)
     {
         return $this->setData(self::REFERENCE, $reference);
     }
@@ -182,9 +183,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param string $operation
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setOperation($operation)
+    public function setOperation(string $operation)
     {
         return $this->setData(self::OPERATION, $operation);
     }
@@ -194,9 +195,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param string $entity
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setEntity($entity)
+    public function setEntity(string $entity)
     {
         return $this->setData(self::ENTITY, $entity);
     }
@@ -206,9 +207,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param string $message
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setMessage($message)
+    public function setMessage(string $message)
     {
         return $this->setData(self::MESSAGE, $message);
     }
@@ -218,9 +219,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param string $additionalData
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setAdditionalData($additionalData)
+    public function setAdditionalData(string $additionalData)
     {
         return $this->setData(self::ADDITIONAL_DATA, $additionalData);
     }
@@ -230,9 +231,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param string $created
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setCreatedAt($created)
+    public function setCreatedAt(string $created)
     {
         return $this->setData(self::CREATED_AT, $created);
     }
@@ -242,9 +243,9 @@ class ImportLine extends \Magento\Framework\Model\AbstractModel implements Impor
      *
      * @param string $processed
      *
-     * @return \RealtimeDespatch\OrderFlow\Api\Data\ImportLineInterface
+     * @return ImportLineInterface
      */
-    public function setProcessedAt($processed)
+    public function setProcessedAt(string $processed)
     {
         return $this->setData(self::PROCESSED_AT, $processed);
     }
