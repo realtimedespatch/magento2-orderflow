@@ -3,10 +3,9 @@
 namespace RealtimeDespatch\OrderFlow\Cron\Export;
 
 use Magento\Store\Model\ResourceModel\Website\CollectionFactory as WebsiteCollectionFactory;
+use Magento\Store\Model\ResourceModel\Website\Collection as WebsiteCollection;
 use Magento\Store\Model\Website;
-use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\ExportHelperInterface;
-use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
 use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
 
 /**
@@ -16,36 +15,36 @@ use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
  *
  * @SuppressWarnings(PHPMD.LongVariable)
  */
-abstract class ExportCron
+class ExportCron
 {
     /**
-     * @var RequestBuilderInterface
+     * @var ExportHelperInterface
      */
-    protected $requestBuilder;
+    protected $helper;
+
+    /**
+     * @var WebsiteCollection
+     */
+    protected $websites;
 
     /**
      * @var RequestProcessorFactoryInterface
      */
-    protected $requestProcessorFactory;
+    protected $reqProcessorFactory;
 
     /**
-     * @var WebsiteCollectionFactory
-     */
-    protected $websiteCollectionFactory;
-
-    /**
-     * @param RequestBuilderInterface $requestBuilder
+     * @param ExportHelperInterface $helper
      * @param RequestProcessorFactoryInterface $requestProcessorFactory
      * @param WebsiteCollectionFactory $websiteCollectionFactory
      */
     public function __construct(
-        RequestBuilderInterface $requestBuilder,
-        RequestProcessorFactoryInterface $requestProcessorFactory,
-        WebsiteCollectionFactory $websiteCollectionFactory
+        ExportHelperInterface $helper,
+        WebsiteCollectionFactory $websiteCollectionFactory,
+        RequestProcessorFactoryInterface $requestProcessorFactory
     ) {
-        $this->requestBuilder = $requestBuilder;
-        $this->requestProcessorFactory = $requestProcessorFactory;
-        $this->websiteCollectionFactory = $websiteCollectionFactory;
+        $this->helper = $helper;
+        $this->websites = $websiteCollectionFactory->create();
+        $this->reqProcessorFactory = $requestProcessorFactory;
     }
 
     /**
@@ -55,15 +54,13 @@ abstract class ExportCron
      */
     public function execute()
     {
-        $websites = $this->websiteCollectionFactory->create();
-
-        foreach ($websites as $website) {
+        foreach ($this->websites as $website) {
             $this->executeForWebsite($website);
         }
     }
 
     /**
-     *  Execute Cron for Website.
+     * Execute Cron for Website.
      *
      * @param Website $website
      *
@@ -71,33 +68,15 @@ abstract class ExportCron
      */
     protected function executeForWebsite(Website $website)
     {
-        if (! $this->getExportHelper()->isEnabled($website->getId())) {
+        $websiteId = $website->getId();
+
+        if (! $this->helper->isEnabled($websiteId)) {
             return;
         }
 
-        $request = $this->getRequest($website);
-
-        if (! $request) {
-            return;
+        foreach ($this->helper->getExportableRequests($websiteId) as $request) {
+            $requestProcessor = $this->reqProcessorFactory->get($request);
+            $requestProcessor->process($request);
         }
-
-        $requestProcessor = $this->requestProcessorFactory->get($request->getEntity(), $request->getOperation());
-        $requestProcessor->process($request);
     }
-
-    /**
-     * Helper Getter.
-     *
-     * @return ExportHelperInterface
-     */
-    abstract protected function getExportHelper();
-
-    /**
-     * Request Getter.
-     *
-     * @param Website $website
-     *
-     * @return RequestInterface
-     */
-    abstract protected function getRequest(Website $website);
 }

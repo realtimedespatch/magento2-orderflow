@@ -4,8 +4,8 @@
 
 namespace RealtimeDespatch\OrderFlow\Cron\Log;
 
-use Psr\Log\LoggerInterface;
 use RealtimeDespatch\OrderFlow\Helper\Log\Cleaning;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export\Collection;
 use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export\CollectionFactory;
 
 /**
@@ -16,14 +16,9 @@ use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export\CollectionFactory;
 class ExportLogCleaner
 {
     /**
-     * @var LoggerInterface
+     * @var Collection
      */
-    protected $logger;
-
-    /**
-     * @var CollectionFactory
-     */
-    protected $factory;
+    protected $collection;
 
     /**
      * @var Cleaning
@@ -31,36 +26,30 @@ class ExportLogCleaner
     protected $helper;
 
     /**
-     * @param LoggerInterface $logger
      * @param CollectionFactory $factory
      * @param Cleaning $helper
      */
     public function __construct(
-        LoggerInterface $logger,
         CollectionFactory $factory,
         Cleaning $helper
     ) {
-        $this->logger = $logger;
-        $this->factory = $factory;
+        $this->collection = $factory->create();
         $this->helper = $helper;
     }
 
     /**
      * Executes the export log cleaning job.
      *
-     * @return $this|void
+     * @return boolean
      */
     public function execute()
     {
         if (! $this->helper->isEnabled()) {
-            return;
+            return false;
         }
 
-        $cutoff = date('Y-m-d', strtotime('-'.($this->helper->getExportLogDuration() - 1).' days'));
+        $this->collection->deleteOlderThanCutoff($this->helper->getExportLogExpirationDate());
 
-        $this->factory
-             ->create()
-             ->addFieldToFilter('created_at', ['lteq' => $cutoff])
-             ->walk('delete');
+        return true;
     }
 }

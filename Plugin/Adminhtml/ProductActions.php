@@ -5,12 +5,15 @@ namespace RealtimeDespatch\OrderFlow\Plugin\Adminhtml;
 use Magento\Framework\AuthorizationInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\UrlInterface;
+use Magento\Catalog\Ui\Component\Listing\Columns\ProductActions as Actions;
 
 /**
  * Adds an Export Button to Product Actions.
  */
 class ProductActions
 {
+    const ACL_RESOURCE = 'RealtimeDespatch_OrderFlow::orderflow_exports_products';
+
     /**
      * @var UrlInterface
      */
@@ -30,8 +33,7 @@ class ProductActions
         ContextInterface $context,
         UrlInterface $urlBuilder,
         AuthorizationInterface $auth
-    )
-    {
+    ) {
         $this->urlBuilder = $urlBuilder;
         $this->context = $context;
         $this->auth = $auth;
@@ -40,16 +42,16 @@ class ProductActions
     /**
      * Adds the export action to the product grid.
      *
-     * @param $productActions
-     * @param $result
+     * @param Actions $productActions
+     * @param array $result
      * @return mixed
      */
-    public function afterPrepareDataSource($productActions, $result)
+    public function afterPrepareDataSource(Actions $productActions, array $result): array
     {
         if (isset($result['data']['items'])) {
             $storeId = $this->context->getFilterParam('store_id');
             foreach ($result['data']['items'] as &$item) {
-                if ( ! $this->auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_products')) {
+                if (! $this->auth->isAllowed(self::ACL_RESOURCE)) {
                     continue;
                 }
 
@@ -59,7 +61,6 @@ class ProductActions
                         ['id' => $item['entity_id'], 'store' => $storeId]
                     ),
                     'label' => __('Export'),
-                    'hidden' => false,
                 ];
             }
         }

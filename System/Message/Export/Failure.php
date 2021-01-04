@@ -3,7 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\System\Message\Export;
 
 use Magento\Framework\AuthorizationInterface;
-use Magento\Framework\DataObject;
 use Magento\Framework\Notification\MessageInterface;
 use Magento\Framework\UrlInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
@@ -12,6 +11,7 @@ use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export\CollectionFactory;
 class Failure implements MessageInterface
 {
     const IDENTITY = 'ORDERFLOW_EXPORT_FAILURE';
+    const ACL_RESOURCE = 'RealtimeDespatch_OrderFlow::orderflow_exports';
 
     /**
      * @var CollectionFactory
@@ -34,7 +34,6 @@ class Failure implements MessageInterface
     protected $unreadExport;
 
     /**
-     * Failure constructor.
      * @param CollectionFactory $collectionFactory
      * @param AuthorizationInterface $authorization
      * @param UrlInterface $urlBuilder
@@ -47,7 +46,6 @@ class Failure implements MessageInterface
         $this->collectionFactory = $collectionFactory;
         $this->authorization = $authorization;
         $this->urlBuilder = $urlBuilder;
-        $this->unreadExport = $this->getLatestFailedExport();
     }
 
     /**
@@ -67,29 +65,27 @@ class Failure implements MessageInterface
      */
     public function isDisplayed()
     {
-        if (! $this->authorization->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports')) {
+        if (! $this->authorization->isAllowed(self::ACL_RESOURCE)) {
             return false;
         }
 
-        return $this->unreadExport && $this->unreadExport->getId();
+        return (boolean) $this->getUnreadFailedExport()->getId();
     }
 
     /**
-     * Checks whether there is an unread export.
+     * Unread Export Failure Getter.
      *
-     * @return DataObject
+     * @return ExportInterface
      */
-    protected function getLatestFailedExport()
+    public function getUnreadFailedExport()
     {
-        return $this
-            ->collectionFactory
-            ->create()
-            ->addFieldToFilter('failures', ['gt' => 0])
-            ->addFieldToFilter('viewed_at', ['null' => true])
-            ->setOrder('created_at')
-            ->setPageSize(1)
-            ->setCurPage(1)
-            ->getFirstItem();
+        if ($this->unreadExport) {
+            return $this->unreadExport;
+        }
+
+        $this->unreadExport = $this->collectionFactory->create()->getUnreadFailedExport();
+
+        return $this->unreadExport;
     }
 
     /**
@@ -99,9 +95,13 @@ class Failure implements MessageInterface
      */
     public function getText()
     {
+        if (! $this->getUnreadFailedExport()->getId()) {
+            return __('An unexpected error has occurred');
+        }
+
         $url = $this->urlBuilder->getUrl(
             'orderflow/export/view',
-            ['export_id' => $this->unreadExport->getId()]
+            ['export_id' => $this->getUnreadFailedExport()->getId()]
         );
 
         return __('A recent OrderFlow export contains failures. <a href="'.$url.'">View Details</a>');
@@ -114,6 +114,6 @@ class Failure implements MessageInterface
      */
     public function getSeverity()
     {
-        return MessageInterface::SEVERITY_MAJOR;
+        return MessageInterface::SEVERITY_MINOR;
     }
 }

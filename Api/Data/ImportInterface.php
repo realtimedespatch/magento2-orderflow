@@ -209,4 +209,18 @@ interface ImportInterface
      * @return mixed
      */
     public function setLines($lines);
+
+    /**
+     * Checks whether this is an inventory import.
+     *
+     * @return boolean
+     */
+    public function isInventoryImport();
+
+    /**
+     * Checks whether this is a shipment import.
+     *
+     * @return boolean
+     */
+    public function isShipmentImport();
 }

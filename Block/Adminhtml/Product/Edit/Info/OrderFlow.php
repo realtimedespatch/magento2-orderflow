@@ -11,10 +11,6 @@ use Magento\Framework\Registry;
 use RealtimeDespatch\OrderFlow\Helper\Admin\Info;
 use RealtimeDespatch\OrderFlow\Helper\Api;
 
-/**
- * Class OrderFlow
- * @package RealtimeDespatch\OrderFlow\Block\Adminhtml\Product\Edit\Info
- */
 class OrderFlow extends Template
 {
     /**
@@ -61,8 +57,8 @@ class OrderFlow extends Template
         ManagerInterface $messageManager,
         Info $adminInfoHelper,
         Api $apiHelper,
-        array $data = [])
-    {
+        array $data = []
+    ) {
         $this->_messageManager = $messageManager;
         $this->_request = $request;
         $this->_coreRegistry = $registry;
@@ -88,7 +84,7 @@ class OrderFlow extends Template
      */
     public function getProduct()
     {
-        if ( ! $this->getData('product') instanceof Product) {
+        if (! $this->getData('product') instanceof Product) {
             $this->setData('product', $this->_coreRegistry->registry('product'));
         }
         return $this->getData('product');

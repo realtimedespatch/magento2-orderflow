@@ -1,43 +1,37 @@
 <?php
 
-/** @noinspection PhpUndefinedClassInspection */
-
 namespace RealtimeDespatch\OrderFlow\Cron\Import;
 
 use RealtimeDespatch\OrderFlow\Api\ImportHelperInterface;
-use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Collection;
-use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\CollectionFactory as RequestCollectionFactory;
 use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
 
 /**
  * Import Cron.
  *
- * Abstract Base Class for the Import Cron Jobs.
- *
- * @SuppressWarnings(PHPMD.LongVariable)
+ * Base Class for the Import Cron Jobs.
  */
-abstract class ImportCron
+class ImportCron
 {
     /**
-     * @var RequestCollectionFactory
+     * @var ImportHelperInterface
      */
-    protected $requestCollectionFactory;
+    protected $helper;
 
     /**
      * @var RequestProcessorFactoryInterface
      */
-    protected $requestProcessorFactory;
+    protected $reqProcessorFactory;
 
     /**
-     * @param RequestCollectionFactory $requestCollectionFactory
-     * @param RequestProcessorFactoryInterface $requestProcessorFactory
+     * @param ImportHelperInterface $helper
+     * @param RequestProcessorFactoryInterface $reqProcessorFactory
      */
     public function __construct(
-        RequestCollectionFactory $requestCollectionFactory,
-        RequestProcessorFactoryInterface $requestProcessorFactory
+        ImportHelperInterface $helper,
+        RequestProcessorFactoryInterface $reqProcessorFactory
     ) {
-        $this->requestCollectionFactory = $requestCollectionFactory;
-        $this->requestProcessorFactory = $requestProcessorFactory;
+        $this->helper = $helper;
+        $this->reqProcessorFactory = $reqProcessorFactory;
     }
 
     /**
@@ -47,46 +41,13 @@ abstract class ImportCron
      */
     public function execute()
     {
-        if (! $this->getHelper()->isEnabled()) {
+        if (! $this->helper->isEnabled()) {
             return;
         }
 
-        foreach ($this->getImportableRequests() as $request) {
-            $requestProcessor = $this->requestProcessorFactory->get($request->getEntity(), $request->getOperation());
+        foreach ($this->helper->getImportableRequests() as $request) {
+            $requestProcessor = $this->reqProcessorFactory->get($request);
             $requestProcessor->process($request);
         }
     }
-
-    /**
-     * Importable Requests Getter.
-     *
-     * @return Collection
-     */
-    protected function getImportableRequests()
-    {
-        /** @noinspection PhpUndefinedMethodInspection */
-        return $this
-            ->requestCollectionFactory
-            ->create()
-            ->addFieldToFilter('type', ['eq' => 'Import'])
-            ->addFieldToFilter('entity', ['eq' => $this->getEntityType()])
-            ->addFieldToFilter('processed_at', ['null' => true])
-            ->setOrder('message_id', 'ASC')
-            ->setPageSize($this->getHelper()->getBatchSize())
-            ->setCurPage(1);
-    }
-
-    /**
-     * Helper Getter.
-     *
-     * @return ImportHelperInterface
-     */
-    abstract protected function getHelper();
-
-    /**
-     * Entity Type Getter.
-     *
-     * @return string
-     */
-    abstract protected function getEntityType();
 }

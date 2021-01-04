@@ -5,6 +5,7 @@
 namespace RealtimeDespatch\OrderFlow\Model\Service\Api;
 
 use Magento\Framework\App\Request\Http;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Session\Generic;
 use Psr\Log\LoggerInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface;
@@ -13,8 +14,6 @@ use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
 use RealtimeDespatch\OrderFlow\Api\ShipmentRequestManagementInterface;
 
 /**
- * Class ShipmentApiService
- *
  * @api
  * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -53,7 +52,8 @@ class ShipmentApiService implements ShipmentRequestManagementInterface
         Generic $session,
         LoggerInterface $logger,
         RequestBuilderInterface $builder,
-        Http $httpRequest) {
+        Http $httpRequest
+    ) {
         $this->session = $session;
         $this->logger = $logger;
         $this->builder = $builder;
@@ -73,21 +73,22 @@ class ShipmentApiService implements ShipmentRequestManagementInterface
      * @param string|null $messageSeqId
      *
      * @return mixed
+     * @throws CouldNotSaveException
      * @api
      */
-    public function create(string $orderIncrementId,
-                           $skuQty = array(),
-                           $comment = null,
-                           $email = false,
-                           $includeComment = false,
-                           $courierName = null,
-                           $serviceName = null,
-                           $trackingNumber = null,
-                           $dateShipped = null,
-                           $messageSeqId = null)
-    {
-        try
-        {
+    public function create(
+        string $orderIncrementId,
+        $skuQty = [],
+        $comment = null,
+        $email = false,
+        $includeComment = false,
+        $courierName = null,
+        $serviceName = null,
+        $trackingNumber = null,
+        $dateShipped = null,
+        $messageSeqId = null
+    ) {
+        try {
             $this->_create(
                 $orderIncrementId,
                 $skuQty,
@@ -100,8 +101,7 @@ class ShipmentApiService implements ShipmentRequestManagementInterface
                 $dateShipped,
                 $messageSeqId
             );
-        }
-        catch (Exception $ex) {
+        } catch (Exception $ex) {
             return __('Error Processing Message ').$messageSeqId;
         }
 
@@ -109,7 +109,6 @@ class ShipmentApiService implements ShipmentRequestManagementInterface
     }
 
     /**
-     * @api
      * @param string $orderIncrementId
      * @param QuantityItemInterface[] $skuQty
      * @param string|null $comment
@@ -122,6 +121,8 @@ class ShipmentApiService implements ShipmentRequestManagementInterface
      * @param string|null $messageSeqId
      *
      * @return void
+     * @throws CouldNotSaveException
+     * @api
      */
     public function _create(
         string $orderIncrementId,
@@ -134,8 +135,7 @@ class ShipmentApiService implements ShipmentRequestManagementInterface
         $trackingNumber = null,
         $dateShipped = null,
         $messageSeqId = null
-    )
-    {
+    ) {
         $body = [
             'orderIncrementId' => $orderIncrementId,
             'skuQtys' => $skuQty,

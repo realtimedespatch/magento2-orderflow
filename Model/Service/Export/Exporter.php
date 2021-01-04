@@ -3,7 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\Model\Service\Export;
 
 use Exception;
-use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use RealtimeDespatch\OrderFlow\Api\ExporterTypeInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
@@ -15,30 +14,17 @@ use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
  */
 class Exporter
 {
-    /* Event Names */
-    const EVENT_NAME_SUCCESS = 'orderflow_export_success';
-    const EVENT_NAME_FAILURE = 'orderflow_exception';
-
     /**
      * @var ExporterTypeInterface
      */
     public $type;
 
     /**
-     * @var ManagerInterface
-     */
-    protected $eventManager;
-
-    /**
      * @param ExporterTypeInterface $type
-     * @param ManagerInterface $eventManager
      */
-    public function __construct(
-        ExporterTypeInterface $type,
-        ManagerInterface $eventManager
-    ) {
+    public function __construct(ExporterTypeInterface $type)
+    {
         $this->type = $type;
-        $this->eventManager = $eventManager;
     }
 
     /**
@@ -56,22 +42,12 @@ class Exporter
         }
 
         try {
-            $export = $this->type->export($request);
-
-            $this->eventManager->dispatch(
-                self::EVENT_NAME_SUCCESS,
-                ['export' => $export, 'type' => $this->type->getType()]
-            );
-
-            return true;
+            $this->type->export($request);
         } catch (Exception $ex) {
-            $this->eventManager->dispatch(
-                self::EVENT_NAME_FAILURE,
-                ['exception' => $ex, 'type' => $this->type->getType(), 'process' => 'export']
-            );
-
             return false;
         }
+
+        return true;
     }
 
     /**

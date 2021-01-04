@@ -162,11 +162,11 @@ class RequestLine extends AbstractModel implements RequestLineInterface
     /**
      * Set sequence id
      *
-     * @param string $sequenceId
+     * @param string|null $sequenceId
      *
      * @return RequestLineInterface
      */
-    public function setSequenceId(string $sequenceId)
+    public function setSequenceId(string $sequenceId = null)
     {
         return $this->setData(self::SEQUENCE_ID, $sequenceId);
     }

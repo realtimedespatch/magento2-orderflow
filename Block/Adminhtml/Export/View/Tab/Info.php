@@ -22,6 +22,11 @@ class Info extends Template implements TabInterface
     protected $request;
 
     /**
+     * @var ExportInterface|null
+     */
+    protected $export;
+
+    /**
      * @var WebsiteFactory
      */
     protected $websiteFactory;
@@ -79,9 +84,19 @@ class Info extends Template implements TabInterface
      */
     public function getExport()
     {
-        return $this->exportRepository->get(
+        $export = parent::getData('export');
+
+        if ($export) {
+            return $export;
+        }
+
+        $export = $this->exportRepository->get(
             $this->request->getParam('export_id')
         );
+
+        parent::setData('export', $export);
+
+        return $export;
     }
 
     /**

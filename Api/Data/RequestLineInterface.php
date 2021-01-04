@@ -80,13 +80,13 @@ interface RequestLineInterface
     public function setRequestId(string $requestId);
 
     /**
-     * Set sequence ID
+     * Set sequence id
      *
-     * @param string $sequenceId
+     * @param string|null $sequenceId
      *
      * @return RequestLineInterface
      */
-    public function setSequenceId(string $sequenceId);
+    public function setSequenceId(string $sequenceId = null);
 
     /**
      * Set type

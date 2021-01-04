@@ -4,14 +4,14 @@
     <route url="/V1/orderflow/inventory/" method="POST">
         <service class="RealtimeDespatch\OrderFlow\Api\InventoryRequestManagementInterface" method="update"/>
         <resources>
-            <resource ref="anonymous" />
+            <resource ref="RealtimeDespatch_OrderFlow::orderflow" />
         </resources>
     </route>
     <!-- Shipments -->
     <route url="/V1/orderflow/shipment/" method="POST">
         <service class="RealtimeDespatch\OrderFlow\Api\ShipmentRequestManagementInterface" method="create"/>
         <resources>
-            <resource ref="anonymous" />
+            <resource ref="RealtimeDespatch_OrderFlow::orderflow" />
         </resources>
     </route>
 </routes>

@@ -8,7 +8,11 @@ use Magento\Sales\Model\ResourceModel\Order\Collection;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Website;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
 use RealtimeDespatch\OrderFlow\Api\ExportHelperInterface;
+use RealtimeDespatch\OrderFlow\Model\Source\Export\Status as ExportStatus;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Collection as RequestCollection;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\CollectionFactory as RequestCollectionFactory;
 
 /**
  * Order Export Helper.
@@ -17,24 +21,30 @@ use RealtimeDespatch\OrderFlow\Api\ExportHelperInterface;
  */
 class Order extends AbstractHelper implements ExportHelperInterface
 {
-    const STATUS_PENDING = 'Pending';
-    const STATUS_QUEUED = 'Queued';
-
     /**
      * @var OrderCollectionFactory
      */
     protected $orderCollectionFactory;
 
     /**
+     * @var RequestCollectionFactory
+     */
+    protected $reqCollectionFactory;
+
+    /**
      * @param Context $context
      * @param OrderCollectionFactory $orderCollectionFactory
+     * @param RequestCollectionFactory $reqCollectionFactory
      */
     public function __construct(
         Context $context,
-        OrderCollectionFactory $orderCollectionFactory
+        OrderCollectionFactory $orderCollectionFactory,
+        RequestCollectionFactory $reqCollectionFactory
     ) {
-        $this->orderCollectionFactory = $orderCollectionFactory;
         parent::__construct($context);
+
+        $this->orderCollectionFactory = $orderCollectionFactory;
+        $this->reqCollectionFactory = $reqCollectionFactory;
     }
 
     /**
@@ -84,26 +94,11 @@ class Order extends AbstractHelper implements ExportHelperInterface
             $scopeId
         );
 
-        return explode(',', $statuses);
-    }
-
-    /**
-     * Checks whether an order can be exported.
-     *
-     * @param string $orderStatus
-     * @param string $exportStatus
-     * @param integer|null $scopeId
-     *
-     * @return boolean
-     */
-    public function canExport(string $orderStatus, string $exportStatus, $scopeId = null)
-    {
-        // If the order is not in an exportable order status return false;
-        if (! in_array($orderStatus, $this->getExportableOrderStatuses($scopeId))) {
-            return false;
+        if (! $statuses) {
+            return [];
         }
 
-        return ( ! $exportStatus) || $exportStatus == self::STATUS_PENDING;
+        return explode(',', $statuses);
     }
 
     /**
@@ -123,9 +118,28 @@ class Order extends AbstractHelper implements ExportHelperInterface
             ->addFieldToFilter('is_virtual', ['eq' => 0])
             ->addFieldToFilter('orderflow_export_date', ['null' => true])
             ->addFieldToFilter('orderflow_export_status', [
-                ['neq' => self::STATUS_QUEUED],
+                ['neq' => ExportStatus::STATUS_QUEUED],
                 ['null' => true],
             ])
             ->setPage(1, $this->getBatchSize($website->getId()));
+    }
+
+    /**
+     * Exportable Requests Getter.
+     *
+     * @param integer|null $scopeId
+     *
+     * @return RequestCollection
+     */
+    public function getExportableRequests($scopeId = null)
+    {
+        /** @var RequestCollection $collection */
+        $collection = $this->reqCollectionFactory->create();
+
+        return $collection->getExportableRequests(
+            ExportInterface::ENTITY_ORDER,
+            $scopeId,
+            $this->getBatchSize()
+        );
     }
 }

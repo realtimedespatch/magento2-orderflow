@@ -28,8 +28,7 @@ class Request extends AbstractDb
         Context $context,
         DateTime $date,
         $resourcePrefix = null
-    )
-    {
+    ) {
         parent::__construct($context, $resourcePrefix);
         $this->date = $date;
     }

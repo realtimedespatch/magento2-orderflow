@@ -3,8 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\Api\Data;
 
 /**
- * Sequence Item Interface
- *
  * @api
  */
 interface SequenceItemInterface

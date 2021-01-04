@@ -16,7 +16,7 @@ class UnitsActiveQuotes extends Column
             foreach ($dataSource['data']['items'] as & $item) {
                 if (isset($item['additional_data'])) {
                     $data = json_decode($item['additional_data'], true);
-                    $item['active_quotes'] = isset($data['unitsActiveQuotes']) ? $data['unitsActiveQuotes'] : 0;
+                    $item['units_active_quotes'] = isset($data['unitsActiveQuotes']) ? $data['unitsActiveQuotes'] : 0;
                 }
             }
         }

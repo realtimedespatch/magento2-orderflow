@@ -56,7 +56,7 @@ class RequestLine extends AbstractDb
         }
 
         /* @var \RealtimeDespatch\OrderFlow\Model\RequestLine $object */
-        if ( ! $object->getRequestId() && $object->getRequest()) {
+        if (! $object->getRequestId() && $object->getRequest()) {
             $object->setRequestId($object->getRequest()->getId());
         }
 

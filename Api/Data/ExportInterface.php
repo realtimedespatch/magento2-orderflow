@@ -158,11 +158,11 @@ interface ExportInterface
     /**
      * Set Scope Id
      *
-     * @param integer $scopeId
+     * @param integer|null $scopeId
      *
      * @return ExportInterface
      */
-    public function setScopeId(int $scopeId);
+    public function setScopeId(int $scopeId = null);
 
     /**
      * Set operation

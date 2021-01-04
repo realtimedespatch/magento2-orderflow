@@ -2,6 +2,8 @@
 
 namespace RealtimeDespatch\OrderFlow\Api;
 
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Collection;
+
 interface ExportHelperInterface
 {
     /**
@@ -12,4 +14,13 @@ interface ExportHelperInterface
      * @return boolean
      */
     public function isEnabled($scopeId = null);
+
+    /**
+     * Exportable Requests Getter.
+     *
+     * @param integer|null $scopeId
+     *
+     * @return Collection
+     */
+    public function getExportableRequests($scopeId = null);
 }

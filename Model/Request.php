@@ -12,6 +12,7 @@ use Magento\Framework\Registry;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface;
 use RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine\CollectionFactory as RequestLineCollectionFactory;
+use RealtimeDespatch\OrderFlow\Helper\Xml as XmlHelper;
 
 /**
  * Class Request
@@ -34,7 +35,12 @@ class Request extends AbstractModel implements RequestInterface
      *
      * @var array
      */
-    protected $_lines;
+    protected $lines = null;
+
+    /**
+     * @var XmlHelper
+     */
+    protected $xmlHelper;
 
     /**
      * @var RequestLineCollectionFactory
@@ -45,6 +51,7 @@ class Request extends AbstractModel implements RequestInterface
      * @param Context $context
      * @param Registry $registry
      * @param RequestLineCollectionFactory $requestLineCollectionFactory
+     * @param XmlHelper $xmlHelper
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
      * @param array $data
@@ -53,24 +60,25 @@ class Request extends AbstractModel implements RequestInterface
         Context $context,
         Registry $registry,
         RequestLineCollectionFactory $requestLineCollectionFactory,
+        XmlHelper $xmlHelper,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->requestLineCollectionFactory = $requestLineCollectionFactory;
+        $this->xmlHelper = $xmlHelper;
 
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
     /**
-     * Initialize resource model
+     * Initiliaze.
      *
      * @return void
      */
     protected function _construct()
     {
-        $this->_init('RealtimeDespatch\OrderFlow\Model\ResourceModel\Request');
-        $this->_lines = array();
+        $this->_init(\RealtimeDespatch\OrderFlow\Model\ResourceModel\Request::class);
     }
 
     /**
@@ -90,18 +98,18 @@ class Request extends AbstractModel implements RequestInterface
      */
     public function getLines()
     {
-        if ($this->_lines) {
-            return $this->_lines;
+         if (! is_null($this->lines)) {
+            return $this->lines;
         }
 
-        $this->_lines = $this
+        $this->lines = $this
             ->requestLineCollectionFactory
             ->create()
             ->addFieldToSelect('*')
             ->addFieldToFilter('request_id', ['eq' => $this->getId()])
             ->loadData();
 
-        return $this->_lines;
+        return $this->lines;
     }
 
     /**
@@ -166,11 +174,9 @@ class Request extends AbstractModel implements RequestInterface
         }
 
         try {
-            $dom = new DOMDocument;
-            $dom->preserveWhiteSpace = false;
-            $dom->loadXML(gzinflate($this->getData(self::REQUEST_BODY)));
-            $dom->formatOutput = true;
-            $xml = $dom->saveXml();
+            $xml = gzinflate($this->getData(self::REQUEST_BODY));
+            $dom = $this->xmlHelper->getDomDocument($xml);
+            return $dom->saveXML();
         } catch (Exception $ex) {
             $xml = __('Request Unavailable');
         }
@@ -190,11 +196,9 @@ class Request extends AbstractModel implements RequestInterface
         }
 
         try {
-            $dom = new DOMDocument;
-            $dom->preserveWhiteSpace = false;
-            $dom->loadXML(gzinflate($this->getData(self::RESPONSE_BODY)));
-            $dom->formatOutput = true;
-            $xml = $dom->saveXml();
+            $xml = gzinflate($this->getData(self::RESPONSE_BODY));
+            $dom = $this->xmlHelper->getDomDocument($xml);
+            return $dom->saveXML();
         } catch (Exception $ex) {
             $xml = gzinflate($this->getData(self::RESPONSE_BODY));
         }
@@ -232,7 +236,7 @@ class Request extends AbstractModel implements RequestInterface
     public function addLine(RequestLineInterface $line)
     {
         $line->setRequest($this);
-        $this->_lines[] = $line;
+        $this->lines[] = $line;
 
         return $this;
     }
@@ -246,7 +250,7 @@ class Request extends AbstractModel implements RequestInterface
      */
     public function setLines($lines)
     {
-        $this->_lines = $lines;
+        $this->lines = $lines;
 
         return $this;
     }
@@ -266,11 +270,11 @@ class Request extends AbstractModel implements RequestInterface
     /**
      * Set Scope Id
      *
-     * @param string $scopeId
+     * @param integer|null $scopeId
      *
      * @return RequestInterface
      */
-    public function setScopeId(string $scopeId)
+    public function setScopeId(int $scopeId = null)
     {
         return $this->setData(self::SCOPE_ID, $scopeId);
     }

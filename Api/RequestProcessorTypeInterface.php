@@ -2,7 +2,6 @@
 
 namespace RealtimeDespatch\OrderFlow\Api;
 
-use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 
 /**
@@ -22,7 +21,7 @@ interface RequestProcessorTypeInterface
      *
      * @param RequestInterface $request
      *
-     * @return ExportInterface
+     * @return boolean
      */
     public function process(RequestInterface $request);
 }

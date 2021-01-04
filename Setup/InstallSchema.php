@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection MessDetectorValidationInspection */
+
 namespace RealtimeDespatch\OrderFlow\Setup;
 
 use Magento\Framework\DB\Ddl\Table;

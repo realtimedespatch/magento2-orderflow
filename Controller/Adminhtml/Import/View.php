@@ -19,7 +19,7 @@ class View extends Import
         try {
             $import = $this->getImport();
 
-            if ( ! $import) {
+            if (! $import) {
                 return $this->resultRedirectFactory->create()->setRefererUrl();
             }
 

@@ -3,7 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\Model\Service\Import;
 
 use Exception;
-use Magento\Framework\Event\ManagerInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use \RealtimeDespatch\OrderFlow\Api\ImporterTypeInterface;
 
@@ -14,30 +13,17 @@ use \RealtimeDespatch\OrderFlow\Api\ImporterTypeInterface;
  */
 class Importer
 {
-    /* Events */
-    const EVENT_SUCCESS = 'orderflow_export_success';
-    const EVENT_FAILURE = 'orderflow_exception';
-
     /**
      * @var ImporterTypeInterface
      */
     public $type;
 
     /**
-     * @var ManagerInterface
-     */
-    protected $eventManager;
-
-    /**
      * @param ImporterTypeInterface $type
-     * @param ManagerInterface $eventManager
      */
-    public function __construct(
-        ImporterTypeInterface $type,
-        ManagerInterface $eventManager
-    ) {
+    public function __construct(ImporterTypeInterface $type)
+    {
         $this->type = $type;
-        $this->eventManager = $eventManager;
     }
 
     /**
@@ -54,21 +40,11 @@ class Importer
         }
 
         try {
-            $import = $this->type->import($request);
-
-            $this->eventManager->dispatch(
-                self::EVENT_SUCCESS,
-                ['import' => $import, 'type' => $this->type->getType()]
-            );
-
-            return true;
+            $this->type->import($request);
         } catch (Exception $ex) {
-            $this->eventManager->dispatch(
-                self::EVENT_FAILURE,
-                ['exception' => $ex, 'type' => $this->type->getType(), 'process' => 'import']
-            );
-
             return false;
         }
+
+        return true;
     }
 }

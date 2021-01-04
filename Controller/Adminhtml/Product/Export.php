@@ -8,6 +8,7 @@ use Magento\Backend\App\Action\Context;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product\Type;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -148,6 +149,7 @@ class Export extends Action
      * @param ProductInterface $product
      * @return RequestInterface
      * @throws NoSuchEntityException
+     * @throws CouldNotSaveException
      */
     protected function buildRequest(ProductInterface $product)
     {

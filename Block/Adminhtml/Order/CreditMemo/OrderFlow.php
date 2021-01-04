@@ -15,8 +15,15 @@ use RealtimeDespatch\OrderFlow\Helper\Api;
 
 class OrderFlow extends AbstractOrder
 {
-    protected $_adminInfoHelper;
-    protected $_apiHelper;
+    /**
+     * @var Info
+     */
+    protected $adminInfoHelper;
+
+    /**
+     * @var Api
+     */
+    protected $apiHelper;
 
     /**
      * @param Context $context
@@ -34,9 +41,10 @@ class OrderFlow extends AbstractOrder
         Api $apiHelper,
         array $data = []
     ) {
-        $this->_adminInfoHelper = $adminInfoHelper;
-        $this->_apiHelper = $apiHelper;
         parent::__construct($context, $registry, $adminHelper, $data);
+
+        $this->adminInfoHelper = $adminInfoHelper;
+        $this->apiHelper = $apiHelper;
     }
 
     /**
@@ -66,7 +74,7 @@ class OrderFlow extends AbstractOrder
      */
     public function canDisplayAdminInfo()
     {
-        return $this->_adminInfoHelper->isEnabled();
+        return $this->adminInfoHelper->isEnabled();
     }
 
     /**
@@ -76,12 +84,13 @@ class OrderFlow extends AbstractOrder
      */
     public function getOrderFlowOrderUrl()
     {
-        $storeId = $this->getOrder()->getStoreId();
+        $order = $this->getOrder();
+        $storeId = $order->getStoreId();
 
-        $url  = $this->_apiHelper->getEndpoint($storeId);
+        $url  = $this->apiHelper->getEndpoint($storeId);
         $url .= 'despatch/order/referenceDetail.htm?externalReference=';
-        $url .= urlencode($this->getOrder()->getIncrementId());
-        $url .= '&channel='.urlencode($this->_apiHelper->getChannel($storeId));
+        $url .= urlencode($order->getIncrementId());
+        $url .= '&channel='.urlencode($this->apiHelper->getChannel($storeId));
 
         return $url;
     }

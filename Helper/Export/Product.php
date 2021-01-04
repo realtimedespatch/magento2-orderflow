@@ -8,7 +8,11 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Website;
+use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
 use RealtimeDespatch\OrderFlow\Api\ExportHelperInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Collection as RequestCollection;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\CollectionFactory as RequestCollectionFactory;
+use RealtimeDespatch\OrderFlow\Model\Source\Export\Status;
 
 /**
  * Product Export Helper.
@@ -23,16 +27,24 @@ class Product extends AbstractHelper implements ExportHelperInterface
     protected $productCollectionFactory;
 
     /**
+     * @var RequestCollectionFactory
+     */
+    protected $reqCollectionFactory;
+
+    /**
      * @param Context $context
      * @param CollectionFactory $productCollectionFactory
+     * @param RequestCollectionFactory $reqCollectionFactory
      */
     public function __construct(
         Context $context,
-        CollectionFactory $productCollectionFactory
+        CollectionFactory $productCollectionFactory,
+        RequestCollectionFactory $reqCollectionFactory
     ) {
-        $this->productCollectionFactory = $productCollectionFactory;
-
         parent::__construct($context);
+
+        $this->productCollectionFactory = $productCollectionFactory;
+        $this->reqCollectionFactory = $reqCollectionFactory;
     }
 
     /**
@@ -100,7 +112,7 @@ class Product extends AbstractHelper implements ExportHelperInterface
             ->addAttributeToFilter(
                 [
                     ['attribute' => 'orderflow_export_status', 'null' => true],
-                    ['attribute' => 'orderflow_export_status', ['neq' => ['Queued']]],
+                    ['attribute' => 'orderflow_export_status', ['neq' => [Status::STATUS_QUEUED]]],
                 ],
                 '',
                 'left'
@@ -124,8 +136,27 @@ class Product extends AbstractHelper implements ExportHelperInterface
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('type_id', ['eq' => 'simple'])
             ->addAttributeToFilter('orderflow_export_date', ['notnull' => true])
-            ->addFieldToFilter('orderflow_export_status', ['eq' => 'Pending'])
+            ->addAttributeToFilter('orderflow_export_status', ['eq' => Status::STATUS_PENDING])
             ->setStore($this->getStoreId($website->getId()))
             ->setPage(1, $this->getBatchSize($website->getId()));
+    }
+
+    /**
+     * Exportable Requests Getter.
+     *
+     * @param integer|null $scopeId
+     *
+     * @return RequestCollection
+     */
+    public function getExportableRequests($scopeId = null)
+    {
+        /** @var RequestCollection $collection */
+        $collection = $this->reqCollectionFactory->create();
+
+        return $collection->getExportableRequests(
+            ExportInterface::ENTITY_PRODUCT,
+            $scopeId,
+            $this->getBatchSize()
+        );
     }
 }

@@ -16,7 +16,7 @@ class UnitsUnsentOrders extends Column
             foreach ($dataSource['data']['items'] as & $item) {
                 if (isset($item['additional_data'])) {
                     $data = json_decode($item['additional_data'], true);
-                    $item['unsent_orders'] = isset($data['unitsUnsentOrders']) ? $data['unitsUnsentOrders'] : 0;
+                    $item['units_unsent_orders'] = isset($data['unitsUnsentOrders']) ? $data['unitsUnsentOrders'] : 0;
                 }
             }
         }

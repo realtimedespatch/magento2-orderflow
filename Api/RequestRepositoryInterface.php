@@ -8,8 +8,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 
 /**
- * Request repository interface.
- *
  * @api
  */
 interface RequestRepositoryInterface

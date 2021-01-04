@@ -62,4 +62,17 @@ class AbstractImport extends Widget
 
         return $this->currentImport;
     }
+
+    /**
+     * Import Setter.
+     *
+     * @param ImportInterface $import
+     * @return AbstractImport
+     */
+    public function setImport(ImportInterface $import)
+    {
+        $this->currentImport = $import;
+
+        return $this;
+    }
 }

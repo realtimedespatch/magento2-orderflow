@@ -73,4 +73,17 @@ class AbstractRequest extends Widget
 
         return $this->currentRequest;
     }
+
+    /**
+     * Request Setter.
+     *
+     * @param RequestInterface $request
+     * @return AbstractRequest
+     */
+    public function setRtdRequest(RequestInterface $request)
+    {
+        $this->currentRequest = $request;
+
+        return $this;
+    }
 }

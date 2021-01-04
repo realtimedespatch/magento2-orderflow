@@ -3,8 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\Api\Data;
 
 /**
- * Quantity Item Interface
- *
  * @api
  */
 interface QuantityItemInterface

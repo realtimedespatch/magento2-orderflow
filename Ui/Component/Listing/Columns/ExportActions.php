@@ -61,7 +61,7 @@ class ExportActions extends Column
     public function prepareDataSource(array $dataSource)
     {
         if (isset($dataSource['data']['items'])) {
-            foreach ($dataSource['data']['items'] as & $item) {
+            foreach ($dataSource['data']['items'] as &$item) {
                 $name = $this->getData('name');
                 if (isset($item['export_id'])) {
                     $item[$name]['view_export'] = [
@@ -73,7 +73,7 @@ class ExportActions extends Column
                     ];
                 }
 
-                if ($this->canViewRequest()) {
+                if ($this->canViewRequest() && isset($item['request_id'])) {
                     $item[$name]['view_request'] = [
                         'href'  => $this->urlBuilder->getUrl(
                             self::REQUEST_URL_PATH_VIEW,

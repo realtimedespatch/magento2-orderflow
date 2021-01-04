@@ -19,7 +19,7 @@ class View extends Request
         try {
             $request = $this->getOrderFlowRequest();
 
-            if ( ! $request) {
+            if (! $request) {
                 return $this->resultRedirectFactory->create()->setRefererUrl();
             }
 

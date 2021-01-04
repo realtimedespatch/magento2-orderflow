@@ -3,6 +3,7 @@
 namespace RealtimeDespatch\OrderFlow\Factory;
 
 use Magento\Framework\ObjectManagerInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface;
 use RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor;
 
@@ -33,12 +34,15 @@ class RequestProcessorFactory implements RequestProcessorFactoryInterface
      *
      * See: https://devdocs.magento.com/guides/v2.4/extension-dev-guide/object-manager.html
      *
-     * @param string $entity
-     * @param string $operation
+     * @param RequestInterface $request
      * @return RequestProcessor
      */
-    public function get(string $entity, string $operation)
+    public function get(RequestInterface $request)
     {
-        return $this->objectManager->create($entity.$operation.'RequestProcessor');
+        $className  = $request->getEntity();
+        $className .= $request->getOperation();
+        $className .= 'RequestProcessor';
+
+        return $this->objectManager->create($className);
     }
 }

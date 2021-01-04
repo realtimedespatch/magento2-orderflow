@@ -5,6 +5,7 @@
 namespace RealtimeDespatch\OrderFlow\Model\Service\Api;
 
 use Magento\Framework\App\Request\Http;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Session\Generic;
 use Psr\Log\LoggerInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
@@ -69,14 +70,20 @@ class InventoryApiService implements InventoryRequestManagementInterface
      * @param integer $messageSeqId
      *
      * @return mixed
+     * @throws CouldNotSaveException
+     * @throws CouldNotSaveException
+     * @throws CouldNotSaveException
      * @api
      */
     public function update(array $productQtys, array $productSeqs, int $messageSeqId)
     {
         try {
-           $this->_update($productQtys, $productSeqs, $messageSeqId);
-        }
-        catch (Exception $ex) {
+            $this->_update(
+                $productQtys,
+                $productSeqs,
+                $messageSeqId
+            );
+        } catch (Exception $ex) {
             return __('Error Processing Message ').$messageSeqId;
         }
 
@@ -91,6 +98,7 @@ class InventoryApiService implements InventoryRequestManagementInterface
      * @param string $messageSeqId
      *
      * @return void
+     * @throws CouldNotSaveException
      * @api
      */
     protected function _update(array $productQtys, array $productSeqs, string $messageSeqId)

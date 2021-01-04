@@ -2,6 +2,8 @@
 
 namespace RealtimeDespatch\OrderFlow\Api;
 
+use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
+
 /**
  * Request Processor Factory Interface.
  *
@@ -10,11 +12,10 @@ namespace RealtimeDespatch\OrderFlow\Api;
 interface RequestProcessorFactoryInterface
 {
     /**
-     * Returns the correct request process for specific entity, and operation types.
+     * Request Factory Getter.
      *
-     * @param string $entity
-     * @param string $operation
+     * @param RequestInterface $request
      * @return mixed
      */
-    public function get(string $entity, string $operation);
+    public function get(RequestInterface $request);
 }

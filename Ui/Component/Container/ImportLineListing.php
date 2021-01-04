@@ -76,7 +76,7 @@ class ImportLineListing extends Container
             $importId = $this->request->getParam('import_id');
             $import = $this->importRepository->get($importId);
 
-            if ($import->getEntity() === 'shipment') {
+            if ($import->isShipmentImport()) {
                 $data['config']['ns'] = self::SHIPMENT_IMPORT_LINE_LISTING_NS;
                 $data['config']['dataScope'] = self::SHIPMENT_IMPORT_LINE_LISTING_NS;
             }

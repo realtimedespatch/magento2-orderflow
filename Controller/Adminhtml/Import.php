@@ -41,8 +41,7 @@ abstract class Import extends Action
         Action\Context $context,
         PageFactory $pageFactory,
         ImportRepositoryInterface $importRepository
-    )
-    {
+    ) {
         parent::__construct($context);
 
         $this->pageFactory = $pageFactory;

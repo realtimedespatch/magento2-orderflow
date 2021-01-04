@@ -2,7 +2,6 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Service\Request;
 
-use RealtimeDespatch\OrderFlow\Api\Data\ExportInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\RequestProcessorTypeInterface;
 
@@ -31,7 +30,7 @@ class RequestProcessor
      *
      * @param RequestInterface $request
      *
-     * @return ExportInterface|boolean
+     * @return boolean
      */
     public function process(RequestInterface $request)
     {

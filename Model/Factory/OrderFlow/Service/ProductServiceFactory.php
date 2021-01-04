@@ -21,11 +21,20 @@ class ProductServiceFactory
     protected $helper;
 
     /**
-     * @param Api $helper
+     * @var DefaultGatewayFactory
      */
-    public function __construct(Api $helper)
-    {
+    protected $gatewayFactory;
+
+    /**
+     * @param Api $helper
+     * @param DefaultGatewayFactory $gatewayFactory
+     */
+    public function __construct(
+        Api $helper,
+        DefaultGatewayFactory $gatewayFactory
+    ) {
         $this->helper = $helper;
+        $this->gatewayFactory = $gatewayFactory;
     }
 
     /**
@@ -38,8 +47,8 @@ class ProductServiceFactory
     public function getService($scopeId = null)
     {
         $credentials = $this->helper->getCredentials($scopeId);
-        $factory = new DefaultGatewayFactory();
+        $gateway = $this->gatewayFactory->create($credentials);
 
-        return new ProductService($factory->create($credentials));
+        return new ProductService($gateway);
     }
 }

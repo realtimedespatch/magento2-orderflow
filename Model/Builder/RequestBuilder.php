@@ -96,21 +96,6 @@ class RequestBuilder implements RequestBuilderInterface
     }
 
     /**
-     * Sets the processed date.
-     *
-     * @param string $processed
-     *
-     * @return RequestBuilderInterface
-     */
-    public function markProcessed(string $processed)
-    {
-        $this->request->setCreatedAt($processed);
-        $this->request->setProcessedAt($processed);
-
-        return $this;
-    }
-
-    /**
      * Sets the request body.
      *
      * @param string $body
@@ -153,19 +138,6 @@ class RequestBuilder implements RequestBuilderInterface
     }
 
     /**
-     * Resets the builder.
-     *
-     * @return RequestBuilderInterface
-     */
-    public function resetBuilder()
-    {
-        /** @noinspection PhpUndefinedMethodInspection */
-        $this->request = $this->requestFactory->create();
-
-        return $this;
-    }
-
-    /**
      * Returns a new request instance.
      *
      * @return RequestInterface|Request
@@ -178,11 +150,32 @@ class RequestBuilder implements RequestBuilderInterface
     /**
      * Returns a new request instance.
      *
+     * @param string $type
+     * @param string $entity
+     * @param string $operation
+     * @param null $messageId
+     * @param array $lines
      * @return RequestInterface
      * @throws CouldNotSaveException
      */
-    public function saveRequest()
-    {
+    public function saveRequest(
+        string $type,
+        string $entity,
+        string $operation,
+        $messageId = null,
+        array $lines = []
+    ) {
+        $this->setRequestData(
+            $type,
+            $entity,
+            $operation,
+            $messageId
+        );
+
+        foreach ($lines as $line) {
+            $this->addRequestLine($line);
+        }
+
         return $this->requestRepository->save($this->request);
     }
 }

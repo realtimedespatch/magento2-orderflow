@@ -6,8 +6,6 @@ use RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface;
 
 /**
- * Inventory Request Management Interface.
- *
  * @api
  */
 interface InventoryRequestManagementInterface

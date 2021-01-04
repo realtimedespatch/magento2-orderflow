@@ -3,6 +3,7 @@
 namespace RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\View\Tab;
 
 use Magento\Backend\Block\Widget\Tab\TabInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use RealtimeDespatch\OrderFlow\Block\Adminhtml\Request\AbstractRequest;
 
 /**
@@ -14,18 +15,19 @@ class Info extends AbstractRequest implements TabInterface
      * Returns the associated website name.
      *
      * @return string
+     * @throws NoSuchEntityException
      */
     public function getWebsiteName()
     {
         /** @noinspection PhpUndefinedMethodInspection */
-        if (! $this->getRequest()->getScopeId()) {
+        if (! $this->getRtdRequest()->getScopeId()) {
             return 'OrderFlow';
         }
 
         /** @noinspection PhpUndefinedMethodInspection */
         $website = $this->websiteFactory
                         ->create()
-                        ->load($this->getRequest()->getScopeId());
+                        ->load($this->getRtdRequest()->getScopeId());
 
         return $website->getName();
     }

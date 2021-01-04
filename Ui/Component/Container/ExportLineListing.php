@@ -76,7 +76,7 @@ class ExportLineListing extends Container
             $exportId = $this->request->getParam('export_id');
             $export = $this->exportRepository->get($exportId);
 
-            if ($export->getEntity() === 'order') {
+            if ($export->isOrderExport()) {
                 $data['config']['ns'] = self::ORDER_EXPORT_LINE_LISTING_NS;
                 $data['config']['dataScope'] = self::ORDER_EXPORT_LINE_LISTING_NS;
             }

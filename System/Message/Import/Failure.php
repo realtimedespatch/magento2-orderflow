@@ -3,7 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\System\Message\Import;
 
 use Magento\Framework\AuthorizationInterface;
-use Magento\Framework\DataObject;
 use Magento\Framework\Notification\MessageInterface;
 use Magento\Framework\UrlInterface;
 use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
@@ -17,6 +16,7 @@ use RealtimeDespatch\OrderFlow\Model\ResourceModel\Import\CollectionFactory as I
 class Failure implements MessageInterface
 {
     const IDENTITY = 'ORDERFLOW_IMPORT_FAILURE';
+    const ACL_RESOURCE = 'RealtimeDespatch_OrderFlow::orderflow_imports';
 
     /**
      * @var ImportCollectionFactory
@@ -51,7 +51,6 @@ class Failure implements MessageInterface
         $this->collectionFactory = $collectionFactory;
         $this->authorization = $authorization;
         $this->urlBuilder = $urlBuilder;
-        $this->unreadImport = $this->getLatestFailedImport();
     }
 
     /**
@@ -71,29 +70,27 @@ class Failure implements MessageInterface
      */
     public function isDisplayed()
     {
-        if (! $this->authorization->isAllowed('RealtimeDespatch_OrderFlow::orderflow_imports')) {
+        if (! $this->authorization->isAllowed(self::ACL_RESOURCE)) {
             return false;
         }
 
-        return $this->unreadImport && $this->unreadImport->getId();
+        return (boolean) $this->getUnreadFailedImport()->getId();
     }
 
     /**
      * Checks whether there is an unread import.
      *
-     * @return DataObject
+     * @return ImportInterface
      */
-    protected function getLatestFailedImport()
+    public function getUnreadFailedImport()
     {
-        return $this
-            ->collectionFactory
-            ->create()
-            ->addFieldToFilter('failures', ['gt' => 0])
-            ->addFieldToFilter('viewed_at', ['null' => true])
-            ->setOrder('created_at')
-            ->setPageSize(1)
-            ->setCurPage(1)
-            ->getFirstItem();
+        if ($this->unreadImport) {
+            return $this->unreadImport;
+        }
+
+        $this->unreadImport = $this->collectionFactory->create()->getUnreadFailedImport();
+
+        return $this->unreadImport;
     }
 
     /**
@@ -103,21 +100,25 @@ class Failure implements MessageInterface
      */
     public function getText()
     {
+        if (! $this->getUnreadFailedImport()->getId()) {
+            return __('An unexpected error has occurred');
+        }
+
         $url = $this->urlBuilder->getUrl(
             'orderflow/import/view',
-            ['import_id' => $this->unreadImport->getId()]
+            ['import_id' => $this->getUnreadFailedImport()->getId()]
         );
 
         return __('A recent OrderFlow import contains failures. <a href="'.$url.'">View Details</a>');
     }
 
     /**
-     * Retrieve message severity
+     * Retrieve message severity.
      *
      * @return int
      */
     public function getSeverity()
     {
-        return MessageInterface::SEVERITY_MAJOR;
+        return MessageInterface::SEVERITY_MINOR;
     }
 }

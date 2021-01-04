@@ -2,16 +2,18 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Adminhtml;
 
-use Magento\Framework\AuthorizationInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\UrlInterface;
-use RealtimeDespatch\OrderFlow\Helper\Export\Order;
+use Magento\Framework\AuthorizationInterface;
+use Magento\Sales\Ui\Component\Listing\Column\ViewAction;
 
 /**
  * Adds an Export Button to Order Actions.
  */
 class OrderActions
 {
+    const ACL_RESOURCE = 'RealtimeDespatch_OrderFlow::orderflow_exports_products';
+
     /**
      * @var UrlInterface
      */
@@ -23,41 +25,38 @@ class OrderActions
     protected $context;
 
     /**
-     * @var Order
-     */
-    protected $helper;
-
-    /**
      * @var AuthorizationInterface
      */
     protected $auth;
 
+    /**
+     * @param ContextInterface $context
+     * @param UrlInterface $urlBuilder
+     * @param AuthorizationInterface $auth
+     */
     public function __construct(
         ContextInterface $context,
         UrlInterface $urlBuilder,
-        Order $helper,
         AuthorizationInterface $auth
-    )
-    {
+    ) {
         $this->urlBuilder = $urlBuilder;
         $this->context = $context;
-        $this->helper = $helper;
         $this->auth = $auth;
     }
 
     /**
      * Adds the export action to the order grid.
      *
-     * @param $orderActions
-     * @param $result
-     * @return mixed
+     * @param ViewAction $orderActions
+     * @param array $result
+     * @return array
      */
-    public function afterPrepareDataSource($orderActions, $result)
+    public function afterPrepareDataSource(ViewAction $orderActions, array $result): array
     {
         if (isset($result['data']['items'])) {
             $storeId = $this->context->getFilterParam('store_id');
             foreach ($result['data']['items'] as &$item) {
-                if ( ! $this->auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_products')) {
+                if (! $this->auth->isAllowed(self::ACL_RESOURCE)) {
                     continue;
                 }
 
@@ -66,8 +65,7 @@ class OrderActions
                         'orderflow/order/export',
                         ['order_id' => $item['entity_id'], 'store' => $storeId]
                     ),
-                    'label' => __('Export'),
-                    'hidden' => false,
+                    'label' => __('Export')
                 ];
             }
         }

@@ -139,11 +139,11 @@ interface RequestInterface
     /**
      * Set Scope Id
      *
-     * @param string $scopeId
+     * @param integer|null $scopeId
      *
      * @return RequestInterface
      */
-    public function setScopeId(string $scopeId);
+    public function setScopeId(int $scopeId = null);
 
     /**
      * Set type

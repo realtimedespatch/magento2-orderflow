@@ -42,8 +42,8 @@ class Website extends Column
     {
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
-                if (isset($item['scope_id'])) {
-                    $website = $this->websiteFactory->create()->load((integer) $item['scope_id']);
+                if (isset($item[$this->getData('name')])) {
+                    $website = $this->websiteFactory->create()->load((integer) $item[$this->getData('name')]);
                     $item[$this->getData('name')] = $website->getName();
                 } else {
                     $item[$this->getData('name')] = 'OrderFlow';

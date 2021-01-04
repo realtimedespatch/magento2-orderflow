@@ -40,8 +40,7 @@ abstract class Request extends Action
         Action\Context $context,
         PageFactory $pageFactory,
         RequestRepositoryInterface $requestRepository
-    )
-    {
+    ) {
         parent::__construct($context);
 
         $this->pageFactory = $pageFactory;

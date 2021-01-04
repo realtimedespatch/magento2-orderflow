@@ -2,6 +2,8 @@
 
 namespace RealtimeDespatch\OrderFlow\Api;
 
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Collection;
+
 interface ImportHelperInterface
 {
     /**
@@ -10,4 +12,11 @@ interface ImportHelperInterface
      * @return boolean
      */
     public function isEnabled();
+
+    /**
+     * Importable Requests Getter.
+     *
+     * @return Collection
+     */
+    public function getImportableRequests();
 }

@@ -3,8 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\Api;
 
 /**
- * Order Request Management Interface.
- *
  * @api
  */
 interface OrderRequestManagementInterface

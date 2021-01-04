@@ -73,7 +73,7 @@ class ImportActions extends Column
                     ];
                 }
 
-                if ($this->canViewRequest()) {
+                if ($this->canViewRequest() && isset($item['request_id'])) {
                     $item[$name]['view_request'] = [
                         'href'  => $this->urlBuilder->getUrl(
                             self::REQUEST_URL_PATH_VIEW,

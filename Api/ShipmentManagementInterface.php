@@ -3,8 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\Api;
 
 /**
- * Shipment Management Interface.
- *
  * @api
  */
 interface ShipmentManagementInterface

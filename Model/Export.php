@@ -216,11 +216,11 @@ class Export extends AbstractModel implements ExportInterface
     /**
      * Set Scope Id
      *
-     * @param integer $scopeId
+     * @param integer|null $scopeId
      *
      * @return ExportInterface
      */
-    public function setScopeId(int $scopeId)
+    public function setScopeId(int $scopeId = null)
     {
         return $this->setData(self::SCOPE_ID, $scopeId);
     }

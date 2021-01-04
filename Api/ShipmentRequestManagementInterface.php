@@ -5,8 +5,6 @@ namespace RealtimeDespatch\OrderFlow\Api;
 use RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface;
 
 /**
- * Shipment Request Management Interface.
- *
  * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
  * @api
  */
@@ -27,14 +25,16 @@ interface ShipmentRequestManagementInterface
      * @return mixed
      * @api
      */
-    public function create(string $orderIncrementId,
-                           $skuQty = array(),
-                           $comment = null,
-                           $email = false,
-                           $includeComment = false,
-                           $courierName = null,
-                           $serviceName = null,
-                           $trackingNumber = null,
-                           $dateShipped = null,
-                           $messageSeqId = null);
+    public function create(
+        string $orderIncrementId,
+        $skuQty = [],
+        $comment = null,
+        $email = false,
+        $includeComment = false,
+        $courierName = null,
+        $serviceName = null,
+        $trackingNumber = null,
+        $dateShipped = null,
+        $messageSeqId = null
+    );
 }

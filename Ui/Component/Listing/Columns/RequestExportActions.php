@@ -76,14 +76,20 @@ class RequestExportActions extends Column
                 $exportName = $this->getData('name');
                 if (isset($item['request_id'])) {
                     $item[$exportName]['view'] = [
-                        'href'  => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_VIEW, ['request_id' => $item['request_id']]),
+                        'href'  => $this->urlBuilder->getUrl(
+                            self::REQUEST_URL_PATH_VIEW,
+                            ['request_id' => $item['request_id']]
+                        ),
                         'label' => __('View Request')
                     ];
                 }
 
                 if (isset($item['processed_at']) && $item['processed_at'] == 'Pending') {
                     $item[$exportName]['process'] = [
-                        'href' => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_PROCESS, ['request_id' => $item['request_id']]),
+                        'href' => $this->urlBuilder->getUrl(
+                            self::REQUEST_URL_PATH_PROCESS,
+                            ['request_id' => $item['request_id']]
+                        ),
                         'label' => __('Process'),
                         'confirm' => [
                             'title' => __('Process Request'),
@@ -109,17 +115,17 @@ class RequestExportActions extends Column
     /**
      * Checks whether the current user is able to review the associated export.
      *
-     * @param string $entity Entity Type
+     * @param string $entityType
      *
      * @return bool
      */
-    public function canViewExport(string $entity)
+    public function canViewExport(string $entityType)
     {
-        if ($entity == ExportInterface::ENTITY_PRODUCT) {
+        if ($entityType == ExportInterface::ENTITY_PRODUCT) {
             return $this->auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_products');
         }
 
-        if ($entity == ExportInterface::ENTITY_ORDER) {
+        if ($entityType == ExportInterface::ENTITY_ORDER) {
             return $this->auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_orders');
         }
 

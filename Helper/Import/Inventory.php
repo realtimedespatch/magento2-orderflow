@@ -3,8 +3,13 @@
 namespace RealtimeDespatch\OrderFlow\Helper\Import;
 
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Store\Model\ScopeInterface;
+use RealtimeDespatch\OrderFlow\Api\Data\ImportInterface;
 use RealtimeDespatch\OrderFlow\Api\ImportHelperInterface;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\Collection;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Request\CollectionFactory as RequestCollectionFactory;
 
 /**
  * Inventory Import Helper.
@@ -12,11 +17,37 @@ use RealtimeDespatch\OrderFlow\Api\ImportHelperInterface;
 class Inventory extends AbstractHelper implements ImportHelperInterface
 {
     /**
+     * @var DateTime
+     */
+    protected $datetime;
+
+    /**
+     * @var RequestCollectionFactory
+     */
+    protected $reqCollectionFactory;
+
+    /**
+     * @param Context $context
+     * @param DateTime $dateTime
+     * @param RequestCollectionFactory $reqCollectionFactory
+     */
+    public function __construct(
+        Context $context,
+        DateTime $dateTime,
+        RequestCollectionFactory $reqCollectionFactory
+    ) {
+        parent::__construct($context);
+
+        $this->datetime = $dateTime;
+        $this->reqCollectionFactory = $reqCollectionFactory;
+    }
+
+    /**
      * Checks whether the import process is enabled.
      *
      * @return boolean
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_inventory_import/settings/is_enabled',
@@ -25,11 +56,27 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
     }
 
     /**
+     * Importable Requests Getter.
+     *
+     * @return array
+     */
+    public function getImportableRequests(): array
+    {
+        /** @var Collection $collection */
+        $collection = $this->reqCollectionFactory->create();
+
+        return $collection->getImportableRequests(
+            ImportInterface::ENTITY_INVENTORY,
+            $this->getBatchSize()
+        );
+    }
+
+    /**
      * Returns the maximum batch size for processing.
      *
      * @return integer
      */
-    public function getBatchSize()
+    public function getBatchSize(): int
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/batch_size',
@@ -42,7 +89,7 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return boolean
      */
-    public function isNegativeQtyEnabled()
+    public function isNegativeQtyEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_inventory_import/settings/negative_qtys_enabled',
@@ -55,7 +102,7 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return boolean
      */
-    public function isInventoryAdjustmentEnabled()
+    public function isInventoryAdjustmentEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(
             'orderflow_inventory_import/settings/adjust_inventory',
@@ -68,14 +115,12 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return boolean
      */
-    public function isUnsentOrderAdjustmentEnabled()
+    public function isUnsentOrderAdjustmentEnabled(): bool
     {
-        $flag = (integer) $this->scopeConfig->getValue(
+        return $this->scopeConfig->isSetFlag(
             'orderflow_inventory_import/settings/adjust_inventory',
             ScopeInterface::SCOPE_WEBSITE
         );
-
-        return $flag > 0;
     }
 
     /**
@@ -83,14 +128,12 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return boolean
      */
-    public function isActiveQuoteAdjustmentEnabled()
+    public function isActiveQuoteAdjustmentEnabled(): bool
     {
-        $flag = (integer) $this->scopeConfig->getValue(
+        return $this->scopeConfig->isSetFlag(
             'orderflow_inventory_import/settings/adjust_inventory',
             ScopeInterface::SCOPE_WEBSITE
         );
-
-        return $flag > 1;
     }
 
     /**
@@ -98,12 +141,16 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return array
      */
-    public function getValidUnsentOrderStatuses()
+    public function getValidUnsentOrderStatuses(): array
     {
         $statuses = $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/valid_unsent_order_statuses',
             ScopeInterface::SCOPE_WEBSITE
         );
+
+        if (! $statuses) {
+            return [];
+        }
 
         return explode(',', $statuses);
     }
@@ -113,7 +160,7 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return integer
      */
-    public function getActiveQuoteCutoff()
+    public function getActiveQuoteCutoff(): int
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/active_quote_cutoff',
@@ -126,9 +173,12 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return string
      */
-    public function getActiveQuoteCutoffDate()
+    public function getActiveQuoteCutoffDate(): string
     {
-        return date('Y-m-d H:i:s', strtotime('-'.$this->getActiveQuoteCutoff().' days'));
+        return $this->datetime->date(
+            'Y-m-d H:i:s',
+            '-'.$this->getActiveQuoteCutoff().' days'
+        );
     }
 
     /**
@@ -136,7 +186,7 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return integer
      */
-    public function getUnsentOrderCutoff()
+    public function getUnsentOrderCutoff(): int
     {
         return (integer) $this->scopeConfig->getValue(
             'orderflow_inventory_import/settings/unsent_order_cutoff',
@@ -149,8 +199,11 @@ class Inventory extends AbstractHelper implements ImportHelperInterface
      *
      * @return string
      */
-    public function getUnsentOrderCutoffDate()
+    public function getUnsentOrderCutoffDate(): string
     {
-        return date('Y-m-d H:i:s', strtotime('-'.$this->getUnsentOrderCutoff().' days'));
+        return $this->datetime->date(
+            'Y-m-d H:i:s',
+            '-'.$this->getUnsentOrderCutoff().' days'
+        );
     }
 }

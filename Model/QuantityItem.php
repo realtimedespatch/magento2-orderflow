@@ -5,10 +5,7 @@ namespace RealtimeDespatch\OrderFlow\Model;
 use RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface;
 
 /**
- * Class QuantityItem
- *
  * @api
- * @package RealtimeDespatch\OrderFlow\Model
  */
 class QuantityItem implements QuantityItemInterface
 {
@@ -29,7 +26,8 @@ class QuantityItem implements QuantityItemInterface
     /**
      * QuantityItem constructor.
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->sku = null;
         $this->qty = null;
     }

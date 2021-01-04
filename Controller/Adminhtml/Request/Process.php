@@ -63,7 +63,7 @@ class Process extends Action
         try {
             /* @var Request $request */
             $request = (int) $this->requestRepository->get($requestId);
-            $this->requestProcessorFactory->get($request->getEntity(), $request->getOperation())->process($request);
+            $this->requestProcessorFactory->get($request)->process($request);
             $this->messageManager->addSuccessMessage(__('Request successfully processed.'));
         } catch (Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());

@@ -3,8 +3,6 @@
 namespace RealtimeDespatch\OrderFlow\Api;
 
 /**
- * Product Request Management Interface.
- *
  * @api
  */
 interface ProductRequestManagementInterface

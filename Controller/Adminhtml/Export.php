@@ -41,8 +41,7 @@ abstract class Export extends Action
         Action\Context $context,
         PageFactory $pageFactory,
         ExportRepositoryInterface $exportRepository
-    )
-    {
+    ) {
         parent::__construct($context);
 
         $this->pageFactory = $pageFactory;

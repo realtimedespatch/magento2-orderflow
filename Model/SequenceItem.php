@@ -5,10 +5,7 @@ namespace RealtimeDespatch\OrderFlow\Model;
 use RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface;
 
 /**
- * Class SequenceItem
- *
  * @api
- * @package RealtimeDespatch\OrderFlow\Model
  */
 class SequenceItem implements SequenceItemInterface
 {
@@ -17,29 +14,30 @@ class SequenceItem implements SequenceItemInterface
      *
      * @var string
      */
-    private $_sku;
+    private $sku;
 
     /**
      * Message Sequence ID
      *
      * @var integer
      */
-    private $_seq;
+    private $seq;
 
     /**
      * Last Exported Timestamp
      *
      * @var string
      */
-    private $_lastOrderExported;
+    private $lastOrderExported;
 
     /**
      * SequenceItem constructor.
      */
-    public function __construct() {
-        $this->_sku = null;
-        $this->_seq = null;
-        $this->_lastOrderExported = null;
+    public function __construct()
+    {
+        $this->sku = null;
+        $this->seq = null;
+        $this->lastOrderExported = null;
     }
 
     /**
@@ -50,7 +48,7 @@ class SequenceItem implements SequenceItemInterface
      */
     public function getSku()
     {
-        return $this->_sku;
+        return $this->sku;
     }
 
     /**
@@ -61,7 +59,7 @@ class SequenceItem implements SequenceItemInterface
      */
     public function getSeq()
     {
-        return $this->_seq;
+        return $this->seq;
     }
 
     /**
@@ -72,7 +70,7 @@ class SequenceItem implements SequenceItemInterface
      */
     public function getLastOrderExported()
     {
-        return $this->_lastOrderExported;
+        return $this->lastOrderExported;
     }
 
     /**
@@ -84,7 +82,7 @@ class SequenceItem implements SequenceItemInterface
      */
     public function setSku(string $sku)
     {
-        $this->_sku = $sku;
+        $this->sku = $sku;
 
         return $this;
     }
@@ -98,7 +96,7 @@ class SequenceItem implements SequenceItemInterface
      */
     public function setSeq(string $seq)
     {
-        $this->_seq = $seq;
+        $this->seq = $seq;
 
         return $this;
     }
@@ -112,7 +110,7 @@ class SequenceItem implements SequenceItemInterface
      */
     public function setLastOrderExported(string $exported)
     {
-        $this->_lastOrderExported = $exported;
+        $this->lastOrderExported = $exported;
 
         return $this;
     }

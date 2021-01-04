@@ -76,14 +76,20 @@ class RequestImportActions extends Column
                 $importName = $this->getData('name');
                 if (isset($item['request_id'])) {
                     $item[$importName]['view'] = [
-                        'href'  => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_VIEW, ['request_id' => $item['request_id']]),
+                        'href'  => $this->urlBuilder->getUrl(
+                            self::REQUEST_URL_PATH_VIEW,
+                            ['request_id' => $item['request_id']]
+                        ),
                         'label' => __('View Request')
                     ];
                 }
 
                 if (isset($item['processed_at']) && $item['processed_at'] == 'Pending') {
                     $item[$importName]['process'] = [
-                        'href' => $this->urlBuilder->getUrl(self::REQUEST_URL_PATH_PROCESS, ['request_id' => $item['request_id']]),
+                        'href' => $this->urlBuilder->getUrl(
+                            self::REQUEST_URL_PATH_PROCESS,
+                            ['request_id' => $item['request_id']]
+                        ),
                         'label' => __('Process'),
                         'confirm' => [
                             'title' => __('Process Request'),

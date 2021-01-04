@@ -2,6 +2,8 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Adminhtml;
 
+use Exception;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
@@ -9,6 +11,7 @@ use RealtimeDespatch\OrderFlow\Api\Data\RequestInterface;
 use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
 use RealtimeDespatch\OrderFlow\Helper\Export\Order as OrderHelper;
 use RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor;
+use RealtimeDespatch\OrderFlow\Model\Source\Export\Status as ExportStatus;
 
 /**
  * Order Cancellation Plugin
@@ -76,22 +79,39 @@ class OrderCancellation
 
         // Check whether the order can be cancelled.
         if (! $order->canCancel()) {
-            return;
+            throw new LocalizedException(__('Order cancellation failed - the order cannot be cancelled.'));
         }
 
-        // Orders that are awaiting export cannot be cancelled.
-        /** @noinspection PhpUndefinedMethodInspection */
-        if ($order->getOrderflowExportStatus() === self::STATUS_QUEUED) {
-            throw new LocalizedException(__('Order Cancellation Failed - The Order is Pending Export to OrderFlow.'));
+        // Orders that are queued for export cannot be cancelled.
+        if ($order->getData('orderflow_export_status') === ExportStatus::STATUS_QUEUED) {
+            throw new LocalizedException(__('Order cancellation failed - the order is already queued for export.'));
         }
 
-        $request = $this->buildRequest($order);
-        $this->requestProcessor->process($request);
-
-        /** @noinspection PhpUndefinedMethodInspection */
-        if ($this->orderRepository->get($order->getId())->getOrderflowExportStatus() !== self::STATUS_CANCELLED) {
-            throw new LocalizedException(__('Order Cancellation Failed - Please Try Again.'));
+        // Build, and process the cancellation request.
+        try {
+            $request = $this->buildRequest($order);
+            $this->requestProcessor->process($request);
+        } catch (Exception $ex) {
+            throw new LocalizedException(__('Order cancellation failed - please try again.'));
         }
+
+        // Check the order has been cancelled.
+        if (! $this->isOrderCancelled($order)) {
+            throw new LocalizedException(__('Order cancellation failed - please try again.'));
+        }
+    }
+
+    /**
+     * Checks whether the order has been cancelled.
+     *
+     * @param Order $order
+     * @return bool
+     */
+    protected function isOrderCancelled(Order $order): bool
+    {
+        $order = $this->orderRepository->get($order->getId());
+
+        return $order->getData('orderflow_export_status') === ExportStatus::STATUS_CANCELLED;
     }
 
     /**
@@ -99,17 +119,18 @@ class OrderCancellation
      *
      * @param Order $order
      * @return RequestInterface
+     * @throws CouldNotSaveException
      */
-    protected function buildRequest(Order $order)
+    protected function buildRequest(Order $order): RequestInterface
     {
-        $this->requestBuilder->setRequestData(
+        $messageId = null;
+
+        return $this->requestBuilder->saveRequest(
             RequestInterface::TYPE_EXPORT,
             RequestInterface::ENTITY_ORDER,
-            RequestInterface::OP_CANCEL
+            RequestInterface::OP_CANCEL,
+            $messageId,
+            [json_encode(['increment_id' => $order->getIncrementId()])]
         );
-
-        $this->requestBuilder->addRequestLine(json_encode(['increment_id' => $order->getIncrementId()]));
-
-        return $this->requestBuilder->saveRequest();
     }
 }

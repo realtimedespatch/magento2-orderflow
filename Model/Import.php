@@ -271,4 +271,24 @@ class Import extends AbstractModel implements ImportInterface
     {
         return $this->setData(self::LINES, $lines);
     }
+
+    /**
+     * Checks whether this is an inventory import.
+     *
+     * @return boolean
+     */
+    public function isInventoryImport()
+    {
+        return $this->getEntity() === self::ENTITY_INVENTORY;
+    }
+
+    /**
+     * Checks whether this is a shipment import.
+     *
+     * @return boolean
+     */
+    public function isShipmentImport()
+    {
+        return $this->getEntity() === self::ENTITY_SHIPMENT;
+    }
 }

@@ -35,7 +35,7 @@ class Body extends AbstractRequest implements TabInterface
         try {
             $request = $this->getRtdRequest();
 
-            return ! $request->isExport() || $request->getOperation() == 'Export';
+            return $request->isImport() || $request->getOperation() == 'Export';
         } catch (LocalizedException $ex) {
             return false;
         }
@@ -46,13 +46,7 @@ class Body extends AbstractRequest implements TabInterface
      */
     public function isHidden()
     {
-        try {
-            $request = $this->getRtdRequest();
-
-            return $request->isExport() && $request->getOperation() !== 'Export';
-        } catch (LocalizedException $ex) {
-            return true;
-        }
+        return ! $this->canShowTab();
     }
 
     /**

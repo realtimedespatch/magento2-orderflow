@@ -9,16 +9,21 @@ use Magento\Framework\Data\OptionSourceInterface;
  */
 class Options implements OptionSourceInterface
 {
+    const STATUS_PENDING = 'Pending';
+    const STATUS_QUEUED = 'Queued';
+    const STATUS_EXPORTED = 'Exported';
+    const STATUS_FAILED = 'Failed';
+
     /**
      * @return array
      */
     public function toOptionArray()
     {
         return [
-            ['value' => 'Pending', 'label' => 'Pending'],
-            ['value' => 'Queued', 'label' => 'Queued'],
-            ['value' => 'Exported', 'label' => 'Exported'],
-            ['value' => 'Failed', 'label' => 'Failed']
+            ['value' => self::STATUS_PENDING, 'label' => self::STATUS_PENDING],
+            ['value' => self::STATUS_QUEUED, 'label' => self::STATUS_QUEUED],
+            ['value' => self::STATUS_EXPORTED, 'label' => self::STATUS_EXPORTED],
+            ['value' => self::STATUS_FAILED, 'label' => self::STATUS_FAILED]
         ];
     }
 }

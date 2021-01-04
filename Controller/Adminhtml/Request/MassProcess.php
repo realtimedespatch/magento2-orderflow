@@ -68,7 +68,7 @@ class MassProcess extends Action
         $collectionSize = $collection->getSize();
 
         foreach ($collection as $request) {
-            $this->requestProcessorFactory->get($request->getEntity(), $request->getOperation())->process($request);
+            $this->requestProcessorFactory->get($request)->process($request);
         }
 
         $this->messageManager->addSuccessMessage(__('A total of %1 request(s) have been processed.', $collectionSize));

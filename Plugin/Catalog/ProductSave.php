@@ -3,6 +3,7 @@
 namespace RealtimeDespatch\OrderFlow\Plugin\Catalog;
 
 use Magento\Catalog\Model\Product;
+use RealtimeDespatch\OrderFlow\Model\Source\Export\Status as ExportStatus;
 
 /**
  * Class ProductSave
@@ -11,7 +12,7 @@ use Magento\Catalog\Model\Product;
  */
 class ProductSave
 {
-    const EXPORT_STATUS_PENDING = 'Pending';
+    const EXPORT_STATUS_KEY = 'orderflow_export_status';
 
     /**
      * Resets the export status for a product that has been updated.
@@ -28,13 +29,18 @@ class ProductSave
         \Magento\Catalog\Model\ResourceModel\Product $resourceModel,
         Product $product
     ) {
-        // Ignore if the product has not changed, or the status has already been updated by a different listener
-        if ($product->isDataChanged() || $product->dataHasChangedFor('orderflow_export_status')) {
+        // Product has no changes.
+        if (! $product->isDataChanged()) {
             return [$product];
         }
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $product->setOrderflowExportStatus(self::EXPORT_STATUS_PENDING);
+        // The export status as already been updated.
+        if ($product->dataHasChangedFor(self::EXPORT_STATUS_KEY)) {
+            return [$product];
+        }
+
+        // Set export status as pending to trigger the push to OrderFlow
+        $product->setData(self::EXPORT_STATUS_KEY, ExportStatus::STATUS_PENDING);
 
         return [$product];
     }

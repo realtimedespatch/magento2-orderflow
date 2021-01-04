@@ -19,7 +19,7 @@ class View extends Export
         try {
             $export = $this->getExport();
 
-            if ( ! $export) {
+            if (! $export) {
                 return $this->resultRedirectFactory->create()->setRefererUrl();
             }
 

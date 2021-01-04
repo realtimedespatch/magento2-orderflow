@@ -10,18 +10,20 @@ use Magento\Sales\Block\Adminhtml\Order\View;
  */
 class OrderView
 {
+    const ACL_RESOURCE = 'RealtimeDespatch_OrderFlow::orderflow_exports_orders';
+    const EXPORT_URL_PATH = 'orderflow/order/export';
+
     /**
      * @var AuthorizationInterface
      */
-    protected $_auth;
+    protected $auth;
 
     /**
-     * OrderView constructor.
      * @param AuthorizationInterface $auth
      */
     public function __construct(AuthorizationInterface $auth)
     {
-        $this->_auth = $auth;
+        $this->auth = $auth;
     }
 
     /**
@@ -29,11 +31,11 @@ class OrderView
      */
     public function beforeSetLayout(View $view)
     {
-        if ( ! $this->_auth->isAllowed('RealtimeDespatch_OrderFlow::orderflow_exports_orders')) {
+        if (! $this->auth->isAllowed(self::ACL_RESOURCE)) {
             return;
         }
 
-        $exportUrl = $view->getUrl('orderflow/order/export');
+        $exportUrl = $view->getUrl(self::EXPORT_URL_PATH);
         $message = __('Are you sure you wish to export this order?');
 
         $view->addButton(

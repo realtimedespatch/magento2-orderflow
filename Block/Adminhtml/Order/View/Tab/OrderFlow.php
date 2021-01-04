@@ -41,9 +41,10 @@ class OrderFlow extends AbstractOrder implements TabInterface
         Api $apiHelper,
         array $data = []
     ) {
+        parent::__construct($context, $registry, $adminHelper, $data);
+
         $this->adminInfoHelper = $adminInfoHelper;
         $this->apiHelper = $apiHelper;
-        parent::__construct($context, $registry, $adminHelper, $data);
     }
 
     /**
@@ -74,11 +75,12 @@ class OrderFlow extends AbstractOrder implements TabInterface
      */
     public function getOrderFlowOrderUrl()
     {
-        $storeId = $this->getOrder()->getStoreId();
+        $order = $this->getOrder();
+        $storeId = $order->getStoreId();
 
         $url  = $this->apiHelper->getEndpoint($storeId);
         $url .= 'despatch/order/referenceDetail.htm?externalReference=';
-        $url .= urlencode($this->getOrder()->getIncrementId());
+        $url .= urlencode($order->getIncrementId());
         $url .= '&channel='.urlencode($this->apiHelper->getChannel($storeId));
 
         return $url;

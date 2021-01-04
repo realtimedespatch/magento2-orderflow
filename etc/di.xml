@@ -222,6 +222,34 @@
             </argument>
         </arguments>
     </virtualType>
+
+    <!-- Cron Jobs -->
+    <virtualType name="RealtimeDespatch\OrderFlow\Cron\Import\InventoryImportCron" type="RealtimeDespatch\OrderFlow\Cron\Import\ImportCron">
+        <arguments>
+            <argument name="helper" xsi:type="string">RealtimeDespatch\OrderFlow\Helper\Import\Inventory</argument>
+            <argument name="reqProcessorFactory" xsi:type="string">RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="RealtimeDespatch\OrderFlow\Cron\Import\ShipmentImportCron" type="RealtimeDespatch\OrderFlow\Cron\Import\ImportCron">
+        <arguments>
+            <argument name="helper" xsi:type="string">RealtimeDespatch\OrderFlow\Helper\Import\Shipment</argument>
+            <argument name="reqProcessorFactory" xsi:type="string">RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="RealtimeDespatch\OrderFlow\Cron\Export\OrderExportCron" type="RealtimeDespatch\OrderFlow\Cron\Export\ExportCron">
+        <arguments>
+            <argument name="helper" xsi:type="string">RealtimeDespatch\OrderFlow\Helper\Export\Order</argument>
+            <argument name="reqProcessorFactory" xsi:type="string">RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="RealtimeDespatch\OrderFlow\Cron\Export\ProductExportCron" type="RealtimeDespatch\OrderFlow\Cron\Export\ExportCron">
+        <arguments>
+            <argument name="helper" xsi:type="string">RealtimeDespatch\OrderFlow\Helper\Export\Product</argument>
+            <argument name="reqProcessorFactory" xsi:type="string">RealtimeDespatch\OrderFlow\Api\RequestProcessorFactoryInterface</argument>
+        </arguments>
+    </virtualType>
+
     <type name="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\OrderExport">
         <arguments>
             <argument name="requestProcessor" xsi:type="object">OrderExportRequestProcessor</argument>
@@ -238,22 +266,12 @@
         </arguments>
     </type>
     <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
-        <plugin name="orderflow_soap_product_export_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ProductExport"/>
+        <plugin name="orderflow_soap_product_export_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ProductExportRequest"/>
     </type>
     <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
-        <plugin name="orderflow_soap_order_export_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\OrderExport"/>
+        <plugin name="orderflow_soap_order_export_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\OrderExportRequest"/>
     </type>
     <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
-        <plugin name="orderflow_soap_shipment_import_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ShipmentImport"/>
+        <plugin name="orderflow_soap_import_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ImportRequest"/>
     </type>
-    <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
-        <plugin name="orderflow_soap_inventory_import_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\InventoryImport"/>
-    </type>
-    <virtualType name="orderflowLogger" type="Magento\Framework\Logger\Monolog">
-        <arguments>
-            <argument name="handlers"  xsi:type="array">
-                <item name="debug" xsi:type="object">RealtimeDespatch\OrderFlow\Logger\Handler\OrderFlow</item>
-            </argument>
-        </arguments>
-    </virtualType>
 </config>

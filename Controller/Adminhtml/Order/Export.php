@@ -6,6 +6,7 @@ use Exception;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -148,6 +149,7 @@ class Export extends Action
      *
      * @return RequestInterface
      * @throws NoSuchEntityException
+     * @throws CouldNotSaveException
      */
     protected function buildRequest(OrderInterface $order)
     {
