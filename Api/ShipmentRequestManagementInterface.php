@@ -11,21 +11,23 @@ interface ShipmentRequestManagementInterface
 {
     /**
      * @api
-     * @param string                                                       $orderIncrementId
+     * @param string $orderIncrementId
      * @param \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface[] $skuQty
-     * @param string|null                                                  $comment
-     * @param string|false                                                 $email
-     * @param string|false                                                 $includeComment
-     * @param string|null                                                  $courierName
-     * @param string|null                                                  $serviceName
-     * @param string|null                                                  $trackingNumber
-     * @param string|null                                                  $dateShipped
-     * @param string|null                                                   $messageSeqId
+     * @param \RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface[] $tracks
+     * @param string|null $comment
+     * @param string|false $email
+     * @param string|false $includeComment
+     * @param string|null $courierName
+     * @param string|null $serviceName
+     * @param string|null $trackingNumber
+     * @param string|null $dateShipped
+     * @param string|null $messageSeqId
      *
      * @return mixed
      */
     public function create($orderIncrementId,
-                           $skuQty = array(),
+                           $skuQty = [],
+                           $tracks = [],
                            $comment = null,
                            $email = false,
                            $includeComment = false,

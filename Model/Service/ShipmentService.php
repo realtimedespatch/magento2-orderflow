@@ -2,6 +2,10 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Service;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\Order\Shipment;
+use Magento\Sales\Model\Order\Shipment\Track;
+use RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface;
 use RealtimeDespatch\OrderFlow\Api\ShipmentManagementInterface;
 
 /**
@@ -75,10 +79,8 @@ class ShipmentService implements ShipmentManagementInterface
             // Add line(s).
             $this->_createShipmentLines($shipment, $params->skuQtys);
 
-            // Add track.
-            if ($params->trackingNumber) {
-                $this->_addTrack($shipment, $params);
-            }
+            // Add tracks.
+            $this->_addTracks($shipment, $params);
 
             // Register shipment.
             $shipment->register();
@@ -95,7 +97,7 @@ class ShipmentService implements ShipmentManagementInterface
 
             $shipment->save();
         } catch (\Exception $e) {
-            throw new \Magento\Framework\Exception\LocalizedException(
+            throw new LocalizedException(
                 __($e->getMessage())
             );
         }
@@ -106,8 +108,8 @@ class ShipmentService implements ShipmentManagementInterface
      *
      * @param array $params Shipment params.
      *
-     * @return \Magento\Sales\Model\Order\Shipment
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return Shipment
+     * @throws LocalizedException
      */
     protected function _createShipment($params)
     {
@@ -116,7 +118,7 @@ class ShipmentService implements ShipmentManagementInterface
 
         // Check if the order can be shipped.
         if ( ! $order->canShip()) {
-            throw new \Magento\Framework\Exception\LocalizedException(
+            throw new LocalizedException(
                 __("Can't create shipment")
             );
         }
@@ -134,7 +136,7 @@ class ShipmentService implements ShipmentManagementInterface
      * @param Magento\Sales\Model\Order\Shipment $shipment The shipment
      * @param array $skuQtys SKUs, and Quantities to update
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function _createShipmentLines($shipment, $skuQtys)
     {
@@ -148,30 +150,65 @@ class ShipmentService implements ShipmentManagementInterface
     }
 
     /**
-     * Adds a track to the shipment.
+     * Adds tracks to shipment.
      *
-     * @param Magento\Sales\Model\Order\Shipment $shipment The shipment
+     * @param Shipment $shipment
+     * @param array $params
+     *
+     * @eturn void
+     */
+    protected function _addTracks(Shipment $shipment, $params)
+    {
+        // Single Track
+        if ($params->trackingNumber) {
+            $this->_addTrack(
+                $shipment,
+                $params->courierName,
+                $params->serviceName,
+                $params->trackingNumber
+            );
+        }
+
+        // Multi Track
+        foreach ($params->tracks as $track) {
+            $this->_addTrack(
+                $shipment,
+                $track->courierName,
+                $track->serviceName,
+                $track->trackingNumber
+            );
+        }
+    }
+
+    /**
+     * Adds track to shipment.
+     *
+     * @param Shipment $shipment The shipment
      * @param array $params
      *
      * @return void
      */
-    protected function _addTrack($shipment, $params)
-    {
+    protected function _addTrack(
+        Shipment $shipment,
+        $courierName,
+        $serviceName,
+        $trackingNumber
+    ) {
         $track = $this->_trackFactory->create();
-        $track->setCarrierCode(\Magento\Sales\Model\Order\Shipment\Track::CUSTOM_CARRIER_CODE);
-        $track->setTitle($params->courierName.' '.$params->serviceName);
-        $track->setNumber($params->trackingNumber);
+        $track->setCarrierCode(Track::CUSTOM_CARRIER_CODE);
+        $track->setTitle($courierName.' '.$serviceName);
+        $track->setNumber($trackingNumber);
         $shipment->addTrack($track);
     }
 
     /**
      * Retrieves an order item by SKU.
      *
-     * @param Magento\Sales\Model\Order\Shipment $shipment The shipment
+     * @param Shipment $shipment The shipment
      * @param string $sku The SKU
      *
      * @return mixed
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function _getOrderItem($shipment, $sku)
     {
@@ -183,7 +220,7 @@ class ShipmentService implements ShipmentManagementInterface
             }
         }
 
-        throw new \Magento\Framework\Exception\LocalizedException(
+        throw new LocalizedException(
             __('Order Item with SKU: "'.$sku.'" does not exist.')
         );
     }
