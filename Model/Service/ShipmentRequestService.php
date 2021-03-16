@@ -55,6 +55,7 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
      * @api
      * @param string $orderIncrementId
      * @param \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface[] $skuQty
+     * @param \RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface[] $tracks
      * @param string|null $comment
      * @param string|false $email
      * @param string|false $includeComment
@@ -67,7 +68,8 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
      * @return mixed
      */
     public function create($orderIncrementId,
-                           $skuQty = array(),
+                           $skuQty = [],
+                           $tracks = [],
                            $comment = null,
                            $email = false,
                            $includeComment = false,
@@ -82,6 +84,7 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
             $this->_create(
                 $orderIncrementId,
                 $skuQty,
+                $tracks,
                 $comment,
                 $email,
                 $includeComment,
@@ -103,6 +106,7 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
      * @api
      * @param integer $orderIncrementId
      * @param \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface[] $skuQty
+     * @param \RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface[] $tracks
      * @param string|null $comment
      * @param string|false $email
      * @param string|false $includeComment
@@ -116,7 +120,8 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
      */
     public function _create(
         $orderIncrementId,
-        $skuQty = array(),
+        $skuQty = [],
+        $tracks = [],
         $comment = null,
         $email = false,
         $includeComment = false,
@@ -130,6 +135,7 @@ class ShipmentRequestService implements ShipmentRequestManagementInterface
         $body = array(
             'orderIncrementId' => $orderIncrementId,
             'skuQtys' => $skuQty,
+            'tracks' => $tracks,
             'comment' => $comment,
             'email' => $email,
             'includeComment' => $includeComment,

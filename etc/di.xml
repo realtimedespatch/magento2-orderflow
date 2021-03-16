@@ -16,6 +16,7 @@
     <preference for="RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface" type="RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface" type="RealtimeDespatch\OrderFlow\Model\SequenceItem" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface" type="RealtimeDespatch\OrderFlow\Model\QuantityItem" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface" type="RealtimeDespatch\OrderFlow\Model\TrackItem" />
     <virtualType name="OrderCreateRequestProcessor" type="RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor" shared="true">
         <arguments>
             <argument name="type" xsi:type="object" shared="false">OrderCreateRequestProcessorType</argument>
