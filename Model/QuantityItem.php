@@ -27,6 +27,13 @@ class QuantityItem implements QuantityItemInterface
     public $qty;
 
     /**
+     * Inventory source
+     *
+     * @var string
+     */
+    public $source;
+
+    /**
      * QuantityItem constructor.
      */
     public function __construct() {
@@ -82,6 +89,31 @@ class QuantityItem implements QuantityItemInterface
     public function setQty($qty)
     {
         $this->qty = $qty;
+
+        return $this;
+    }
+
+    /**
+     * Get the inventory source
+     *
+     * @api
+     * @return string
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
+     * Set the inventory source
+     *
+     * @api
+     * @param $source
+     * @return mixed|void
+     */
+    public function setSource($source)
+    {
+        $this->source = $source;
 
         return $this;
     }

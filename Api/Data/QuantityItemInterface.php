@@ -42,4 +42,21 @@ interface QuantityItemInterface
      * @return \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface
      */
     public function setQty($qty);
+
+    /**
+     * Get the inventory source
+     *
+     * @api
+     * @return string
+     */
+    public function getSource();
+
+    /**
+     * Set the inventory source
+     *
+     * @api
+     * @param $source
+     * @return \RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface
+     */
+    public function setSource($source);
 }

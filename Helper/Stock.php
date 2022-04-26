@@ -2,6 +2,9 @@
 
 namespace RealtimeDespatch\OrderFlow\Helper;
 
+use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
+use Magento\InventoryApi\Api\SourceItemsSaveInterface;
+
 /**
  * Stock Helper.
  */
@@ -28,22 +31,38 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_quoteFactory;
 
     /**
+     * @var SourceItemInterfaceFactory
+     */
+    protected $_sourceItemFactory;
+
+    /**
+     * @var SourceItemsSaveInterface
+     */
+    protected $_sourceItemsSave;
+
+    /**
      * @param Magento\Framework\App\Helper\Context $context
      * @param Magento\Catalog\Api\ProductRepositoryInterface $productRepository
      * @param RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper
      * @param Magento\Sales\Model\OrderFactory $orderFactory
+     * @param SourceItemInterfaceFactory $sourceItemFactory
+     * @param SourceItemsSaveInterface $sourceItemsSave
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
         \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
         \RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper,
         \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Quote\Model\QuoteFactory $quoteFactory
+        \Magento\Quote\Model\QuoteFactory $quoteFactory,
+        SourceItemInterfaceFactory $sourceItemFactory,
+        SourceItemsSaveInterface $sourceItemsSave
     ) {
         $this->_productRepository = $productRepository;
         $this->_helper = $inventoryHelper;
         $this->_orderFactory = $orderFactory;
         $this->_quoteFactory = $quoteFactory;
+        $this->_sourceItemFactory = $sourceItemFactory;
+        $this->_sourceItemsSave = $sourceItemsSave;
         parent::__construct($context);
     }
 
@@ -53,24 +72,24 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
      * @param string    $sku                SKU
      * @param integer   $qty                Qty
      * @param \DateTime $lastOrderExported  Last Order Exported Timestamp
+     * @param string    $source             Inventory source code
      *
-     * @return \stdClass
      */
-    public function updateProductStock($sku, $qty, $lastOrderExported)
+    public function updateProductStock($sku, $qty, $lastOrderExported, $source = "default")
     {
         $product = $this->_productRepository->get($sku);
-        $inventory = $this->calculateProductStock($product->getId(), $qty, $lastOrderExported);
-        $isInStock = $inventory->unitsCalculated > 0 ? 1 : 0;
+        $isInStock = $qty > 0 ? 1 : 0;
 
-        if ( ! $this->_helper->isNegativeQtyEnabled() && $inventory->unitsCalculated < 0) {
+        if ( ! $this->_helper->isNegativeQtyEnabled() && $qty < 0) {
             $qty = 0;
         }
 
-        $product->setStockData(['qty' => $inventory->unitsCalculated, 'is_in_stock' => $isInStock]);
-        $product->setQuantityAndStockStatus(['qty' => $inventory->unitsCalculated, 'is_in_stock' => $isInStock]);
-        $product->save();
-
-        return $inventory;
+        $sourceItem = $this->_sourceItemFactory->create();
+        $sourceItem->setSourceCode($source);
+        $sourceItem->setSku($sku);
+        $sourceItem->setQuantity($qty);
+        $sourceItem->setStatus($isInStock);
+        $this->_sourceItemsSave->execute([$sourceItem]);
     }
 
     /**

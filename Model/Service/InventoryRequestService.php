@@ -94,6 +94,8 @@ class InventoryRequestService implements InventoryRequestManagementInterface
             $messageSeqId
         );
 
+        file_put_contents('/tmp/test.txt', $this->_httpRequest->getContent());
+
         $this->_builder->setRequestBody($this->_httpRequest->getContent());
 
         $productSeqsMap = [];
@@ -103,6 +105,8 @@ class InventoryRequestService implements InventoryRequestManagementInterface
 
         foreach ($productQtys as $productQty) {
             $body = (array) $productQty;
+
+            //file_put_contents('/tmp/test.txt', json_encode($body));
             $seq = $productSeqsMap[$productQty->getSku()];
             $body['lastOrderExported'] = $seq->getLastOrderExported();
             $this->_builder->addRequestLine(json_encode($body), $seq->getSeq());

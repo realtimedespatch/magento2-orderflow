@@ -101,14 +101,17 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
             $body = $requestLine->getBody();
             $sku  = (string) $body->sku;
             $unitsReceived = (integer) $body->qty;
+            $source = (string) $body->source;
             $lastOrderExported = isset($body->lastOrderExported) ? new \DateTime($body->lastOrderExported) : new \DateTime;
+
+            $reference = "${sku}_${source}";
 
             // Check for a duplicate import line
             if ($this->_isDuplicateLine($requestLine->getSequenceId())) {
                 return $this->_createDuplicateImportLine(
                     $import,
                     $seqId,
-                    $sku,
+                    $reference,
                     $request->getOperation(),
                     __('Duplicate Inventory Request Ignored.')
                 );
@@ -119,7 +122,7 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
                 return $this->_createSupersededImportLine(
                     $import,
                     $seqId,
-                    $sku,
+                    $reference,
                     $request->getOperation(),
                     sprintf(
                         'Product quantity update to %d discarded as already superseded by inventory record %d',
@@ -130,21 +133,21 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
             }
 
             // Update the product's inventory
-            $inventory = $this->_stockHelper->updateProductStock($sku, $unitsReceived, $lastOrderExported);
+            $this->_stockHelper->updateProductStock($sku, $unitsReceived, $lastOrderExported, $source);
 
             return $this->_createSuccessImportLine(
                 $import,
                 $seqId,
-                $sku,
+                $reference,
                 $request->getOperation(),
-                __('Product Quantity Successfully Updated to ').$inventory->unitsCalculated,
-                $inventory
+                __('Product Quantity Successfully Updated to ').$unitsReceived,
+                []
             );
         } catch (\Exception $ex) {
             return $this->_createFailureImportLine(
                 $import,
                 $seqId,
-                $sku,
+                $reference,
                 $request->getOperation(),
                 $ex->getMessage()
             );
