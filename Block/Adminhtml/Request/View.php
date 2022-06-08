@@ -36,16 +36,16 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
     /**
      * View constructor.
      * @param \Magento\Backend\Block\Widget\Context $context
-     * @param array $data
      * @param \Magento\Framework\Registry $registry
      * @param \RealtimeDespatch\OrderFlow\Model\ResourceModel\Export $exportResourceModel
+     * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Widget\Context $context,
-        array $data = [],
         \Magento\Framework\Registry $registry,
         \RealtimeDespatch\OrderFlow\Model\ResourceModel\Export $exportResourceModel,
-        \RealtimeDespatch\OrderFlow\Model\ResourceModel\Import $importResourceModel
+        \RealtimeDespatch\OrderFlow\Model\ResourceModel\Import $importResourceModel,
+        array $data = []
     ) {
         $this->_coreRegistry = $registry;
         $this->_exportResourceModel = $exportResourceModel;

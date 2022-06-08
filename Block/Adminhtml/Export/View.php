@@ -25,13 +25,13 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
 
     /**
      * @param Context $context
-     * @param array $data
      * @param \Magento\Framework\Registry $registry
+     * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Widget\Context $context,
-        array $data = [],
-        \Magento\Framework\Registry $registry
+        \Magento\Framework\Registry $registry,
+        array $data = []
     ) {
         $this->_coreRegistry = $registry;
         parent::__construct($context, $data);

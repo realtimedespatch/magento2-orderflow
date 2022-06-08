@@ -39,6 +39,7 @@ class QuantityItem implements QuantityItemInterface
     public function __construct() {
         $this->sku = null;
         $this->qty = null;
+        $this->source = null;
     }
 
     /**

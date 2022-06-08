@@ -6,7 +6,7 @@
     "OSL-3.0"
   ],
   "require": {
-    "sixbysix/realtime-despatch": ">=1.2.2"
+    "sixbysix/realtime-despatch": "dev-php8.1"
   },
   "autoload": {
     "files": ["registration.php"],

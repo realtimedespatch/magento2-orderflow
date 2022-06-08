@@ -70,32 +70,46 @@ class ShipmentService implements ShipmentManagementInterface
      *
      * @return mixed
      */
-    public function createShipment($params)
+    public function createShipments($params)
     {
         try {
-            // Create shipment.
-            $shipment = $this->_createShipment($params);
 
-            // Add line(s).
-            $this->_createShipmentLines($shipment, $params->skuQtys);
-
-            // Add tracks.
-            $this->_addTracks($shipment, $params);
-
-            // Register shipment.
-            $shipment->register();
-            $shipment->getOrder()->setIsInProcess(true);
-
-            // Ssve shipment.
-            $shipment->save();
-            $shipment->getOrder()->save();
-
-            // Notify customer.
-            if ($params->email) {
-                $this->_shipmentNotifier->notify($shipment);
+            // divide sku qtys by source
+            $sourceSkuQtys = [];
+            foreach ($params->skuQtys as $skuQty) {
+                $source = $skuQty->source;
+                if (!isset($sourceSkuQtys[$source])) {
+                    $sourceSkuQtys[$source] = [];
+                }
+                $sourceSkuQtys[$source][] = $skuQty;
             }
 
-            $shipment->save();
+            foreach ($sourceSkuQtys as $source => $skuQtys) {
+                // Create shipment.
+                $shipment = $this->_createShipment($params);
+                $shipment->getExtensionAttributes()->setSourceCode($source);
+
+                // Add line(s).
+                $this->_createShipmentLines($shipment, $skuQtys);
+
+                // Add tracks.
+                $this->_addTracks($shipment, $params);
+
+                // Register shipment.
+                $shipment->register();
+                $shipment->getOrder()->setIsInProcess(true);
+
+                // Ssve shipment.
+                $shipment->save();
+                $shipment->getOrder()->save();
+
+                // Notify customer.
+                if ($params->email) {
+                    $this->_shipmentNotifier->notify($shipment);
+                }
+
+                $shipment->save();
+            }
         } catch (\Exception $e) {
             throw new LocalizedException(
                 __($e->getMessage())

@@ -10,11 +10,11 @@ namespace RealtimeDespatch\OrderFlow\Api;
 interface ShipmentManagementInterface
 {
     /**
-     * Creates a new shipment
+     * Creates new shipment(s)
      *
      * @param array $params Shipment Params
      *
      * @return mixed
      */
-    public function createShipment($params);
+    public function createShipments($params);
 }
