@@ -13,24 +13,32 @@ class ProductExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Servic
     protected $_tx;
 
     /**
-     * @var \Magento\Catalog\Model\ProductRepository
+     * @var \Magento\Catalog\Api\ProductRepositoryInterface
      */
     protected $_productRepository;
+
+    /**
+     * @var \RealtimeDespatch\OrderFlow\Helper\Export\Product
+     */
+    protected $_helper;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @pparam \Magento\Catalog\Model\ProductRepository $productRepository
+     * @param \Magento\Catalog\Api\ProductRepositoryInterface $productRepository
+     * @param \RealtimeDespatch\OrderFlow\Helper\Export\Product $helper
      */
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $config,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Catalog\Model\ProductRepository $productRepository
+        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+        \RealtimeDespatch\OrderFlow\Helper\Export\Product $helper
     ) {
         parent::__construct($config, $logger, $objectManager);
         $this->_productRepository = $productRepository;
+        $this->_helper = $helper;
         $this->_tx = $this->_objectManager->create('Magento\Framework\DB\Transaction');
     }
 
@@ -103,7 +111,11 @@ class ProductExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Servic
         $sku = (string) $body->sku;
 
         try {
-            $product = $this->_productRepository->get($sku, true, 0);
+            $product = $this->_productRepository
+                ->get($sku, true, \Magento\Store\Model\Store::DEFAULT_STORE_ID);
+            if (!$this->_helper->isProductExportEnabledForProductWebsites($product)) {
+                throw new \Exception("Product '{$sku}' is not in any product export enabled websites");
+            }
             $product->setOrderflowExportStatus(__('Exported'));
             $product->setOrderflowExportDate($request->getCreationTime());
             $this->_tx->addObject($product);
