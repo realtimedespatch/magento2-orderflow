@@ -17,16 +17,24 @@ class ProductExport
     protected $_requestBuilder;
 
     /**
+     * @var \RealtimeDespatch\OrderFlow\Helper\Export\Product
+     */
+    protected $_helper;
+
+    /**
      * ProductExport constructor.
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
      */
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $objectManager,
-        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder)
+        \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder,
+        \RealtimeDespatch\OrderFlow\Helper\Export\Product $helper
+    )
     {
         $this->_objectManager = $objectManager;
         $this->_requestBuilder = $requestBuilder;
+        $this->_helper = $helper;
     }
 
     public function around__call(\Magento\Webapi\Controller\Soap\Request\Handler $soapServer, callable $proceed, $operation, $arguments)
@@ -34,7 +42,15 @@ class ProductExport
         $result = $proceed($operation, $arguments);
 
         if ($this->_isProductExport($operation) && isset($arguments[0]->sku)) {
-            $this->_getRequestProcessor()->process($this->_buildProductExportRequest($result['result'], $arguments[0]->sku));
+            $sku = $arguments[0]->sku;
+            $this->_getRequestProcessor()->process($this->_buildProductExportRequest($result['result'], $sku));
+            if (!$this->_helper->isProductExportEnabledForProductWebsites($sku)) {
+                throw new \Magento\Framework\Webapi\Exception(
+                    __("Product '{$sku}' is not in any product export enabled websites"),
+                    0,
+                    \Magento\Framework\Webapi\Exception::HTTP_INTERNAL_ERROR
+                );
+            }
         }
 
         return $result;

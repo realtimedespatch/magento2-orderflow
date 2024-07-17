@@ -104,7 +104,7 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
             $source = (string) $body->source;
             $lastOrderExported = isset($body->lastOrderExported) ? new \DateTime($body->lastOrderExported) : new \DateTime;
 
-            $reference = "${sku}_${source}";
+            $reference = implode('_', [$sku, $source]);
 
             // Check for a duplicate import line
             if ($this->_isDuplicateLine($requestLine->getSequenceId())) {

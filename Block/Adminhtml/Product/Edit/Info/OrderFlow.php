@@ -95,7 +95,10 @@ class OrderFlow extends \Magento\Backend\Block\Template
     public function getProductUrl()
     {
         $product = $this->getProduct();
-        $storeId = $this->_request->getParam('store', 0);
+        if (!$product->getSku()) {
+            return '';
+        }
+        $storeId = $this->_request->getParam('store', \Magento\Store\Model\Store::DEFAULT_STORE_ID);
 
         $url  = $this->_apiHelper->getEndpoint($storeId);
         $url .= 'inventory/product/referenceDetail.htm?externalReference';
@@ -113,7 +116,10 @@ class OrderFlow extends \Magento\Backend\Block\Template
     public function getInventoryUrl()
     {
         $product = $this->getProduct();
-        $storeId = $this->_request->getParam('store', 0);
+        if (!$product->getSku()) {
+            return '';
+        }
+        $storeId = $this->_request->getParam('store', \Magento\Store\Model\Store::DEFAULT_STORE_ID);
 
         $url  = $this->_apiHelper->getEndpoint($storeId);
         $url .= 'inventory/inventory/referenceDetail.htm?externalReference';

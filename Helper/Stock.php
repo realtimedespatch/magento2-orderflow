@@ -41,6 +41,11 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_sourceItemsSave;
 
     /**
+     * @var \Magento\Framework\Module\Manager $_moduleManager
+     */
+    protected $_moduleManager;
+
+    /**
      * @param Magento\Framework\App\Helper\Context $context
      * @param Magento\Catalog\Api\ProductRepositoryInterface $productRepository
      * @param RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper
@@ -54,16 +59,24 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
         \RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper,
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Quote\Model\QuoteFactory $quoteFactory,
-        SourceItemInterfaceFactory $sourceItemFactory,
-        SourceItemsSaveInterface $sourceItemsSave
+        \Magento\Framework\Module\Manager $moduleManager
     ) {
         $this->_productRepository = $productRepository;
         $this->_helper = $inventoryHelper;
         $this->_orderFactory = $orderFactory;
         $this->_quoteFactory = $quoteFactory;
-        $this->_sourceItemFactory = $sourceItemFactory;
-        $this->_sourceItemsSave = $sourceItemsSave;
+        $this->_moduleManager = $moduleManager;
         parent::__construct($context);
+    }
+
+    public function setSourceItemFactory(SourceItemInterfaceFactory $sourceItemInterfaceFactory)
+    {
+        $this->_sourceItemFactory = $sourceItemFactory;
+    }
+
+    public function setSourceItemsSave(SourceItemsSaveInterface $sourceItemsSave)
+    {
+        $this->_sourceItemsSave = $sourceItemsSave;
     }
 
     /**
@@ -78,18 +91,32 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
     public function updateProductStock($sku, $qty, $lastOrderExported, $source = "default")
     {
         $product = $this->_productRepository->get($sku);
-        $isInStock = $qty > 0 ? 1 : 0;
 
-        if ( ! $this->_helper->isNegativeQtyEnabled() && $qty < 0) {
-            $qty = 0;
+        // MSI Enabled
+        if ($this->_moduleManager->isEnabled('Magento_InventoryApi')) {
+            if ( ! $this->_helper->isNegativeQtyEnabled() && $qty < 0) {
+                $qty = 0;
+            }
+            $isInStock = $qty > 0 ? 1 : 0;
+
+            $sourceItem = $this->_sourceItemFactory->create();
+            $sourceItem->setSourceCode($source);
+            $sourceItem->setSku($sku);
+            $sourceItem->setQuantity($qty);
+            $sourceItem->setStatus($isInStock);
+            $this->_sourceItemsSave->execute([$sourceItem]);
+        } else {
+            $inventory = $this->calculateProductStock($product->getId(), $qty, $lastOrderExported);
+            $qty = $inventory->unitsCalculated;
+            if ( ! $this->_helper->isNegativeQtyEnabled() && $qty < 0) {
+                $qty = 0;
+            }
+            $isInStock = $qty > 0 ? 1 : 0;
+
+            $product->setStockData(['qty' => $qty, 'is_in_stock' => $isInStock]);
+            $product->setQuantityAndStockStatus(['qty' => $qty, 'is_in_stock' => $isInStock]);
+            $product->save();
         }
-
-        $sourceItem = $this->_sourceItemFactory->create();
-        $sourceItem->setSourceCode($source);
-        $sourceItem->setSku($sku);
-        $sourceItem->setQuantity($qty);
-        $sourceItem->setStatus($isInStock);
-        $this->_sourceItemsSave->execute([$sourceItem]);
     }
 
     /**

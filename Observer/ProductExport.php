@@ -60,7 +60,7 @@ class ProductExport implements ObserverInterface
     protected function _updateProductExportStatus($exportLine)
     {
         try {
-            $product = $this->_repository->get($exportLine->getReference(), true, 0);
+            $product = $this->_repository->get($exportLine->getReference(), true, \Magento\Store\Model\Store::DEFAULT_STORE_ID);
             $product->setOrderflowExportStatus($exportLine->getEntityExportStatus());
             $this->_tx->addObject($product);
         } catch (\Magento\Framework\Exception\NoSuchEntityException $ex) {

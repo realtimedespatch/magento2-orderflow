@@ -71,7 +71,7 @@ class OrderExport implements ObserverInterface
                 return false;
             }
 
-            $order->setOrderflowExportStatus($exportLine->getEntityExportStatus(), true, 0);
+            $order->setOrderflowExportStatus($exportLine->getEntityExportStatus(), true, \Magento\Store\Model\Store::DEFAULT_STORE_ID);
             $this->_tx->addObject($order);
         } catch (\Magento\Framework\Exception\NoSuchEntityException $ex) {
             return false;

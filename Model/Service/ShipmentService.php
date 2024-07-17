@@ -42,6 +42,11 @@ class ShipmentService implements ShipmentManagementInterface
     protected $_shipmentNotifier;
 
     /**
+     * @var \Magento\Framework\Module\Manager $_moduleManager
+     */
+    protected $_moduleManager;
+
+    /**
      * @param Psr\Log\LoggerInterface $logger
      * @param Magento\Framework\Event\ManagerInterface $eventManager
      * @param RealtimeDespatch\OrderFlow\Helper\Import\Shipment $helper
@@ -54,13 +59,15 @@ class ShipmentService implements ShipmentManagementInterface
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Shipping\Model\Order\TrackFactory $trackFactory,
         \Magento\Sales\Model\Convert\Order $orderConverter,
-        \Magento\Shipping\Model\ShipmentNotifier $shipmentNotifier
+        \Magento\Shipping\Model\ShipmentNotifier $shipmentNotifier,
+        \Magento\Framework\Module\Manager $moduleManager
     ) {
         $this->_helper = $helper;
         $this->_orderFactory = $orderFactory;
         $this->_trackFactory = $trackFactory;
         $this->_orderConverter = $orderConverter;
         $this->_shipmentNotifier = $shipmentNotifier;
+        $this->_moduleManager = $moduleManager;
     }
 
     /**
@@ -87,7 +94,9 @@ class ShipmentService implements ShipmentManagementInterface
             foreach ($sourceSkuQtys as $source => $skuQtys) {
                 // Create shipment.
                 $shipment = $this->_createShipment($params);
-                $shipment->getExtensionAttributes()->setSourceCode($source);
+                if ($this->_moduleManager->isEnabled('Magento_InventoryShipping')) {
+                    $shipment->getExtensionAttributes()->setSourceCode($source);
+                }
 
                 // Add line(s).
                 $this->_createShipmentLines($shipment, $skuQtys);
