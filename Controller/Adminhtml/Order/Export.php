@@ -57,16 +57,16 @@ class Export extends \Magento\Backend\App\Action
     {
         $resultRedirect = $this->resultRedirectFactory->create();
 
-        // Check whether order exports are enabled.
-        if ( ! $this->_exportHelper->isEnabled()) {
-            $this->messageManager->addError(__('Order exports are currently disabled. Please review the OrderFlow module configuration.'));
-            return $resultRedirect->setRefererUrl();
-        }
-
         try {
             $order = $this->_getOrder();
 
             if ( ! $order) {
+                return $resultRedirect->setRefererUrl();
+            }
+
+            // Check whether order exports are enabled.
+            if ( ! $this->_exportHelper->isEnabled($order->getStore()->getWebsiteId())) {
+                $this->messageManager->addError(__('Order exports are currently disabled. Please review the OrderFlow module configuration.'));
                 return $resultRedirect->setRefererUrl();
             }
 
