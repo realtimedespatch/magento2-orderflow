@@ -108,6 +108,13 @@ class OrderExportExporterType extends \RealtimeDespatch\OrderFlow\Model\Service\
             if ( ! $order->getId()) {
                 throw new \Exception('Order #'.$incrementId.' does not exist.');
             }
+            $websiteId = $order->getStore()->getWebsiteId();
+            if (!$this->isEnabled($websiteId)) {
+                throw new \Exception(
+                    "Order exports are disabled for website ID '{$websiteId}'. " .
+                            "Please review your OrderFlow module configuration."
+                );
+            }
 
             $order->setOrderflowExportStatus(__('Exported'));
             $order->setOrderflowExportDate($request->getCreationTime());
