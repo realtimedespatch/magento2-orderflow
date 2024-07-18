@@ -65,7 +65,7 @@ class Export extends \Magento\Backend\App\Action
             }
 
             // Check whether order exports are enabled.
-            if ( ! $this->_exportHelper->isEnabled($order->getStore()->getWebsiteId())) {
+            if ( ! $this->_exportHelper->isEnabled($this->_getWebsiteId($order))) {
                 $this->messageManager->addError(__('Order exports are currently disabled. Please review the OrderFlow module configuration.'));
                 return $resultRedirect->setRefererUrl();
             }
