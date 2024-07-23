@@ -85,11 +85,11 @@ class ImportRepository implements \RealtimeDespatch\OrderFlow\Api\ImportReposito
     public function save(\RealtimeDespatch\OrderFlow\Api\Data\ImportInterface $entity)
     {
         try {
-            $this->resource->save($import);
+            $this->resource->save($entity);
         } catch (\Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));
         }
-        return $import;
+        return $entity;
     }
 
     /**
@@ -102,7 +102,7 @@ class ImportRepository implements \RealtimeDespatch\OrderFlow\Api\ImportReposito
     public function delete(\RealtimeDespatch\OrderFlow\Api\Data\ImportInterface $entity)
     {
         try {
-            $this->resource->delete($import);
+            $this->resource->delete($entity);
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
