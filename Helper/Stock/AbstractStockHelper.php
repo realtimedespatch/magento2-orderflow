@@ -1,14 +1,11 @@
 <?php
+declare(strict_types=1);
 
-namespace RealtimeDespatch\OrderFlow\Helper;
+namespace RealtimeDespatch\OrderFlow\Helper\Stock;
 
-use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
-use Magento\InventoryApi\Api\SourceItemsSaveInterface;
-
-/**
- * Stock Helper.
- */
-class Stock extends \Magento\Framework\App\Helper\AbstractHelper
+abstract class AbstractStockHelper
+    extends \Magento\Framework\App\Helper\AbstractHelper
+    implements \RealtimeDespatch\OrderFlow\Api\StockHelperInterface
 {
     /**
      * @var Magento\Catalog\Api\ProductRepositoryInterface
@@ -31,16 +28,6 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_quoteFactory;
 
     /**
-     * @var SourceItemInterfaceFactory
-     */
-    protected $_sourceItemFactory;
-
-    /**
-     * @var SourceItemsSaveInterface
-     */
-    protected $_sourceItemsSave;
-
-    /**
      * @var \Magento\Framework\Module\Manager $_moduleManager
      */
     protected $_moduleManager;
@@ -50,17 +37,16 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
      * @param Magento\Catalog\Api\ProductRepositoryInterface $productRepository
      * @param RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper
      * @param Magento\Sales\Model\OrderFactory $orderFactory
-     * @param SourceItemInterfaceFactory $sourceItemFactory
-     * @param SourceItemsSaveInterface $sourceItemsSave
      */
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context,
-        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+        \Magento\Framework\App\Helper\Context               $context,
+        \Magento\Catalog\Api\ProductRepositoryInterface     $productRepository,
         \RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Magento\Quote\Model\QuoteFactory $quoteFactory,
-        \Magento\Framework\Module\Manager $moduleManager
-    ) {
+        \Magento\Sales\Model\OrderFactory                   $orderFactory,
+        \Magento\Quote\Model\QuoteFactory                   $quoteFactory,
+        \Magento\Framework\Module\Manager                   $moduleManager
+    )
+    {
         $this->_productRepository = $productRepository;
         $this->_helper = $inventoryHelper;
         $this->_orderFactory = $orderFactory;
@@ -69,62 +55,12 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
         parent::__construct($context);
     }
 
-    public function setSourceItemFactory(SourceItemInterfaceFactory $sourceItemInterfaceFactory)
-    {
-        $this->_sourceItemFactory = $sourceItemFactory;
-    }
-
-    public function setSourceItemsSave(SourceItemsSaveInterface $sourceItemsSave)
-    {
-        $this->_sourceItemsSave = $sourceItemsSave;
-    }
-
-    /**
-     * Updates a product's stock.
-     *
-     * @param string    $sku                SKU
-     * @param integer   $qty                Qty
-     * @param \DateTime $lastOrderExported  Last Order Exported Timestamp
-     * @param string    $source             Inventory source code
-     *
-     */
-    public function updateProductStock($sku, $qty, $lastOrderExported, $source = "default")
-    {
-        $product = $this->_productRepository->get($sku);
-
-        // MSI Enabled
-        if ($this->_moduleManager->isEnabled('Magento_InventoryApi')) {
-            if ( ! $this->_helper->isNegativeQtyEnabled() && $qty < 0) {
-                $qty = 0;
-            }
-            $isInStock = $qty > 0 ? 1 : 0;
-
-            $sourceItem = $this->_sourceItemFactory->create();
-            $sourceItem->setSourceCode($source);
-            $sourceItem->setSku($sku);
-            $sourceItem->setQuantity($qty);
-            $sourceItem->setStatus($isInStock);
-            $this->_sourceItemsSave->execute([$sourceItem]);
-        } else {
-            $inventory = $this->calculateProductStock($product->getId(), $qty, $lastOrderExported);
-            $qty = $inventory->unitsCalculated;
-            if ( ! $this->_helper->isNegativeQtyEnabled() && $qty < 0) {
-                $qty = 0;
-            }
-            $isInStock = $qty > 0 ? 1 : 0;
-
-            $product->setStockData(['qty' => $qty, 'is_in_stock' => $isInStock]);
-            $product->setQuantityAndStockStatus(['qty' => $qty, 'is_in_stock' => $isInStock]);
-            $product->save();
-        }
-    }
-
     /**
      * Calculates a product's stock taking into account unsent orders, and active quotes.
      *
-     * @param integer   $productId          Product SKU
-     * @param integer   $unitsReceived      Units Received From OrderFlow
-     * @param \DateTime $lastOrderExported  Last Order Exported Date
+     * @param integer $productId Product SKU
+     * @param integer $unitsReceived Units Received From OrderFlow
+     * @param \DateTime $lastOrderExported Last Order Exported Date
      *
      * @return array
      */
@@ -150,14 +86,14 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
      * This is calculated by summing the number of units attached to unexported orders, and orders that have been
      * exported to OrderFlow after it's inventory calculation.
      *
-     * @param integer   $productId          Product SKU
-     * @param integer   $unitsReceived      Units Received From OrderFlow
+     * @param integer $productId Product SKU
+     * @param integer $unitsReceived Units Received From OrderFlow
      *
      * @return integer
      */
     protected function _calculateUnsentOrderUnits($productId, $lastOrderExported)
     {
-        if ( ! $this->_helper->isUnsentOrderAdjustmentEnabled()) {
+        if (!$this->_helper->isUnsentOrderAdjustmentEnabled()) {
             return 0;
         }
 
@@ -196,7 +132,7 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
      */
     protected function _calculateActiveQuoteUnits($productId)
     {
-        if ( ! $this->_helper->isActiveQuoteAdjustmentEnabled()) {
+        if (!$this->_helper->isActiveQuoteAdjustmentEnabled()) {
             return 0;
         }
 
@@ -223,4 +159,6 @@ class Stock extends \Magento\Framework\App\Helper\AbstractHelper
 
         return max(0, $activeUnits);
     }
+
+    abstract public function updateProductStock($sku, $qty, $lastOrderExported, $source = "default");
 }

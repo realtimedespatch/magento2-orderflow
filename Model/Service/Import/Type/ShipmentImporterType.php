@@ -122,7 +122,7 @@ class ShipmentImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Imp
             }
 
             // Create the shipment.
-            $inventory = $this->_shipper->createShipment($body);
+            $inventory = $this->_shipper->createShipments($body);
 
             return $this->_createSuccessImportLine(
                 $import,

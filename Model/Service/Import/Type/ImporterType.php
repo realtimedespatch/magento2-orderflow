@@ -22,6 +22,8 @@ abstract class ImporterType implements ImporterTypeInterface
      */
     protected $_objectManager;
 
+    protected $_processedIds = [];
+
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $cnfig
      * @param \Psr\Log\LoggerInterface $logger
@@ -122,7 +124,7 @@ abstract class ImporterType implements ImporterTypeInterface
      */
     protected function _createSupersededImportLine($import, $seqId, $reference, $operation, $message, $data = array())
     {
-        $import->setSuccesses($import->getSuccesses() + 1);
+        $import->setSuperseded($import->getSuperseded() + 1);
 
         return $this->_createImportLine(
             $seqId,
