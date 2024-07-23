@@ -96,6 +96,7 @@ class InventoryImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Im
             // Retrieve inventory parameters
             $body = $requestLine->getBody();
             $sku  = (string) $body->sku;
+            $source = (string) ($body->site ?? 'default');
             $unitsReceived = (integer) $body->qty;
             $lastOrderExported = isset($body->lastOrderExported) ? new \DateTime($body->lastOrderExported) : new \DateTime;
 
@@ -126,7 +127,7 @@ class InventoryImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Im
             }
 
             // Update the product's inventory
-            $inventory = $this->_stockHelper->updateProductStock($sku, $unitsReceived, $lastOrderExported);
+            $inventory = $this->_stockHelper->updateProductStock($sku, $unitsReceived, $lastOrderExported, $source);
 
             return $this->_createSuccessImportLine(
                 $import,
