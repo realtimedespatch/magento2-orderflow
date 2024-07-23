@@ -50,7 +50,7 @@ class Importer
                 ['import' => $import, 'type' => $this->_type->getType()]
             );
         }
-        catch (Exception $ex) {
+        catch (\Exception $ex) {
             $this->_eventManager->dispatch(
                 'orderflow_exception',
                 ['exception' => $ex, 'type' => $this->_type->getType(), 'process' => 'import']
