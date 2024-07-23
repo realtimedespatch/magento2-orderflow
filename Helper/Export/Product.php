@@ -126,7 +126,7 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
     {
         if (NULL === $this->_configToWebsiteMap) {
             $websiteTree = [];
-            foreach ($this->getProductExportEnabledWebsiteIds() as $website) {
+            foreach ($this->getProductExportEnabledWebsiteIds() as $websiteId) {
                 /**
                  * Here we'll build a multi-dimensional array of website IDs which have the same
                  * API configuration - i.e. they are connected to the same OrderFlow instance, organisation
@@ -137,9 +137,9 @@ class Product extends \Magento\Framework\App\Helper\AbstractHelper
                  *     "https://txnlimitedtest.orderflow-wms.co.uk/web/|txn|mal_m2" => ["1","2"]
                  * ]
                  */
-                $key = $this->_getEndpointKey($website->getId());
+                $key = $this->_getEndpointKey($websiteId);
                 $this->_configToWebsiteMap[$key] ??= [];
-                $this->_configToWebsiteMap[$key][] = $website->getId();
+                $this->_configToWebsiteMap[$key][] = $websiteId;
             }
         }
 
