@@ -2,6 +2,8 @@
 
 namespace RealtimeDespatch\OrderFlow\Helper\Export;
 
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+
 /**
  * Order Export Helper.
  */
@@ -16,15 +18,23 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_orderFactory;
 
     /**
+     * @var TimezoneInterface
+     */
+    protected TimezoneInterface $_timezone;
+
+    /**
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Mage\Sales\Model\OrderFactory $orderFactory
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
-        \Magento\Sales\Model\OrderFactory $orderFactory
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        TimezoneInterface $timezone
     )
     {
         $this->_orderFactory = $orderFactory;
+        $this->_timezone = $timezone;
+
         parent::__construct($context);
     }
 
@@ -79,22 +89,30 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Checks whether an order can be exported.
+     * Returns the minimum datetime from which orders should be exported if set in config
      *
-     * @param string $orderStatus
-     * @param string $exportStatus
-     * @param integer|null $scopeId
-     *
-     * @return boolean
+     * @param $scopeId
+     * @return false|string
+     * @throws \Exception
      */
-    public function canExport($orderStatus, $exportStatus, $scopeId = null)
+    public function getMinOrderDatetime($scopeId = null)
     {
-        // If the order is not in an exportable order status return false;
-        if ( ! in_array($orderStatus, $this->getExportableOrderStatuses($scopeId))) {
+        $value = $this->scopeConfig->getValue(
+            'orderflow_order_export/settings/min_order_datetime',
+            \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE,
+            $scopeId
+        );
+        if (empty($value)) {
             return false;
         }
+        // datetime will be stored in admin timezone, convert to UTC
+        $adminTimezone = $this->_timezone->getConfigTimezone(
+            \Magento\Framework\App\Config\ScopeConfigInterface::SCOPE_TYPE_DEFAULT
+        );
+        $datetime = new \DateTime($value, new \DateTimeZone($adminTimezone));
+        $datetime->setTimezone(new \DateTimeZone('UTC'));
 
-        return ( ! $exportStatus) || $exportStatus == self::STATUS_PENDING;
+        return $datetime->format('Y-m-d H:i:s');
     }
 
     /**
@@ -106,7 +124,7 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getCreateableOrders($website)
     {
-        return $this->_orderFactory
+        $orders = $this->_orderFactory
             ->create()
             ->getCollection()
             ->addFieldToFilter('store_id', ['in' => $website->getStoreIds()])
@@ -118,5 +136,11 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
                 ['null' => true],
             ])
             ->setPage(1, $this->getBatchSize($website->getId()));
+
+        if ($datetime = $this->getMinOrderDatetime($website->getId())) {
+            $orders->addFieldToFilter('created_at', ['gt' => $datetime]);
+        }
+
+        return $orders;
     }
 }
