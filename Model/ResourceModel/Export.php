@@ -59,6 +59,7 @@ class Export extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     /**
      * Process post data before saving
      *
+     * @deprecated There is no creation_time field in the table
      * @param \Magento\Framework\Model\AbstractModel $object
      * @return $this
      * @throws \Magento\Framework\Exception\LocalizedException

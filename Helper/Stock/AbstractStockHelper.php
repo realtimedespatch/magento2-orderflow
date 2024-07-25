@@ -8,7 +8,7 @@ abstract class AbstractStockHelper
     implements \RealtimeDespatch\OrderFlow\Api\StockHelperInterface
 {
     /**
-     * @var Magento\Catalog\Api\ProductRepositoryInterface
+     * @var \Magento\Catalog\Api\ProductRepositoryInterface
      */
     protected $_productRepository;
 
@@ -28,11 +28,6 @@ abstract class AbstractStockHelper
     protected $_quoteFactory;
 
     /**
-     * @var \Magento\Framework\Module\Manager $_moduleManager
-     */
-    protected $_moduleManager;
-
-    /**
      * @param Magento\Framework\App\Helper\Context $context
      * @param Magento\Catalog\Api\ProductRepositoryInterface $productRepository
      * @param RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper
@@ -43,15 +38,13 @@ abstract class AbstractStockHelper
         \Magento\Catalog\Api\ProductRepositoryInterface     $productRepository,
         \RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper,
         \Magento\Sales\Model\OrderFactory                   $orderFactory,
-        \Magento\Quote\Model\QuoteFactory                   $quoteFactory,
-        \Magento\Framework\Module\Manager                   $moduleManager
+        \Magento\Quote\Model\QuoteFactory                   $quoteFactory
     )
     {
         $this->_productRepository = $productRepository;
         $this->_helper = $inventoryHelper;
         $this->_orderFactory = $orderFactory;
         $this->_quoteFactory = $quoteFactory;
-        $this->_moduleManager = $moduleManager;
         parent::__construct($context);
     }
 

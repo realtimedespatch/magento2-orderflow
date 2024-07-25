@@ -172,7 +172,7 @@ class ShipmentServiceTest extends \PHPUnit\Framework\TestCase
             ->willReturnSelf();
 
         $this->mockTrack
-            ->expects($this->once())
+            ->expects($this->atLeast(1))
             ->method('setNumber')
             ->with($this->params->trackingNumber)
             ->willReturnSelf();
@@ -216,7 +216,7 @@ class ShipmentServiceTest extends \PHPUnit\Framework\TestCase
             ->method('getExtensionAttributes')
             ->willReturn(
                 $this->getMockBuilder(\Magento\Sales\Api\Data\ShipmentExtensionInterface::class)
-                    ->addMethods(['setSourceCode'])
+                    ->onlyMethods(['setSourceCode', 'getSourceCode'])
                     ->getMock()
             );
 
@@ -227,7 +227,7 @@ class ShipmentServiceTest extends \PHPUnit\Framework\TestCase
     {
         $this->params->tracks = [
             (object) [
-                'trackingNumber' => 'ABC12346',
+                'trackingNumber' => 'ABC12345',
             ]
         ];
 

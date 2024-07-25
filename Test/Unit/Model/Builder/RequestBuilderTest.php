@@ -17,6 +17,7 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
     protected RequestLineFactory $mockRequestLineFactory;
     protected RequestRepositoryInterface $mockRequestRepository;
     protected Request $mockRequest;
+    protected Request $mockRequest2;
 
     protected function setUp(): void
     {
@@ -33,9 +34,17 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
             ->addMethods(['setSequenceId'])
             ->getMock();
 
+        $this->mockRequest2 = $this->getMockBuilder(Request::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getId'])
+            ->getMock();
+
         $this->mockRequestFactory
             ->method('create')
-            ->willReturn($this->mockRequest);
+            ->willReturnOnConsecutiveCalls([
+                $this->mockRequest,
+                $this->mockRequest2,
+            ]);
 
         $this->requestBuilder = new RequestBuilder(
             $this->mockRequestFactory,
@@ -152,16 +161,21 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
     public function testResetBuilder(): void
     {
         $mockRequest2 = $this->createMock(Request::class);
-        $mockRequest2->method('getId')->willReturn(124);
+        $mockRequest2
+            ->method('getId'
+            )->willReturn(124);
 
         $this->mockRequestFactory
-            ->expects($this->at(1))
+            ->expects($this->at(2))
             ->method('create')
             ->willReturn($mockRequest2);
 
         $result = $this->requestBuilder->resetBuilder();
         $this->assertEquals($this->requestBuilder, $result);
-        $this->assertNotEquals($this->mockRequest->getId(), $this->requestBuilder->getRequest()->getId());
+        $this->assertNotEquals(
+            $this->mockRequest->getId(),
+            $this->requestBuilder->getRequest()->getId()
+        );
     }
 
     public function testSaveRequest(): void
@@ -169,7 +183,8 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
         $this->mockRequestRepository
             ->expects($this->once())
             ->method('save')
-            ->with($this->mockRequest);
+            ->with($this->mockRequest)
+            ->willReturn($this->mockRequest);
 
         $result = $this->requestBuilder->saveRequest();
         $this->assertEquals($this->mockRequest, $result);

@@ -7,26 +7,27 @@ use PHPUnit\Framework\MockObject\MockObject;
 use RealtimeDespatch\OrderFlow\Model\Export;
 use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export as ExportResource;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\Import;
 
-class ExportTest extends AbstractResourceModelTest
+class ImportTest extends AbstractResourceModelTest
 {
     protected function getMainTableName(): string
     {
-        return 'rtd_exports';
+        return 'rtd_imports';
     }
 
     protected function getIdFieldName(): string
     {
-        return 'export_id';
+        return 'import_id';
     }
 
     protected function getResource(): AbstractDb
     {
-        return new ExportResource($this->mockContext, $this->mockDate);
+        return new Import($this->mockContext, $this->mockDate);
     }
 
     protected function getMockModel(): MockObject
     {
-        return $this->createMock(Export::class);
+        return $this->createMock(Import::class);
     }
 }

@@ -1,29 +1,31 @@
 <?php
 declare(strict_types=1);
 
-namespace RealtimeDespatch\OrderFlow\Test\Unit\Helper;
+namespace RealtimeDespatch\OrderFlow\Test\Unit\Helper\Stock;
 
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Product;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Module\Manager;
+use Magento\Framework\App\Helper\Context;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
-use RealtimeDespatch\OrderFlow\Helper\Api;
-use PHPUnit\Framework\TestCase;
 use RealtimeDespatch\OrderFlow\Helper\Import\Inventory;
-use RealtimeDespatch\OrderFlow\Helper\Stock;
+use RealtimeDespatch\OrderFlow\Helper\Stock\AbstractStockHelper;
+use RealtimeDespatch\OrderFlow\Helper\Stock\MsiStockHelper;
 
-class StockTest extends TestCase
+abstract class AbstractStockHelperTest extends \PHPUnit\Framework\TestCase
 {
-    protected Stock $stockHelper;
+    protected AbstractStockHelper $stockHelper;
     protected ScopeConfigInterface $mockScopeConfig;
-    protected Manager $mockModuleManager;
     protected ProductRepositoryInterface $mockProductRepository;
+    protected Product $mockProduct;
     protected Inventory $mockInventoryHelper;
     protected OrderFactory $mockOrderFactory;
     protected QuoteFactory $mockQuoteFactory;
     protected Order $mockOrder;
+    protected Context $mockContext;
 
     protected function setUp(): void
     {
@@ -32,58 +34,14 @@ class StockTest extends TestCase
         $this->mockInventoryHelper = $this->createMock(\RealtimeDespatch\OrderFlow\Helper\Import\Inventory::class);
         $this->mockScopeConfig = $this->createMock(ScopeConfigInterface::class);
         $this->mockProductRepository = $this->createMock(\Magento\Catalog\Api\ProductRepositoryInterface::class);
-        $this->mockModuleManager = $this->createMock(\Magento\Framework\Module\Manager::class);
         $this->mockOrder = $this->createMock(\Magento\Sales\Model\Order::class);
-
-        $mockContext = $this->createMock(\Magento\Framework\App\Helper\Context::class);
-        $mockContext->method('getScopeConfig')->willReturn($this->mockScopeConfig);
-        $mockContext->method('getModuleManager')->willReturn($this->mockModuleManager);
-
-        $this->stockHelper = new Stock(
-            $mockContext,
-            $this->mockProductRepository,
-            $this->mockInventoryHelper,
-            $this->createMock(\Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory::class),
-            $this->createMock(\Magento\InventoryApi\Api\SourceItemsSaveInterface::class),
-            $this->mockOrderFactory,
-            $this->mockQuoteFactory,
-            $this->mockModuleManager,
-        );
-    }
-
-    public function testSetSourceItemFactory()
-    {
-        $mockSourceItemFactory = $this->createMock(\Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory::class);
-        $this->stockHelper->setSourceItemFactory($mockSourceItemFactory);
-    }
-
-    public function testSetSourceItemsSave()
-    {
-        $mockSourceItemsSave = $this->createMock(\Magento\InventoryApi\Api\SourceItemsSaveInterface::class);
-        $this->stockHelper->setSourceItemsSave($mockSourceItemsSave);
-    }
-
-    public function testUpdateProductStockMsi()
-    {
-        $mockProduct = $this->createMock(\Magento\Catalog\Api\Data\ProductInterface::class);
-        $mockProduct->method('getSku')->willReturn('TEST-SKU');
-
-        $this->mockProductRepository->expects($this->once())
-            ->method('get')
-            ->with('TEST-SKU')
-            ->willReturn($mockProduct);
-
-        $this->mockModuleManager->expects($this->once())
-            ->method('isEnabled')
-            ->with('Magento_InventoryApi')
-            ->willReturn(true);
-
-        $this->stockHelper->updateProductStock('TEST-SKU', 10, new \DateTime());
+        $this->mockProduct = $this->createMock(Product::class);
+        $this->mockContext = $this->createMock(Context::class);
     }
 
     /**
-     * @return void
      * @dataProvider testUpdateProductStockDataProvider
+     * @return void
      * @param string $sku
      * @param int $inputQty
      * @param int $outputQty
@@ -94,7 +52,7 @@ class StockTest extends TestCase
      * @param bool $unsentOrderAdjustment
      * @param bool $activeQuoteAdjustment
      */
-    public function testUpdateProductStockNonMsi(
+    public function testUpdateProductStock(
         string $sku,
         int $inputQty,
         int $outputQty,
@@ -108,18 +66,11 @@ class StockTest extends TestCase
         int $activeQuoteQty = 0
     ): void
     {
-        $mockProduct = $this->createMock(\Magento\Catalog\Model\Product::class);
-        $mockProduct->method('getSku')->willReturn($sku);
+        $this->mockProduct
+            ->method('getSku')
+            ->willReturn($sku);
 
-        $mockProduct->expects($this->once())
-            ->method('setStockData')
-            ->with(['qty' => $outputQty, 'is_in_stock' => $inStock]);
-
-        $mockProduct->expects($this->once())
-            ->method('setQuantityAndStockStatus')
-            ->with(['qty' => $outputQty, 'is_in_stock' => $inStock]);
-
-        $mockProduct
+        $this->mockProduct
             ->method('getId')
             ->willReturn(500);
 
@@ -228,29 +179,18 @@ class StockTest extends TestCase
         $this->mockProductRepository->expects($this->once())
             ->method('get')
             ->with($sku)
-            ->willReturn($mockProduct);
+            ->willReturn($this->mockProduct);
 
-        $this->mockProductRepository->expects($this->once())
-            ->method('save')
-            ->with($mockProduct);
-
-        $this->mockModuleManager->expects($this->once())
-            ->method('isEnabled')
-            ->with('Magento_InventoryApi')
-            ->willReturn(false);
-
-        $this->stockHelper->updateProductStock($sku, $inputQty, $date);
+        $this->stockHelper->updateProductStock($sku, $inputQty, $date, $sourceCode);
     }
 
     public function testUpdateProductStockDataProvider()
     {
         return [
-
             ['TEST-SKU', 10, 10, 1, new \DateTime(), false, 'default', false],
             ['TEST-SKU', 10, 10, 1, new \DateTime(), false, 'default', true, 0],
             ['TEST-SKU', 10, 6, 1, new \DateTime(), false, 'default', true, 4],
             ['TEST-SKU', 10, 4, 1, new \DateTime(), false, 'default', true, 4, true, 2],
-
             ['TEST-SKU', -10, 0, 0, new \DateTime(), false, 'default'],
             ['TEST-SKU', -10, 0, 0, new \DateTime(), false, 'default'],
             ['TEST-SKU', -10, -10, 0, new \DateTime(), true, 'default'],

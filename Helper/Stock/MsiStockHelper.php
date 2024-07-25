@@ -17,7 +17,6 @@ class MsiStockHelper extends AbstractStockHelper
         \RealtimeDespatch\OrderFlow\Helper\Import\Inventory $inventoryHelper,
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Quote\Model\QuoteFactory $quoteFactory,
-        \Magento\Framework\Module\Manager $moduleManager,
         SourceItemInterfaceFactory $sourceItemFactory,
         SourceItemsSaveInterface $sourceItemsSave
     )
@@ -26,14 +25,15 @@ class MsiStockHelper extends AbstractStockHelper
         $this->_sourceItemFactory = $sourceItemFactory;
         parent::__construct(
             $context, $productRepository, $inventoryHelper,
-            $orderFactory, $quoteFactory, $moduleManager
+            $orderFactory, $quoteFactory
         );
     }
 
     public function updateProductStock($sku, $qty, $lastOrderExported, $source = "default")
     {
         $product = $this->_productRepository->get($sku);
-
+        $inventory = $this->calculateProductStock($product->getId(), $qty, $lastOrderExported);
+        $qty = $inventory->unitsCalculated;
         if (!$this->_helper->isNegativeQtyEnabled() && $qty < 0) {
             $qty = 0;
         }
@@ -46,4 +46,6 @@ class MsiStockHelper extends AbstractStockHelper
         $sourceItem->setStatus($isInStock);
         $this->_sourceItemsSave->execute([$sourceItem]);
     }
+
+
 }

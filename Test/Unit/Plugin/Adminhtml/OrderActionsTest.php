@@ -124,7 +124,6 @@ class OrderActionsTest extends \PHPUnit\Framework\TestCase
             );
         }
     }
-
     public function dataProvider(): array
     {
         return [

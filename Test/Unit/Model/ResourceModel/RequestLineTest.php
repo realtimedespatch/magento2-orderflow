@@ -4,29 +4,29 @@ declare(strict_types=1);
 namespace RealtimeDespatch\OrderFlow\Test\Unit\Model\ResourceModel;
 
 use PHPUnit\Framework\MockObject\MockObject;
-use RealtimeDespatch\OrderFlow\Model\Export;
-use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export as ExportResource;
+use RealtimeDespatch\OrderFlow\Model\RequestLine;
+use RealtimeDespatch\OrderFlow\Model\ResourceModel\RequestLine as RequestLineResource;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
-class ExportTest extends AbstractResourceModelTest
+class RequestLineTest extends AbstractResourceModelTest
 {
     protected function getMainTableName(): string
     {
-        return 'rtd_exports';
+        return 'rtd_request_lines';
     }
 
     protected function getIdFieldName(): string
     {
-        return 'export_id';
+        return 'line_id';
     }
 
     protected function getResource(): AbstractDb
     {
-        return new ExportResource($this->mockContext, $this->mockDate);
+        return new RequestLineResource($this->mockContext, $this->mockDate);
     }
 
     protected function getMockModel(): MockObject
     {
-        return $this->createMock(Export::class);
+        return $this->createMock(RequestLine::class);
     }
 }
