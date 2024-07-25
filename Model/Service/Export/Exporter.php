@@ -52,7 +52,7 @@ class Exporter
 
             return $export;
         }
-        catch (Exception $ex) {
+        catch (\Exception $ex) {
             $this->_eventManager->dispatch(
                 'orderflow_exception',
                 ['exception' => $ex, 'type' => $this->_type->getType(), 'process' => 'export']
