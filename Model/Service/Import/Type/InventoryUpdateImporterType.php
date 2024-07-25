@@ -147,7 +147,7 @@ class InventoryUpdateImporterType extends \RealtimeDespatch\OrderFlow\Model\Serv
             return $this->_createFailureImportLine(
                 $import,
                 $seqId,
-                $reference,
+                $reference ?? null,
                 $request->getOperation(),
                 $ex->getMessage()
             );

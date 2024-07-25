@@ -12,6 +12,7 @@ interface RequestLineInterface
     const BODY         = 'body';
     const CREATED_AT   = 'created_at';
     const PROCESSED_AT = 'processed_at';
+    const MESSAGE_ID = 'message_id';
 
     /**
      * Get ID
