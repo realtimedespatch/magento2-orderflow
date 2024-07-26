@@ -2,7 +2,8 @@
 
 namespace RealtimeDespatch\OrderFlow\Model\Service\Import\Type;
 
- use \RealtimeDespatch\OrderFlow\Helper\Stock as StockHelper;
+ use RealtimeDespatch\OrderFlow\Api\StockHelperInterface;
+ use RealtimeDespatch\OrderFlow\Helper\StockHelperFactory;
 
 class InventoryImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Import\Type\ImporterType
 {
@@ -10,7 +11,7 @@ class InventoryImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Im
     const TYPE = 'Inventory';
 
     /**
-     * @param \RealtimeDespatch\OrderFlow\Helper\StockUpdater
+     * @param StockHelperInterface
      */
     protected $_stockHelper;
 
@@ -24,10 +25,10 @@ class InventoryImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Im
         \Magento\Framework\App\Config\ScopeConfigInterface $config,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Framework\ObjectManagerInterface $objectManager,
-        StockHelper $stockHelper
+        StockHelperFactory $stockHelperFactory
     ) {
         parent::__construct($config, $logger, $objectManager);
-        $this->_stockHelper = $stockHelper;
+        $this->_stockHelper = $stockHelperFactory->create();
     }
 
     /**
