@@ -15,6 +15,7 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
     protected RequestBuilder $requestBuilder;
     protected RequestFactory $mockRequestFactory;
     protected RequestLineFactory $mockRequestLineFactory;
+    protected RequestLine $mockRequestLine;
     protected RequestRepositoryInterface $mockRequestRepository;
     protected Request $mockRequest;
     protected Request $mockRequest2;
@@ -23,6 +24,7 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
     {
         $this->mockRequestFactory = $this->createMock(RequestFactory::class);
         $this->mockRequestLineFactory = $this->createMock(RequestLineFactory::class);
+        $this->mockRequestLine = $this->createMock(RequestLine::class);
         $this->mockRequestRepository = $this->createMock(RequestRepositoryInterface::class);
         $this->mockRequest = $this->getMockBuilder(Request::class)
             ->disableOriginalConstructor()
@@ -30,6 +32,7 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
                 'setType', 'setEntity', 'setOperation',
                 'addLine', 'setCreatedAt', 'setProcessedAt',
                 'setRequestBody', 'setResponseBody', 'setScopeId',
+                'setMessageId'
             ])
             ->addMethods(['setSequenceId'])
             ->getMock();
@@ -41,10 +44,10 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
 
         $this->mockRequestFactory
             ->method('create')
-            ->willReturnOnConsecutiveCalls([
+            ->willReturnOnConsecutiveCalls(
                 $this->mockRequest,
                 $this->mockRequest2,
-            ]);
+            );
 
         $this->requestBuilder = new RequestBuilder(
             $this->mockRequestFactory,
@@ -72,7 +75,7 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
 
         $this->mockRequest
             ->expects($this->once())
-            ->method('setSequenceId')
+            ->method('setMessageId')
             ->with(123);
 
         $result = $this->requestBuilder->setRequestData('Import', 'Inventory', 'Update', 123);
@@ -81,19 +84,17 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
 
     public function testAddRequestLine(): void
     {
-        $mockRequestLine = $this->createMock(RequestLine::class);
-
         $this->mockRequestLineFactory
             ->expects($this->once())
             ->method('create')
-            ->willReturn($mockRequestLine);
+            ->willReturn($this->mockRequestLine);
 
-        $mockRequestLine
+        $this->mockRequestLine
             ->expects($this->once())
             ->method('setBody')
             ->with('Example Body');
 
-        $mockRequestLine
+        $this->mockRequestLine
             ->expects($this->once())
             ->method('setSequenceId')
             ->with(123);
@@ -101,7 +102,7 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
         $this->mockRequest
             ->expects($this->once())
             ->method('addLine')
-            ->with($mockRequestLine);
+            ->with($this->mockRequestLine);
 
         $result = $this->requestBuilder->addRequestLine('Example Body', 123);
         $this->assertEquals($this->requestBuilder, $result);
@@ -160,21 +161,11 @@ class RequestBuilderTest extends \PHPUnit\Framework\TestCase
 
     public function testResetBuilder(): void
     {
-        $mockRequest2 = $this->createMock(Request::class);
-        $mockRequest2
-            ->method('getId'
-            )->willReturn(124);
-
-        $this->mockRequestFactory
-            ->expects($this->at(2))
-            ->method('create')
-            ->willReturn($mockRequest2);
-
         $result = $this->requestBuilder->resetBuilder();
         $this->assertEquals($this->requestBuilder, $result);
         $this->assertNotEquals(
-            $this->mockRequest->getId(),
-            $this->requestBuilder->getRequest()->getId()
+            $this->mockRequest,
+            $this->requestBuilder->getRequest()
         );
     }
 
