@@ -38,7 +38,7 @@ class Exporter
      */
     public function export(\RealtimeDespatch\OrderFlow\Model\Request $request)
     {
-        if ( ! $this->_type->isEnabled($request->getScopeId()) && $this->_type::TYPE != 'Product') {
+        if ( ! $this->_type->isEnabled($request->getScopeId()) && $this->_type->getType() != 'Product') {
             throw new \Exception($this->_type->getType().' exports are currently disabled. Please review your OrderFlow module configuration.');
         }
 
@@ -52,7 +52,7 @@ class Exporter
 
             return $export;
         }
-        catch (Exception $ex) {
+        catch (\Exception $ex) {
             $this->_eventManager->dispatch(
                 'orderflow_exception',
                 ['exception' => $ex, 'type' => $this->_type->getType(), 'process' => 'export']

@@ -115,7 +115,7 @@ class RequestRepository implements \RealtimeDespatch\OrderFlow\Api\RequestReposi
     public function delete(\RealtimeDespatch\OrderFlow\Api\Data\RequestInterface $entity)
     {
         try {
-            $this->requestResource->delete($request);
+            $this->requestResource->delete($entity);
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }

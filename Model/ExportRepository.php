@@ -85,11 +85,11 @@ class ExportRepository implements \RealtimeDespatch\OrderFlow\Api\ExportReposito
     public function save(\RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $entity)
     {
         try {
-            $this->resource->save($export);
+            $this->resource->save($entity);
         } catch (\Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));
         }
-        return $export;
+        return $entity;
     }
 
     /**
@@ -102,7 +102,7 @@ class ExportRepository implements \RealtimeDespatch\OrderFlow\Api\ExportReposito
     public function delete(\RealtimeDespatch\OrderFlow\Api\Data\ExportInterface $entity)
     {
         try {
-            $this->resource->delete($export);
+            $this->resource->delete($entity);
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
