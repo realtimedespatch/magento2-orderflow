@@ -127,9 +127,9 @@ class RequestLine extends \Magento\Framework\Model\AbstractModel implements Requ
      *
      * @return \RealtimeDespatch\OrderFlow\Api\Data\RequestLineInterface
      */
-    public function setMessageId($messageId)
+    public function setMessageId(string $messageId)
     {
-        return $this->setData(self::MESSAGE_ID, $id);
+        return $this->setData(self::MESSAGE_ID, $messageId);
     }
 
     /**

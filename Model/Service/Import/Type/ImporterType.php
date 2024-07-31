@@ -23,7 +23,6 @@ abstract class ImporterType implements ImporterTypeInterface
     protected $_objectManager;
 
     protected $_processedIds = [];
-
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $cnfig
      * @param \Psr\Log\LoggerInterface $logger

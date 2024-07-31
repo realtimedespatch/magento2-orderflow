@@ -70,6 +70,11 @@
                     <label>Batch Size</label>
                     <validate>validate-no-empty</validate>
                 </field>
+                <field id="min_order_datetime" translate="label" type="date" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Earliest Order To Export</label>
+                    <frontend_model>RealtimeDespatch\OrderFlow\Block\Adminhtml\Config\DateTime</frontend_model>
+                    <comment>Do not export orders created before this date and time</comment>
+                </field>
             </group>
         </section>
         <section id="orderflow_product_export" translate="label" type="text" sortOrder="4000" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -95,7 +100,7 @@
                     <source_model>Magento\Config\Model\Config\Source\Store</source_model>
                 </field>
             </group>
-        </section>        
+        </section>
         <section id="orderflow_inventory_import" translate="label" type="text" sortOrder="5000" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Inventory Import</label>
             <tab>orderflow_tab</tab>

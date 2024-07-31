@@ -8,12 +8,11 @@ use RealtimeDespatch\OrderFlow\Helper\Stock\MsiStockHelperFactory;
 use RealtimeDespatch\OrderFlow\Helper\Stock\LegacyStockHelperFactory;
 
 /**
- * Stock Helper.
+ * Stock Helper Factory
  */
-class StockHelperFactory extends \Magento\Framework\App\Helper\AbstractHelper
+class StockHelperFactory
 {
     public function __construct(
-        protected \Magento\Framework\App\Helper\Context $context,
         protected MsiStockHelperFactory $msiStockHelperFactory,
         protected LegacyStockHelperFactory $legacyStockHelperFactory,
         protected Manager $moduleManager
