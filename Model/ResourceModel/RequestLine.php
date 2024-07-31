@@ -48,10 +48,6 @@ class RequestLine extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
      */
     protected function _beforeSave(\Magento\Framework\Model\AbstractModel $object)
     {
-        if ($object->isObjectNew() && ! $object->hasCreationTime()) {
-            $object->setCreationTime($this->_date->gmtDate());
-        }
-
         if ( ! $object->getRequestId() && $object->getRequest()) {
             $object->setRequestId($object->getRequest()->getId());
         }

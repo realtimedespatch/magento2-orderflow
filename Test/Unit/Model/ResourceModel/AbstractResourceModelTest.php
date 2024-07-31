@@ -129,10 +129,6 @@ abstract class AbstractResourceModelTest extends \PHPUnit\Framework\TestCase
             ->method('lastInsertId')
             ->willReturn(1);
 
-        $mockModel
-            ->expects($this->once())
-            ->method('setCreationTime');
-
         $this->resource->save($mockModel);
     }
 
