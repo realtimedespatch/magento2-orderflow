@@ -40,7 +40,6 @@ class StockHelperFactoryTest extends \PHPUnit\Framework\TestCase
             ->willReturn($this->mockLegacyStockHelper);
 
         $this->stockHelperFactory = new StockHelperFactory(
-            $this->mockContext,
             $this->mockMsiStockHelperFactory,
             $this->mockLegacyStockHelperFactory,
             $this->mockModuleManager

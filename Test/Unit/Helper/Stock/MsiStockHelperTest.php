@@ -4,160 +4,196 @@ declare(strict_types=1);
 namespace RealtimeDespatch\OrderFlow\Test\Unit\Helper\Stock;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Module\Manager;
+use Magento\Inventory\Model\Source;
+use Magento\InventoryApi\Api\Data\SourceInterface;
 use Magento\Inventory\Model\SourceItem;
+use Magento\InventoryApi\Api\Data\StockSearchResultsInterface;
+use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface;
+use Magento\InventoryApi\Api\StockRepositoryInterface;
+use Magento\InventoryReservations\Model\ResourceModel\GetReservationsQuantity;
+use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
+use PHPUnit\Framework\TestCase;
 use RealtimeDespatch\OrderFlow\Helper\Import\Inventory;
 use RealtimeDespatch\OrderFlow\Helper\Stock\MsiStockHelper;
 
-class MsiStockHelperTest extends AbstractStockHelperTest
+
+class MsiStockHelperTest extends TestCase
 {
 
     protected \Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory $mockSourceItemFactory;
     protected SourceItem $mockSourceItem;
+    protected SourceInterface $mockSource;
     protected \Magento\InventoryApi\Api\SourceItemsSaveInterface $mockSourceItemsSave;
+    protected SearchCriteriaBuilder $mockSearchCriteriaBuilder;
+    protected \Magento\Framework\Api\SearchCriteria $mockSearchCriteria;
+    protected StockResolverInterface $mockStockResolver;
+    protected GetReservationsQuantity $mockGetReservationsQuantity;
+    protected StockRepositoryInterface $mockStockRepository;
+    protected GetSourcesAssignedToStockOrderedByPriorityInterface $mockSourcesAssignedToStock;
+    protected ProductRepositoryInterface $mockProductRepository;
+    protected Inventory $mockInventoryHelper;
+    protected MsiStockHelper $stockHelper;
+    protected StockSearchResultsInterface $mockStockSearchResults;
+    protected \Magento\InventoryApi\Api\Data\StockInterface $mockStock;
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->mockSourceItemFactory = $this->createMock(\Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory::class);
         $this->mockSourceItemsSave = $this->createMock(\Magento\InventoryApi\Api\SourceItemsSaveInterface::class);
         $this->mockSourceItem = $this->createMock(SourceItem::class);
+        $this->mockSearchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
+        $this->mockSearchCriteria = $this->createMock(\Magento\Framework\Api\SearchCriteria::class);
+        $this->mockStockResolver = $this->createMock(StockResolverInterface::class);
+        $this->mockGetReservationsQuantity = $this->createMock(GetReservationsQuantity::class);
+        $this->mockStockRepository = $this->createMock(StockRepositoryInterface::class);
+        $this->mockSourcesAssignedToStock = $this->createMock(GetSourcesAssignedToStockOrderedByPriorityInterface::class);
+        $this->mockProductRepository = $this->createMock(ProductRepositoryInterface::class);
+        $this->mockInventoryHelper = $this->createMock(Inventory::class);
+        $this->mockStockSearchResults = $this->createMock(StockSearchResultsInterface::class);
+        $this->mockStock = $this->createMock(\Magento\InventoryApi\Api\Data\StockInterface::class);
+        $this->mockSource = $this->createMock(SourceInterface::class);
 
         $this->stockHelper = new MsiStockHelper(
-            $this->mockContext,
             $this->mockProductRepository,
-            $this->mockInventoryHelper,
-            $this->mockOrderFactory,
-            $this->mockQuoteFactory,
+            $this->mockSearchCriteriaBuilder,
             $this->mockSourceItemFactory,
-            $this->mockSourceItemsSave
+            $this->mockSourceItemsSave,
+            $this->mockStockResolver,
+            $this->mockGetReservationsQuantity,
+            $this->mockStockRepository,
+            $this->mockSourcesAssignedToStock,
+            $this->mockInventoryHelper,
         );
     }
-
 
     /**
      * @dataProvider testUpdateProductStockDataProvider
      * @param string $sku
      * @param int $inputQty
-     * @param int $outputQty
-     * @param int $inStock
-     * @param \DateTime $date
-     * @param bool $negativeQtyEnabled
+     * @param \DateTime $lastOrderExported
+     * @param int $reservedQty
+     * @param int $setQty
      * @param string $sourceCode
-     * @param bool $unsentOrderAdjustment
-     * @param int $unsetOrderQty
-     * @param bool $activeQuoteAdjustment
-     * @param int $activeQuoteQty
-     * @return void
      */
     public function testUpdateProductStock(
         string $sku,
-        int $inputQty,
-        int $outputQty,
-        int $inStock,
-        \DateTime $date,
-        bool $negativeQtyEnabled,
+        float $inputQty,
+        \DateTime $lastOrderExported,
+        float $reservedQty,
+        float $setQty,
         string $sourceCode,
-        bool $unsentOrderAdjustment = false,
-        int $unsetOrderQty = 0,
-        bool $activeQuoteAdjustment = false,
-        int $activeQuoteQty = 0
+        bool $negativeQtyEnabled
     ): void
     {
+        $this->mockSearchCriteriaBuilder
+            ->expects($this->once())
+            ->method('create')
+            ->willReturn($this->mockSearchCriteria);
+
+        $this->mockStockRepository
+            ->expects($this->once())
+            ->method('getList')
+            ->with($this->mockSearchCriteria)
+            ->willReturn($this->mockStockSearchResults);
+
+        $this->mockStockSearchResults
+            ->expects($this->once())
+            ->method('getItems')
+            ->willReturn([$this->mockStock]);
+
+        $this->mockStock
+            ->expects($this->exactly(2))
+            ->method('getStockId')
+            ->willReturn(1);
+
+        $this->mockSourcesAssignedToStock
+            ->expects($this->once())
+            ->method('execute')
+            ->with(1)
+            ->willReturn([$this->mockSource]);
+
+        $this->mockSource
+            ->expects($this->once())
+            ->method('getSourceCode')
+            ->willReturn($sourceCode);
+
+        $this->mockGetReservationsQuantity
+            ->expects($this->once())
+            ->method('execute')
+            ->with($sku, 1)
+            ->willReturn($reservedQty);
+
+        $this->mockInventoryHelper
+            ->expects($this->once())
+            ->method('isNegativeQtyEnabled')
+            ->willReturn($negativeQtyEnabled);
+
         $this->mockSourceItemFactory
+            ->expects($this->once())
             ->method('create')
             ->willReturn($this->mockSourceItem);
 
         $this->mockSourceItem
             ->expects($this->once())
             ->method('setSourceCode')
-            ->with($sourceCode);
+            ->with($sourceCode)
+            ->willReturnSelf();
 
         $this->mockSourceItem
             ->expects($this->once())
             ->method('setSku')
-            ->with($sku);
+            ->with($sku)
+            ->willReturnSelf();
 
         $this->mockSourceItem
             ->expects($this->once())
             ->method('setQuantity')
-            ->with($outputQty);
+            ->with($setQty)
+            ->willReturnSelf();
 
         $this->mockSourceItem
             ->expects($this->once())
             ->method('setStatus')
-            ->with($inStock);
+            ->with($setQty > 0 ? 1 : 0)
+            ->willReturnSelf();
 
         $this->mockSourceItemsSave
             ->expects($this->once())
             ->method('execute')
             ->with([$this->mockSourceItem]);
 
-        parent::testUpdateProductStock(
+        $this->stockHelper->updateProductStock(
             $sku,
             $inputQty,
-            $outputQty,
-            $inStock,
-            $date,
-            $negativeQtyEnabled,
-            $sourceCode,
-            $unsentOrderAdjustment,
-            $unsetOrderQty,
-            $activeQuoteAdjustment,
-            $activeQuoteQty
+            $lastOrderExported,
+            $sourceCode
         );
     }
 
-    public function testUpdateProductStockNegative(): void
+    public function testUpdateProductStockDataProvider()
     {
-        $sku = 'SKU';
-        $qty = -10;
-        $lastOrderExported = new \DateTime();
-        $source = 'default';
+        /**
+         * $sku
+         * $inputQty
+         * $lastOrderExported
+         * $reservedQty
+         * $setQty
+         * $source
+         * $negativeQtyEnabled
+         */
+        return [
 
-        $this->mockProductRepository
-            ->method('get')
-            ->willReturn($this->createMock(\Magento\Catalog\Api\Data\ProductInterface::class));
-
-        $this->mockInventoryHelper
-            ->method('isNegativeQtyEnabled')
-            ->willReturn(false);
-
-        $this->mockSourceItemFactory
-            ->method('create')
-            ->willReturn($this->mockSourceItem);
-
-        $this->mockSourceItem
-            ->expects($this->once())
-            ->method('setSourceCode')
-            ->with($source);
-
-        $this->mockSourceItem
-            ->expects($this->once())
-            ->method('setSku')
-            ->with($sku);
-
-        $this->mockSourceItem
-            ->expects($this->once())
-            ->method('setQuantity')
-            ->with(0);
-
-        $this->mockSourceItem
-            ->expects($this->once())
-            ->method('setStatus')
-            ->with(0);
-
-        $this->mockSourceItemsSave
-            ->expects($this->once())
-            ->method('execute')
-            ->with([$this->mockSourceItem]);
-
-        $this->stockHelper->updateProductStock($sku, $qty, $lastOrderExported, $source);
+            ['TEST-SKU', 10, new \DateTime(), 5, 5, 'warehouse', false],
+            ['TEST-SKU', 10, new \DateTime(), 0, 10, 'default', false],
+            ['TEST-SKU', 10, new \DateTime(), 11, 0, 'default', false],
+            ['TEST-SKU', 10, new \DateTime(), 11, -1, 'default', true],
+        ];
     }
 }

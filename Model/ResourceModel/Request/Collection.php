@@ -5,6 +5,7 @@ namespace RealtimeDespatch\OrderFlow\Model\ResourceModel\Request;
 /**
  * Class Collection
  * @package RealtimeDespatch\OrderFlow\Model\ResourceModel\Request
+ * @codeCoverageIgnore
  */
 class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
 {

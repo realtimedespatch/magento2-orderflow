@@ -8,6 +8,7 @@ use RealtimeDespatch\OrderFlow\Model\Export;
 use RealtimeDespatch\OrderFlow\Model\ResourceModel\Export as ExportResource;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use RealtimeDespatch\OrderFlow\Model\ResourceModel\Import;
+use RealtimeDespatch\OrderFlow\Model\Import as ImportModel;
 
 class ImportTest extends AbstractResourceModelTest
 {
@@ -28,6 +29,6 @@ class ImportTest extends AbstractResourceModelTest
 
     protected function getMockModel(): MockObject
     {
-        return $this->createMock(Import::class);
+        return $this->createMock(ImportModel::class);
     }
 }

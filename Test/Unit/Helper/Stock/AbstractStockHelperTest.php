@@ -11,13 +11,14 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
+use RealtimeDespatch\OrderFlow\Api\StockHelperInterface;
 use RealtimeDespatch\OrderFlow\Helper\Import\Inventory;
 use RealtimeDespatch\OrderFlow\Helper\Stock\AbstractStockHelper;
 use RealtimeDespatch\OrderFlow\Helper\Stock\MsiStockHelper;
 
 abstract class AbstractStockHelperTest extends \PHPUnit\Framework\TestCase
 {
-    protected AbstractStockHelper $stockHelper;
+    protected StockHelperInterface $stockHelper;
     protected ScopeConfigInterface $mockScopeConfig;
     protected ProductRepositoryInterface $mockProductRepository;
     protected Product $mockProduct;

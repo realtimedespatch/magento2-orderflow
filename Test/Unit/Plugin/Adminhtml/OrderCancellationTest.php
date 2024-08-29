@@ -7,6 +7,8 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderRepository;
+use Magento\Store\Model\Store;
+use Magento\Store\Model\Website;
 use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
 use RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder;
 use RealtimeDespatch\OrderFlow\Model\Request;
@@ -24,6 +26,8 @@ class OrderCancellationTest extends \PHPUnit\Framework\TestCase
     protected ObjectManagerInterface $mockObjectManager;
     protected RequestProcessor $mockRequestProcessor;
     protected Request $mockRequest;
+    protected Store $mockStore;
+    protected Website $mockWebsite;
 
     protected function setUp(): void
     {
@@ -33,11 +37,21 @@ class OrderCancellationTest extends \PHPUnit\Framework\TestCase
         $this->mockObjectManager = $this->createMock(ObjectManagerInterface::class);
         $this->mockRequestProcessor = $this->createMock(RequestProcessor::class);
         $this->mockRequest = $this->createMock(Request::class);
+        $this->mockStore = $this->createMock(Store::class);
+        $this->mockWebsite = $this->createMock(Website::class);
         $this->mockOrder = $this->getMockBuilder(Order::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['canCancel', 'getIncrementId', 'getId'])
+            ->onlyMethods(['canCancel', 'getIncrementId', 'getId', 'getStore'])
             ->addMethods(['getOrderflowExportStatus'])
             ->getMock();
+
+        $this->mockStore
+            ->method('getWebsite')
+            ->willReturn($this->mockWebsite);
+
+        $this->mockOrder
+            ->method('getStore')
+            ->willReturn($this->mockStore);
 
         $this->plugin = new OrderCancellation(
             $this->mockOrderExportHelper,
@@ -91,6 +105,11 @@ class OrderCancellationTest extends \PHPUnit\Framework\TestCase
             ->expects($this->any())
             ->method('getOrderflowExportStatus')
             ->willReturn('Queued');
+
+        $this->mockOrder
+            ->expects($this->once())
+            ->method('getStore')
+            ->willReturn($this->mockStore);
 
        $this->expectException(\Exception::class);
        $this->expectExceptionMessage('Cannot cancel an order awaiting export to OrderFlow.');

@@ -22,7 +22,6 @@ class LegacyStockHelperTest extends AbstractStockHelperTest
         parent::setUp();
 
         $this->stockHelper = new LegacyStockHelper(
-            $this->mockContext,
             $this->mockProductRepository,
             $this->mockInventoryHelper,
             $this->mockOrderFactory,

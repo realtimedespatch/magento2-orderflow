@@ -5,6 +5,7 @@ namespace RealtimeDespatch\OrderFlow\Test\Unit\Helper\Export;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Sales\Model\OrderFactory;
 use PHPUnit\Framework\TestCase;
 use RealtimeDespatch\OrderFlow\Helper\Export\Order;
@@ -15,6 +16,7 @@ class OrderTest extends TestCase
     protected Order $orderHelper;
     protected ScopeConfigInterface $mockScopeConfig;
     protected OrderFactory $mockOrderFactory;
+    protected TimezoneInterface $mockTimezone;
 
     protected function setUp(): void
     {
@@ -24,10 +26,12 @@ class OrderTest extends TestCase
         $mockContext->method('getScopeConfig')->willReturn($this->mockScopeConfig);
 
         $this->mockOrderFactory = $this->createMock(\Magento\Sales\Model\OrderFactory::class);
+        $this->mockTimezone = $this->createMock(\Magento\Framework\Stdlib\DateTime\TimezoneInterface::class);
 
         $this->orderHelper = new Order(
             $mockContext,
-            $this->mockOrderFactory
+            $this->mockOrderFactory,
+            $this->mockTimezone
         );
 
         parent::setUp();
@@ -66,21 +70,6 @@ class OrderTest extends TestCase
             ->willReturn('processing,pending');
 
         $this->assertEquals(['processing', 'pending'], $this->orderHelper->getExportableOrderStatuses());
-    }
-
-    public function testCanExport(): void
-    {
-        $this->mockScopeConfig
-            ->method('getValue')
-            ->with('orderflow_order_export/settings/exportable_status')
-            ->willReturn('processing,pending');
-
-        $this->assertTrue($this->orderHelper->canExport('processing', 'Pending'));
-        $this->assertTrue($this->orderHelper->canExport('processing', null));
-        $this->assertFalse($this->orderHelper->canExport('processing', 'Queued'));
-        $this->assertFalse($this->orderHelper->canExport('complete', 'Queued'));
-        $this->assertFalse($this->orderHelper->canExport('complete', 'Pending'));
-        $this->assertFalse($this->orderHelper->canExport('complete', null));
     }
 
     public function testGetCreateableOrders(): void

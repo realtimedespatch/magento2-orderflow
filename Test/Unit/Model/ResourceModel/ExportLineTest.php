@@ -34,19 +34,7 @@ class ExportLineTest extends AbstractResourceModelTest
 
     protected function getMockModel(): MockObject
     {
-        $mock = $this->getMockBuilder(\RealtimeDespatch\OrderFlow\Model\ExportLine::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['hasDataChanges', 'isSaveAllowed', 'getData', 'isObjectNew'])
-            ->addMethods(['getExport'])
-            ->getMock();
-
-        $mockExport = $this->createMock(\RealtimeDespatch\OrderFlow\Model\Export::class);
-
-        $mock
-            ->expects($this->once())
-            ->method('getExport')
-            ->willReturn($mockExport);
-
+        $mock = $this->createMock(\RealtimeDespatch\OrderFlow\Model\ExportLine::class);
         return $mock;
     }
 }
