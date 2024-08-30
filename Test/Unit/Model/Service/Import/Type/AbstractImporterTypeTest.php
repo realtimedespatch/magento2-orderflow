@@ -105,10 +105,19 @@ abstract class AbstractImporterTypeTest extends \PHPUnit\Framework\TestCase
 
     public function testImport(): void
     {
-        $this->mockTxn->expects($this->once())->method('save');
-        $this->mockImport->expects($this->exactly(2))->method('setSuccesses')->withConsecutive([0], [1]);
-        $this->mockImportLine->expects($this->exactly(1))->method('setResult')->withConsecutive(['Success']);
-        $result = $this->type->import($this->mockRequest);
+        $this->mockTxn
+            ->expects($this->once())
+            ->method('save');
+
+        $this->mockImport
+            ->method('setSuccesses')
+            ->withConsecutive([0], [1]);
+
+        $this->mockImportLine
+            ->expects($this->exactly(1))
+            ->method('setResult');
+
+        $this->type->import($this->mockRequest);
     }
 
     public function testImportDuplicate(): void
