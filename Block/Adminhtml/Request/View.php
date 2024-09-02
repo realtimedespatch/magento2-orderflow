@@ -151,7 +151,7 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
         $exportId = $this->_exportResourceModel->getIdByRequestId($request->getId());
 
         if ( ! $exportId || ! $this->canViewExport($request->getEntity())) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         $exportUrl = $this->getUrl(

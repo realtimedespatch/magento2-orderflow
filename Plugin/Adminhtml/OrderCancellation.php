@@ -55,7 +55,7 @@ class OrderCancellation
     public function beforeCancel(\Magento\Sales\Model\Order $subject)
     {
         if ( ! $this->_helper->isEnabled($subject->getStore()->getWebsiteId())) {
-            throw new Exception(__('Order exports are currently disabled. Please review the OrderFlow module configuration.'));
+            throw new \Exception(__('Order exports are currently disabled. Please review the OrderFlow module configuration.'));
         }
 
         try {

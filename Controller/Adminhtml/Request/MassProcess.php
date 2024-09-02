@@ -42,7 +42,7 @@ class MassProcess extends \Magento\Backend\App\Action
         $collection = $this->filter->getCollection($this->collectionFactory->create());
         $collectionSize = $collection->getSize();
 
-        foreach ($collection as $request) {
+        foreach ($collection->getItems() as $request) {
             $this->_getProcessor($request->getEntity(), $request->getOperation())->process($request);
         }
 

@@ -65,10 +65,6 @@ class Import extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
      */
     protected function _beforeSave(\Magento\Framework\Model\AbstractModel $object)
     {
-        if ($object->isObjectNew() && ! $object->hasCreationTime()) {
-            $object->setCreationTime($this->_date->gmtDate());
-        }
-
         return parent::_beforeSave($object);
     }
 }
