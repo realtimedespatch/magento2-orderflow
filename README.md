@@ -1,22 +1,36 @@
 <h1 align="center">Magento 2 OrderFlow Integration</h1>
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2d22302b19714517ab3bf868c17e737e)](https://www.codacy.com/manual/daniel-ness/magento2-orderflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=realtimedespatch/magento2-orderflow&amp;utm_campaign=Badge_Grade)
-
 ## Installation
 
 ```bash
-composer require realtimedespatch/magento2-orderflow:version
+composer require realtimedespatch/magento2-orderflow
 php bin/magento module:enable RealtimeDespatch_OrderFlow
 php bin/magento setup:upgrade
 php bin/magento setup:di:compile
 ```
 
-## Magento 2.x Compatibility
-
-- Magento 2.1, 2.2, 2.3  / Module Version 1.3.0
+## Compatibility
+- Magento 2.4, 2.5, 2.6, 2.7
+- PHP 8.0-8.4
 
 ## Documentation
 
 The official documentation can be found at the following location:
 
 <a href="https://documentation.realtimedespatch.co.uk/html/Magento2IntegrationGuide/">Documentation</a>
+
+## Contributing
+
+PRs should satisfy the following tests:
+
+### Unit Tests
+
+```bash
+vendor/bin/phpunit -c vendor/realtimedespatch/magento2-orderflow/phpunit.xml --coverage-text vendor/realtimedespatch/magento2-orderflow
+```
+
+### PHP Compatibility
+
+```bash
+vendor/bin/phpcs -p vendor/realtimedespatch/ --standard=PHPCompatibility --runtime-set testVersion 8.0-8.4
+```
