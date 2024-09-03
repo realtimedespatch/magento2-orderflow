@@ -6,7 +6,7 @@
     "OSL-3.0"
   ],
   "require": {
-    "sixbysix/realtime-despatch": "^1.3.0",
+    "sixbysix/realtime-despatch": "^1.4.1",
     "php": "^8.0|^8.1|^8.2|^8.3"
   },
   "autoload": {

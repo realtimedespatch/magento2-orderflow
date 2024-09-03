@@ -42,7 +42,7 @@ class ProductServiceFactoryTest extends \PHPUnit\Framework\TestCase
             ->willReturn('test_password');
 
         $this->mockCredentials
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('getEndpoint')
             ->willReturn('https://example.com');
 

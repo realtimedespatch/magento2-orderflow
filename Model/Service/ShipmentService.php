@@ -73,7 +73,7 @@ class ShipmentService implements ShipmentManagementInterface
     /**
      * Creates a new shipment
      *
-     * @param array $params Shipment Params
+     * @param object $params Shipment Params
      *
      * @return mixed
      */

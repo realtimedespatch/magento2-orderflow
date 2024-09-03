@@ -216,7 +216,7 @@ class ShipmentServiceTest extends \PHPUnit\Framework\TestCase
             ->method('getExtensionAttributes')
             ->willReturn(
                 $this->getMockBuilder(\Magento\Sales\Api\Data\ShipmentExtensionInterface::class)
-                    ->onlyMethods(['setSourceCode', 'getSourceCode'])
+                    ->addMethods(['setSourceCode', 'getSourceCode'])
                     ->getMock()
             );
 
