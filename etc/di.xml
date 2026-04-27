@@ -249,6 +249,9 @@
     <type name="Magento\Catalog\Model\Product\Action">
         <plugin name="orderflow_product_export_status_mass_update" type="RealtimeDespatch\OrderFlow\Plugin\Catalog\ProductActionUpdateAttributes"/>
     </type>
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="orderflow_order_repository_extension_attributes" type="RealtimeDespatch\OrderFlow\Plugin\Sales\OrderRepository"/>
+    </type>
     <virtualType name="orderflowLogger" type="Magento\Framework\Logger\Monolog">
         <arguments>
             <argument name="handlers"  xsi:type="array">
