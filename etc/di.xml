@@ -241,6 +241,9 @@
     <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
         <plugin name="orderflow_soap_inventory_import_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\InventoryImport"/>
     </type>
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="orderflow_order_repository_extension_attributes" type="RealtimeDespatch\OrderFlow\Plugin\Sales\OrderRepository"/>
+    </type>
     <virtualType name="orderflowLogger" type="Magento\Framework\Logger\Monolog">
         <arguments>
             <argument name="handlers"  xsi:type="array">
