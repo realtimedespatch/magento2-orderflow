@@ -13,6 +13,8 @@
     <preference for="RealtimeDespatch\OrderFlow\Api\InventoryRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\InventoryRequestService" />
     <preference for="RealtimeDespatch\OrderFlow\Api\OrderRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\OrderRequestService" />
     <preference for="RealtimeDespatch\OrderFlow\Api\ProductRequestManagementInterface" type="RealtimeDespatch\OrderFlow\Model\Service\ProductRequestService" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\ProductRepositoryInterface" type="RealtimeDespatch\OrderFlow\Model\ProductRepository" />
+    <preference for="RealtimeDespatch\OrderFlow\Api\Data\ProductInterface" type="RealtimeDespatch\OrderFlow\Model\Data\Product" />
     <preference for="RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface" type="RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\SequenceItemInterface" type="RealtimeDespatch\OrderFlow\Model\SequenceItem" />
     <preference for="RealtimeDespatch\OrderFlow\Api\Data\QuantityItemInterface" type="RealtimeDespatch\OrderFlow\Model\QuantityItem" />
