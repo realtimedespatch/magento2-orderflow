@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace RealtimeDespatch\OrderFlow\Test\Unit\Plugin\Webapi\Soap;
 
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Webapi\Controller\Soap\Request\Handler as SoapRequestHandler;
 use RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface;
+use RealtimeDespatch\OrderFlow\Helper\Export\Product as ProductHelper;
 use RealtimeDespatch\OrderFlow\Model\Service\Request\RequestProcessor;
 use RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\InventoryImport;
 use RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\ProductExport;
-use RealtimeDespatch\OrderFlow\Helper\Export\Product as ProductHelper;
-use Magento\Webapi\Controller\Soap\Request\Handler as SoapRequestHandler;
 
 class ProductExportTest extends \PHPUnit\Framework\TestCase
 {
@@ -21,7 +21,7 @@ class ProductExportTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp(): void
     {
-        $this->mockObjectManager = $this->createMock(\Magento\Framework\ObjectManagerInterface::class);
+        $this->mockObjectManager = $this->createMock(ObjectManagerInterface::class);
         $this->mockProductHelper = $this->createMock(ProductHelper::class);
         $this->mockRequestBuilder = $this->getMockBuilder(RequestBuilderInterface::class)
             ->disableOriginalConstructor()
@@ -39,9 +39,8 @@ class ProductExportTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider testAroundCallDataProvider
-     * @return void
      */
-    public function testAroundCall(bool $productExportEnabled): void
+    public function testAroundCall(string $operation, bool $productExportEnabled): void
     {
         $mockRequestProcessor = $this->createMock(RequestProcessor::class);
 
@@ -64,7 +63,7 @@ class ProductExportTest extends \PHPUnit\Framework\TestCase
             ->expects($this->once())
             ->method('setRequestBody');
 
-        $response = ['result' => 'success',];
+        $response = ['result' => 'success'];
 
         $this->mockRequestBuilder
             ->expects($this->once())
@@ -83,21 +82,21 @@ class ProductExportTest extends \PHPUnit\Framework\TestCase
             ->method('saveRequest')
             ->willReturn($mockRequest);
 
+        $this->mockProductHelper
+            ->expects($this->once())
+            ->method('isProductExportEnabledForProductWebsites')
+            ->with('SKU-1234')
+            ->willReturn($productExportEnabled);
+
         if (!$productExportEnabled) {
             $this->expectException(\Magento\Framework\Webapi\Exception::class);
             $this->expectExceptionMessage("Product 'SKU-1234' is not in any product export enabled websites");
-        } else {
-            $this->mockProductHelper
-                ->expects($this->once())
-                ->method('isProductExportEnabledForProductWebsites')
-                ->with('SKU-1234')
-                ->willReturn(true);
         }
 
         $this->plugin->around__call(
             $this->mockSoapRequestHandler,
             fn() => $response,
-            'catalogProductRepositoryV1Get',
+            $operation,
             [
                 (object) [
                     'sku' => 'SKU-1234',
@@ -113,9 +112,14 @@ class ProductExportTest extends \PHPUnit\Framework\TestCase
             ->method('create')
             ->with('ProductExportRequestProcessor');
 
+        $this->mockProductHelper
+            ->expects($this->never())
+            ->method('isProductExportEnabledForProductWebsites');
+
         $this->plugin->around__call(
             $this->mockSoapRequestHandler,
-            function() { },
+            function () {
+            },
             InventoryImport::class,
             [
                 (object) [
@@ -128,8 +132,10 @@ class ProductExportTest extends \PHPUnit\Framework\TestCase
     public function testAroundCallDataProvider(): array
     {
         return [
-            [true],
-            [false],
+            ['catalogProductRepositoryV1Get', true],
+            ['catalogProductRepositoryV1Get', false],
+            ['realtimeDespatchOrderFlowProductRepositoryV1Get', true],
+            ['realtimeDespatchOrderFlowProductRepositoryV1Get', false],
         ];
     }
 }

@@ -2,13 +2,17 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Catalog;
 
+use RealtimeDespatch\OrderFlow\Model\Product\ExportStatus\ProductExportStatusResolver;
+
 /**
  * Class ProductSave
  * @package RealtimeDespatch\OrderFlow\Plugin\Catalog
  */
 class ProductSave
 {
-    const EXPORT_STATUS_PENDING = 'Pending';
+    public function __construct(
+        private readonly ProductExportStatusResolver $productExportStatusResolver
+    ) {}
 
     /**
      * Resets the Export Status if a product has been updated.
@@ -22,13 +26,15 @@ class ProductSave
             return array($product);
         }
 
-        // If a separate process has amended the export status ignore.
-        if ($product->dataHasChangedFor('orderflow_export_status')) {
+        if (!$this->productExportStatusResolver->shouldSetPending(
+            $product->getData('orderflow_export_status'),
+            $product->dataHasChangedFor('orderflow_export_status')
+        )) {
             return array($product);
         }
 
         // Set pending export status.
-        $product->setOrderflowExportStatus(self::EXPORT_STATUS_PENDING);
+        $product->setOrderflowExportStatus(ProductExportStatusResolver::STATUS_PENDING);
 
         return array($product);
     }

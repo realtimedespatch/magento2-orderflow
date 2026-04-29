@@ -10,19 +10,19 @@
          colors="true"
          columns="max"
          beStrictAboutTestsThatDoNotTestAnything="false"
-         bootstrap="/var/www/html/dev/tests/unit/framework/bootstrap.php">
+         bootstrap="Test/Unit/bootstrap.php">
     <coverage>
         <include>
-            <directory suffix=".php">/var/www/html/vendor/realtimedespatch/magento2-orderflow/*</directory>
+            <directory suffix=".php">.</directory>
         </include>
         <exclude>
-            <directory suffix=".php">/var/www/html/vendor/realtimedespatch/magento2-orderflow/Test/*</directory>
+            <directory suffix=".php">Test</directory>
         </exclude>
     </coverage>
     <php>
         <includePath>.</includePath>
         <ini name="memory_limit" value="-1"/>
-        <ini name="date.timezone" value="America/Los_Angeles"/>
+        <ini name="date.timezone" value="Europe/London"/>
         <ini name="xdebug.max_nesting_level" value="200"/>
     </php>
     <listeners>

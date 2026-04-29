@@ -1,5 +1,6 @@
 {
   "name": "realtimedespatch/magento2-orderflow",
+  "version": "1.7.0",
   "description": "Magento 2 OrderFlow Integration",
   "type": "magento2-module",
   "license": [

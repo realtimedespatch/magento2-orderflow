@@ -18,7 +18,8 @@ class ExportStatus extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSo
             ['value' => 'Pending', 'label' => __('Pending')],
             ['value' => 'Queued', 'label' => __('Queued')],
             ['value' => 'Exported', 'label' => __('Exported')],
-            ['value' => 'Failed', 'label' => __('Failed')]
+            ['value' => 'Failed', 'label' => __('Failed')],
+            ['value' => 'Disabled', 'label' => __('Disabled')]
         ];
     }
 }

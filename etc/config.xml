@@ -30,6 +30,7 @@
                 <is_enabled>1</is_enabled>
                 <batch_size>100</batch_size>
                 <cron_expression>* * * * *</cron_expression>
+                <use_attribute_option_labels>0</use_attribute_option_labels>
             </settings>
         </orderflow_product_export>
         <orderflow_log_cleaning>

@@ -11,6 +11,7 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
 {
     const STATUS_PENDING = 'Pending';
     const STATUS_QUEUED = 'Queued';
+    const STATUS_EXPORTED = 'Exported';
 
     /**
      * @var \Mage\Sales\Model\OrderFactory
@@ -132,7 +133,7 @@ class Order extends \Magento\Framework\App\Helper\AbstractHelper
             ->addFieldToFilter('is_virtual', ['eq' => 0])
             ->addFieldToFilter('orderflow_export_date', ['null' => true])
             ->addFieldToFilter('orderflow_export_status', [
-                ['nin' => [self::STATUS_QUEUED, 'Exported']],
+                ['nin' => [self::STATUS_QUEUED, self::STATUS_EXPORTED]],
                 ['null' => true],
             ])
             ->setPage(1, $this->getBatchSize($website->getId()));

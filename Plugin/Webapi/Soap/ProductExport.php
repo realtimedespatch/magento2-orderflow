@@ -5,6 +5,7 @@ namespace RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap;
 class ProductExport
 {
     const OP_PRODUCT_EXPORT = 'catalogProductRepositoryV1Get';
+    const OP_ORDERFLOW_PRODUCT_EXPORT = 'realtimeDespatchOrderFlowProductRepositoryV1Get';
 
     /**
      * @var \Magento\Framework\ObjectManagerInterface
@@ -65,7 +66,7 @@ class ProductExport
      */
     protected function _isProductExport($operation)
     {
-        return $operation === self::OP_PRODUCT_EXPORT;
+        return in_array($operation, [self::OP_PRODUCT_EXPORT, self::OP_ORDERFLOW_PRODUCT_EXPORT], true);
     }
 
     /**

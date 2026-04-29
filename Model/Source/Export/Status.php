@@ -18,7 +18,8 @@ class Status implements \Magento\Framework\Option\ArrayInterface
             ['value' => 'Pending', 'label' => __('Pending')],
             ['value' => 'Queued', 'label' => __('Queued')],
             ['value' => 'Exported', 'label' => __('Exported')],
-            ['value' => 'Failed', 'label' => __('Failed')]
+            ['value' => 'Failed', 'label' => __('Failed')],
+            ['value' => 'Disabled', 'label' => __('Disabled')]
         ];
     }
 
@@ -27,6 +28,12 @@ class Status implements \Magento\Framework\Option\ArrayInterface
      */
     public function toArray()
     {
-        return ['Pending' => __('Pending'), 'Queued' => __('Queued'), 'Exported' => __('Exported'), 'Failed' => __('Failed')];
+        return [
+            'Pending' => __('Pending'),
+            'Queued' => __('Queued'),
+            'Exported' => __('Exported'),
+            'Failed' => __('Failed'),
+            'Disabled' => __('Disabled')
+        ];
     }
 }
