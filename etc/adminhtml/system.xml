@@ -99,6 +99,11 @@
                     <label>Store ID</label>
                     <source_model>Magento\Config\Model\Config\Source\Store</source_model>
                 </field>
+                <field id="use_attribute_option_labels" translate="label comment" type="select" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Use Attribute Option Labels</label>
+                    <comment>When enabled, product export responses return attribute option labels instead of stored option IDs for select and multiselect product attributes.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
             </group>
         </section>
         <section id="orderflow_inventory_import" translate="label" type="text" sortOrder="5000" showInDefault="1" showInWebsite="0" showInStore="0">

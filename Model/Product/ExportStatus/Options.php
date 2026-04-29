@@ -31,6 +31,9 @@ class Options implements \Magento\Framework\Data\OptionSourceInterface
             array(
                 'value' => 'Failed', 'label' => 'Failed',
             ),
+            array(
+                'value' => 'Disabled', 'label' => 'Disabled',
+            ),
         );
     }
 }
