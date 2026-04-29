@@ -117,7 +117,8 @@ class InstallData implements InstallDataInterface
                         'Pending',
                         'Queued',
                         'Exported',
-                        'Failed'
+                        'Failed',
+                        'Disabled'
                     ]
                 ]
             ]

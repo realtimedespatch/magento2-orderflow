@@ -241,6 +241,12 @@
     <type name="\Magento\Webapi\Controller\Soap\Request\Handler">
         <plugin name="orderflow_soap_inventory_import_request" type="RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap\InventoryImport"/>
     </type>
+    <type name="Magento\ImportExport\Model\ResourceModel\Import\Data">
+        <plugin name="orderflow_product_export_status_import" type="RealtimeDespatch\OrderFlow\Plugin\ImportExport\ImportDataPlugin"/>
+    </type>
+    <type name="Magento\Catalog\Model\Product\Action">
+        <plugin name="orderflow_product_export_status_mass_update" type="RealtimeDespatch\OrderFlow\Plugin\Catalog\ProductActionUpdateAttributes"/>
+    </type>
     <virtualType name="orderflowLogger" type="Magento\Framework\Logger\Monolog">
         <arguments>
             <argument name="handlers"  xsi:type="array">
