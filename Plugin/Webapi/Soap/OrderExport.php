@@ -22,19 +22,27 @@ class OrderExport
     protected $_orderRepository;
 
     /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    protected $_storeManager;
+
+    /**
      * OrderExport constructor.
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
      * @param \Magento\Sales\Model\OrderRepository $orderRepository
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder,
-        \Magento\Sales\Model\OrderRepository $orderRepository)
+        \Magento\Sales\Model\OrderRepository $orderRepository,
+        \Magento\Store\Model\StoreManagerInterface $storeManager)
     {
         $this->_objectManager = $objectManager;
         $this->_requestBuilder = $requestBuilder;
         $this->_orderRepository = $orderRepository;
+        $this->_storeManager = $storeManager;
     }
 
     public function around__call(\Magento\Webapi\Controller\Soap\Request\Handler $soapServer, callable $proceed, $operation, $arguments)
@@ -78,9 +86,11 @@ class OrderExport
 
         // It annoying we have to load the order again, but the Magento API truncates the increment Id.
         $order = $this->_orderRepository->get($id);
+        $websiteId = $this->_storeManager->getStore($order->getStoreId())->getWebsiteId();
 
         $this->_requestBuilder->setRequestBody(file_get_contents('php://input'));
         $this->_requestBuilder->setResponseBody(json_encode($response));
+        $this->_requestBuilder->setScopeId($websiteId);
         $this->_requestBuilder->addRequestLine(json_encode(array('increment_id' => $order->getIncrementId())));
 
         return $this->_requestBuilder->saveRequest();
