@@ -49,6 +49,10 @@ class OrderCancellationTest extends \PHPUnit\Framework\TestCase
             ->method('getWebsite')
             ->willReturn($this->mockWebsite);
 
+        $this->mockStore
+            ->method('getWebsiteId')
+            ->willReturn(2);
+
         $this->mockOrder
             ->method('getStore')
             ->willReturn($this->mockStore);
@@ -160,6 +164,11 @@ class OrderCancellationTest extends \PHPUnit\Framework\TestCase
             ->expects($this->once())
             ->method('addRequestLine')
             ->with(json_encode(['increment_id' => $incrementId]));
+
+        $this->mockRequestBuilder
+            ->expects($this->once())
+            ->method('setScopeId')
+            ->with(2);
 
         $this->mockRequestBuilder
             ->expects($this->once())

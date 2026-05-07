@@ -18,13 +18,29 @@ class OrderRequestService implements OrderRequestManagementInterface
     protected $requestBuilder;
 
     /**
+     * @var \Magento\Sales\Model\OrderFactory
+     */
+    protected $orderFactory;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    protected $storeManager;
+
+    /**
      * Constructor
      *
      * @param \RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder $requestBuilder
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
     public function __construct(
-        \RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder $requestBuilder) {
+        \RealtimeDespatch\OrderFlow\Model\Builder\RequestBuilder $requestBuilder,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Magento\Store\Model\StoreManagerInterface $storeManager) {
         $this->requestBuilder = $requestBuilder;
+        $this->orderFactory = $orderFactory;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -48,6 +64,14 @@ class OrderRequestService implements OrderRequestManagementInterface
         );
 
         $this->requestBuilder->addRequestLine(json_encode(array('increment_id' => $reference)));
+
+        $order = $this->orderFactory->create()->loadByIncrementId($reference);
+
+        if ($order->getId()) {
+            $websiteId = $this->storeManager->getStore($order->getStoreId())->getWebsiteId();
+            $this->requestBuilder->setScopeId($websiteId);
+        }
+
         $this->requestBuilder->saveRequest();
 
         return str_replace(' ','T', $received);

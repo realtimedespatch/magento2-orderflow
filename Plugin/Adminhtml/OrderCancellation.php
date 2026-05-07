@@ -93,6 +93,7 @@ class OrderCancellation
             \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_CANCEL
         );
 
+        $this->_builder->setScopeId($order->getStore()->getWebsiteId());
         $this->_builder->addRequestLine(json_encode(array('increment_id' => $order->getIncrementId())));
 
         return $this->_builder->saveRequest();
