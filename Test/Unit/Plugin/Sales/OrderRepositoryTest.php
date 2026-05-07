@@ -30,7 +30,7 @@ namespace Magento\Sales\Api\Data {
         {
             public function getExtensionAttributes();
             public function getData($key = '', $index = null);
-            public function setExtensionAttributes($extensionAttributes);
+            public function setExtensionAttributes(OrderExtensionInterface $extensionAttributes);
         }
     }
 
@@ -62,6 +62,19 @@ class TestOrderExtensionAttributes implements \Magento\Sales\Api\Data\OrderExten
 {
     public mixed $orderflowExportDate = null;
     public mixed $orderflowExportStatus = null;
+
+    public function setData($key, $value): self
+    {
+        if ($key === 'orderflow_export_date') {
+            $this->orderflowExportDate = $value;
+        }
+
+        if ($key === 'orderflow_export_status') {
+            $this->orderflowExportStatus = $value;
+        }
+
+        return $this;
+    }
 
     public function setOrderflowExportDate(mixed $value): self
     {
@@ -100,7 +113,7 @@ class TestOrder implements \Magento\Sales\Api\Data\OrderInterface
         return $this->data[$key] ?? null;
     }
 
-    public function setExtensionAttributes($extensionAttributes): self
+    public function setExtensionAttributes(\Magento\Sales\Api\Data\OrderExtensionInterface $extensionAttributes): self
     {
         $this->setExtensionAttributesArgument = $extensionAttributes;
         $this->extensionAttributes = $extensionAttributes;
