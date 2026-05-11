@@ -106,7 +106,16 @@ class ProductTest extends TestCase
 
         $mockProductCollection = $this->createMock(ProductCollection::class);
         $mockProductCollection
+            ->expects($this->exactly(3))
             ->method('addAttributeToFilter')
+            ->withConsecutive(
+                ['type_id', ['eq' => 'simple']],
+                ['orderflow_export_date', ['null' => true]],
+                [[
+                    ['attribute' => 'orderflow_export_status', 'null' => true],
+                    ['attribute' => 'orderflow_export_status', 'nin' => ['Queued', 'Disabled']],
+                ], '', 'left']
+            )
             ->willReturnSelf();
 
         $mockProductCollection

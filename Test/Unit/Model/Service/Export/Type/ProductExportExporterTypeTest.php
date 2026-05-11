@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace RealtimeDespatch\OrderFlow\Test\Unit\Model\Service\Export\Type;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\OrderRepository;
 use RealtimeDespatch\OrderFlow\Model\Factory\OrderFlow\Service\OrderServiceFactory;
@@ -17,6 +18,7 @@ class ProductExportExporterTypeTest extends AbstractExporterTypeTest
 {
     protected ProductRepositoryInterface $mockProductRepository;
     protected ProductHelper $mockProductHelper;
+    protected DateTime $mockDate;
 
     protected function setUp(): void
     {
@@ -24,13 +26,15 @@ class ProductExportExporterTypeTest extends AbstractExporterTypeTest
 
         $this->mockProductRepository = $this->createMock(ProductRepositoryInterface::class);
         $this->mockProductHelper = $this->createMock(ProductHelper::class);
+        $this->mockDate = $this->createMock(DateTime::class);
 
         $this->exporterType = new ProductExportExporterType(
             $this->mockScopeConfig,
             $this->mockLogger,
             $this->mockObjectManager,
             $this->mockProductRepository,
-            $this->mockProductHelper
+            $this->mockProductHelper,
+            $this->mockDate
         );
     }
 

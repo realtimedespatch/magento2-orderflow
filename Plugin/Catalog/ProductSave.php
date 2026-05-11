@@ -9,6 +9,7 @@ namespace RealtimeDespatch\OrderFlow\Plugin\Catalog;
 class ProductSave
 {
     const EXPORT_STATUS_PENDING = 'Pending';
+    const EXPORT_STATUS_DISABLED = 'Disabled';
 
     /**
      * Resets the Export Status if a product has been updated.
@@ -24,6 +25,10 @@ class ProductSave
 
         // If a separate process has amended the export status ignore.
         if ($product->dataHasChangedFor('orderflow_export_status')) {
+            return array($product);
+        }
+
+        if ($product->getData('orderflow_export_status') === self::EXPORT_STATUS_DISABLED) {
             return array($product);
         }
 

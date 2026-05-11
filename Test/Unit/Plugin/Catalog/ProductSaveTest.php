@@ -20,7 +20,7 @@ class ProductSaveTest extends \PHPUnit\Framework\TestCase
         $this->mockProduct = $this->getMockBuilder(\Magento\Catalog\Model\Product::class)
             ->disableOriginalConstructor()
             ->addMethods(['setOrderflowExportStatus'])
-            ->onlyMethods(['isDataChanged', 'dataHasChangedFor'])
+            ->onlyMethods(['isDataChanged', 'dataHasChangedFor', 'getData'])
             ->getMock();
 
         $this->mockProductResource = $this->createMock(\Magento\Catalog\Model\ResourceModel\Product::class);
@@ -50,8 +50,47 @@ class ProductSaveTest extends \PHPUnit\Framework\TestCase
 
         $this->mockProduct
             ->expects($this->once())
+            ->method('dataHasChangedFor')
+            ->with('orderflow_export_status')
+            ->willReturn(false);
+
+        $this->mockProduct
+            ->expects($this->once())
+            ->method('getData')
+            ->with('orderflow_export_status')
+            ->willReturn('Queued');
+
+        $this->mockProduct
+            ->expects($this->once())
             ->method('setOrderflowExportStatus')
             ->with('Pending');
+
+        $result = $this->plugin->beforeSave($this->mockProductResource, $this->mockProduct);
+        $this->assertEquals($this->mockProduct, $result[0]);
+    }
+
+    public function testBeforeSaveDisabledStatusPreserved(): void
+    {
+        $this->mockProduct
+            ->expects($this->once())
+            ->method('isDataChanged')
+            ->willReturn(true);
+
+        $this->mockProduct
+            ->expects($this->once())
+            ->method('dataHasChangedFor')
+            ->with('orderflow_export_status')
+            ->willReturn(false);
+
+        $this->mockProduct
+            ->expects($this->once())
+            ->method('getData')
+            ->with('orderflow_export_status')
+            ->willReturn('Disabled');
+
+        $this->mockProduct
+            ->expects($this->never())
+            ->method('setOrderflowExportStatus');
 
         $result = $this->plugin->beforeSave($this->mockProductResource, $this->mockProduct);
         $this->assertEquals($this->mockProduct, $result[0]);

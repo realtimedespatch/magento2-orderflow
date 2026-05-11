@@ -19,7 +19,7 @@ class OptionsTest extends \PHPUnit\Framework\TestCase
         $result = $this->options->toOptionArray();
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
-        $expected = array_map(fn($x) => ['value' => $x, 'label' => $x], ['Pending', 'Queued', 'Exported', 'Failed']);
+        $expected = array_map(fn($x) => ['value' => $x, 'label' => $x], ['Pending', 'Queued', 'Exported', 'Failed', 'Disabled']);
         $this->assertEquals($expected, $result);
     }
 }
