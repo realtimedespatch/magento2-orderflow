@@ -22,6 +22,7 @@ namespace Magento\Sales\Api\Data {
     if (!interface_exists(OrderExtensionInterface::class, false)) {
         interface OrderExtensionInterface
         {
+            public function setData($key, $value = null);
         }
     }
 
@@ -30,7 +31,7 @@ namespace Magento\Sales\Api\Data {
         {
             public function getExtensionAttributes();
             public function getData($key = '', $index = null);
-            public function setExtensionAttributes($extensionAttributes);
+            public function setExtensionAttributes(OrderExtensionInterface $extensionAttributes);
         }
     }
 
@@ -63,6 +64,13 @@ class TestOrderExtensionAttributes implements \Magento\Sales\Api\Data\OrderExten
     public mixed $orderflowExportDate = null;
     public mixed $orderflowExportStatus = null;
 
+    public function setData($key, $value = null): self
+    {
+        $this->{$this->camelize($key)} = $value;
+
+        return $this;
+    }
+
     public function setOrderflowExportDate(mixed $value): self
     {
         $this->orderflowExportDate = $value;
@@ -75,6 +83,14 @@ class TestOrderExtensionAttributes implements \Magento\Sales\Api\Data\OrderExten
         $this->orderflowExportStatus = $value;
 
         return $this;
+    }
+
+    private function camelize(string $key): string
+    {
+        $segments = explode('_', $key);
+        $first = array_shift($segments);
+
+        return $first . implode('', array_map('ucfirst', $segments));
     }
 }
 
@@ -100,7 +116,9 @@ class TestOrder implements \Magento\Sales\Api\Data\OrderInterface
         return $this->data[$key] ?? null;
     }
 
-    public function setExtensionAttributes($extensionAttributes): self
+    public function setExtensionAttributes(
+        \Magento\Sales\Api\Data\OrderExtensionInterface $extensionAttributes
+    ): self
     {
         $this->setExtensionAttributesArgument = $extensionAttributes;
         $this->extensionAttributes = $extensionAttributes;

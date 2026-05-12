@@ -7,6 +7,7 @@ use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Module\Manager as ModuleManager;
 use Magento\Sales\Api\Data\OrderItemInterface;
+use Magento\Sales\Api\Data\ShipmentExtensionInterface;
 use Magento\Sales\Api\Data\ShipmentItemInterface;
 use Magento\Sales\Model\Convert\Order as OrderConvert;
 use Magento\Sales\Model\Order;
@@ -215,9 +216,7 @@ class ShipmentServiceTest extends \PHPUnit\Framework\TestCase
             ->expects($this->once())
             ->method('getExtensionAttributes')
             ->willReturn(
-                $this->getMockBuilder(\Magento\Sales\Api\Data\ShipmentExtensionInterface::class)
-                    ->addMethods(['setSourceCode', 'getSourceCode'])
-                    ->getMock()
+                $this->createMock(ShipmentExtensionInterface::class)
             );
 
         $this->testCreateShipments();

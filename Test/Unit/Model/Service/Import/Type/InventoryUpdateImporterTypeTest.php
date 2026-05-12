@@ -3,30 +3,34 @@ declare(strict_types=1);
 
 namespace RealtimeDespatch\OrderFlow\Test\Unit\Model\Service\Import\Type;
 
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\ObjectManagerInterface;
-use Psr\Log\LoggerInterface;
 use RealtimeDespatch\OrderFlow\Helper\StockHelperFactory;
-use RealtimeDespatch\OrderFlow\Model\Service\Import\Type\ImporterType;
-use RealtimeDespatch\OrderFlow\Model\Service\Import\Type\InventoryUpdateImporterType;
 use RealtimeDespatch\OrderFlow\Helper\Stock as StockHelper;
+use RealtimeDespatch\OrderFlow\Model\Indexer\ProductReindexer;
+use RealtimeDespatch\OrderFlow\Model\Service\Import\Type\InventoryUpdateImporterType;
 
 class InventoryUpdateImporterTypeTest extends AbstractImporterTypeTest
 {
-    protected StockHelper\MsiStockHelper $mockMsiStockHelper;
-    protected StockHelper\LegacyStockHelper $mockLegacyStockHelper;
+    protected StockHelper\MsiStockHelper $mockStockHelper;
     protected StockHelperFactory $mockStockHelperFactory;
+    protected ProductReindexer $mockProductReindexer;
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->mockStockHelper = $this->createMock(StockHelper\MsiStockHelper::class);
         $this->mockStockHelperFactory = $this->createMock(StockHelperFactory::class);
+        $this->mockProductReindexer = $this->createMock(ProductReindexer::class);
+
+        $this->mockStockHelperFactory
+            ->method('create')
+            ->willReturn($this->mockStockHelper);
 
         $this->type = new InventoryUpdateImporterType(
             $this->mockScopeConfig,
             $this->mockLogger,
             $this->mockObjectManager,
+            $this->mockProductReindexer,
             $this->mockStockHelperFactory
         );
     }
