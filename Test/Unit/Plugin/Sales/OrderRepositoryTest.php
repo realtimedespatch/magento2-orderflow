@@ -1,6 +1,17 @@
 <?php
 declare(strict_types=1);
 
+namespace Magento\Sales\Model {
+    if (!class_exists(OrderRepositoryFactory::class, false)) {
+        class OrderRepositoryFactory
+        {
+            public function create()
+            {
+            }
+        }
+    }
+}
+
 namespace Magento\Sales\Api\Data {
     if (!class_exists(OrderExtensionFactory::class, false)) {
         class OrderExtensionFactory
@@ -47,6 +58,7 @@ namespace Magento\Sales\Api {
     if (!interface_exists(OrderRepositoryInterface::class, false)) {
         interface OrderRepositoryInterface
         {
+            public function get($id);
         }
     }
 }
@@ -54,9 +66,12 @@ namespace Magento\Sales\Api {
 namespace RealtimeDespatch\OrderFlow\Test\Unit\Plugin\Sales {
 
 require_once dirname(__DIR__, 4) . '/Plugin/Sales/OrderRepository.php';
+require_once dirname(__DIR__, 4) . '/Model/Runtime/OrderRepositoryRefreshContext.php';
 
 use Magento\Sales\Api\Data\OrderExtensionFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\OrderRepositoryFactory;
+use RealtimeDespatch\OrderFlow\Model\Runtime\OrderRepositoryRefreshContext;
 use RealtimeDespatch\OrderFlow\Plugin\Sales\OrderRepository;
 
 class TestOrderExtensionAttributes implements \Magento\Sales\Api\Data\OrderExtensionInterface
@@ -141,6 +156,9 @@ class TestOrderSearchResult implements \Magento\Sales\Api\Data\OrderSearchResult
 
 class TestOrderRepository implements OrderRepositoryInterface
 {
+    public function get($id)
+    {
+    }
 }
 
 class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
@@ -148,12 +166,89 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
     protected OrderRepository $plugin;
     protected OrderExtensionFactory $orderExtensionFactory;
     protected TestOrderExtensionAttributes $createdExtensionAttributes;
+    protected OrderRepositoryRefreshContext $orderRepositoryRefreshContext;
+    protected OrderRepositoryFactory $orderRepositoryFactory;
 
     protected function setUp(): void
     {
         $this->createdExtensionAttributes = new TestOrderExtensionAttributes();
         $this->orderExtensionFactory = new OrderExtensionFactory($this->createdExtensionAttributes);
-        $this->plugin = new OrderRepository($this->orderExtensionFactory);
+        $this->orderRepositoryRefreshContext = $this->createMock(OrderRepositoryRefreshContext::class);
+        $this->orderRepositoryFactory = $this->createMock(OrderRepositoryFactory::class);
+        $this->plugin = new OrderRepository(
+            $this->orderExtensionFactory,
+            $this->orderRepositoryRefreshContext,
+            $this->orderRepositoryFactory
+        );
+    }
+
+    public function testAroundGetUsesProceedWhenNoFreshOrderIsRequested(): void
+    {
+        $orderRepository = new TestOrderRepository();
+        $order = new TestOrder([
+            'orderflow_export_date' => '2026-04-22 10:00:00',
+            'orderflow_export_status' => 'Exported',
+        ]);
+
+        $this->orderRepositoryRefreshContext
+            ->expects($this->once())
+            ->method('isGuardActive')
+            ->willReturn(false);
+
+        $this->orderRepositoryRefreshContext
+            ->expects($this->once())
+            ->method('getForcedOrderId')
+            ->willReturn(null);
+
+        $this->orderRepositoryFactory
+            ->expects($this->never())
+            ->method('create');
+
+        $this->assertSame(
+            $order,
+            $this->plugin->aroundGet($orderRepository, fn ($id) => $order, 1)
+        );
+    }
+
+    public function testAroundGetUsesFreshRepositoryWhenContextRequestsIt(): void
+    {
+        $orderRepository = new TestOrderRepository();
+        $freshOrderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $order = new TestOrder([
+            'orderflow_export_date' => '2026-04-22 10:00:00',
+            'orderflow_export_status' => 'Exported',
+        ]);
+
+        $this->orderRepositoryRefreshContext
+            ->expects($this->once())
+            ->method('isGuardActive')
+            ->willReturn(false);
+
+        $this->orderRepositoryRefreshContext
+            ->expects($this->once())
+            ->method('getForcedOrderId')
+            ->willReturn(1);
+
+        $this->orderRepositoryRefreshContext
+            ->expects($this->exactly(2))
+            ->method('setGuardActive')
+            ->withConsecutive([true], [false]);
+
+        $this->orderRepositoryFactory
+            ->expects($this->once())
+            ->method('create')
+            ->willReturn($freshOrderRepository);
+
+        $freshOrderRepository
+            ->expects($this->once())
+            ->method('get')
+            ->with(1)
+            ->willReturn($order);
+
+        $this->assertSame(
+            $order,
+            $this->plugin->aroundGet($orderRepository, fn () => $this->fail('Proceed should not be called'), 1)
+        );
     }
 
     public function testAfterGetSetsOrderFlowExtensionAttributes(): void

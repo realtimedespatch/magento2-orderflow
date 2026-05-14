@@ -2,6 +2,11 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap;
 
+use Magento\Webapi\Controller\Soap\Request\Handler;
+use Magento\Sales\Model\OrderRepositoryFactory;
+use RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface;
+use RealtimeDespatch\OrderFlow\Model\Runtime\OrderRepositoryRefreshContext;
+
 class OrderExport
 {
     const OP_ORDER_EXPORT = 'salesOrderRepositoryV1Get';
@@ -17,32 +22,54 @@ class OrderExport
     protected $_requestBuilder;
 
     /**
-     * @var \Magento\Sales\Model\OrderRepository
+     * @var RequestRepositoryInterface
      */
-    protected $_orderRepository;
+    protected $_requestRepository;
+
+    protected OrderRepositoryFactory $_orderRepositoryFactory;
+
+    protected OrderRepositoryRefreshContext $_orderRepositoryRefreshContext;
 
     /**
      * OrderExport constructor.
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
-     * @param \Magento\Sales\Model\OrderRepository $orderRepository
+     * @param RequestRepositoryInterface $requestRepository
+     * @param OrderRepositoryFactory $orderRepositoryFactory
+     * @param OrderRepositoryRefreshContext $orderRepositoryRefreshContext
      */
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder,
-        \Magento\Sales\Model\OrderRepository $orderRepository)
+        RequestRepositoryInterface $requestRepository,
+        OrderRepositoryFactory $orderRepositoryFactory,
+        OrderRepositoryRefreshContext $orderRepositoryRefreshContext)
     {
         $this->_objectManager = $objectManager;
         $this->_requestBuilder = $requestBuilder;
-        $this->_orderRepository = $orderRepository;
+        $this->_requestRepository = $requestRepository;
+        $this->_orderRepositoryFactory = $orderRepositoryFactory;
+        $this->_orderRepositoryRefreshContext = $orderRepositoryRefreshContext;
     }
 
-    public function around__call(\Magento\Webapi\Controller\Soap\Request\Handler $soapServer, callable $proceed, $operation, $arguments)
-    {
-        $result = $proceed($operation, $arguments);
+    public function around__call(
+        Handler $soapServer,
+        callable $proceed,
+        $operation,
+        $arguments
+    ) {
+        $request = null;
 
         if ($this->_isOrderExport($operation) && isset($arguments[0]->id)) {
-            $this->_getRequestProcessor()->process($this->_buildOrderExportRequest($result['result'], $arguments[0]->id));
+            $request = $this->_buildOrderExportRequest($arguments[0]->id);
+            $this->_getRequestProcessor()->process($request);
+        }
+
+        $result = $this->_proceedWithFreshOrderRepository($proceed, $operation, $arguments);
+
+        if ($request !== null) {
+            $request->setResponseBody(json_encode($result['result']));
+            $this->_requestRepository->save($request);
         }
 
         return $result;
@@ -55,7 +82,7 @@ class OrderExport
      *
      * @return boolean
      */
-    protected function _isOrderExport($operation)
+    protected function _isOrderExport($operation): bool
     {
         return $operation === self::OP_ORDER_EXPORT;
     }
@@ -63,12 +90,11 @@ class OrderExport
     /**
      * Builds an export request from the order ID.
      *
-     * @param string $response
      * @param string $id
      *
      * @return \RealtimeDespatch\OrderFlow\Model\Request
      */
-    protected function _buildOrderExportRequest($response, $id)
+    protected function _buildOrderExportRequest($id)
     {
         $this->_requestBuilder->setRequestData(
             \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::TYPE_EXPORT,
@@ -76,11 +102,10 @@ class OrderExport
             \RealtimeDespatch\OrderFlow\Api\Data\RequestInterface::OP_EXPORT
         );
 
-        // It annoying we have to load the order again, but the Magento API truncates the increment Id.
-        $order = $this->_orderRepository->get($id);
+        // Use a fresh repository instance so we do not reuse a stale cached order.
+        $order = $this->_orderRepositoryFactory->create()->get((int) $id);
 
         $this->_requestBuilder->setRequestBody(file_get_contents('php://input'));
-        $this->_requestBuilder->setResponseBody(json_encode($response));
         $this->_requestBuilder->addRequestLine(json_encode(array('increment_id' => $order->getIncrementId())));
 
         return $this->_requestBuilder->saveRequest();
@@ -94,5 +119,17 @@ class OrderExport
     protected function _getRequestProcessor()
     {
         return $this->_objectManager->create('OrderExportRequestProcessor');
+    }
+
+    protected function _proceedWithFreshOrderRepository(callable $proceed, $operation, $arguments)
+    {
+        if (!$this->_isOrderExport($operation) || !isset($arguments[0]->id)) {
+            return $proceed($operation, $arguments);
+        }
+
+        return $this->_orderRepositoryRefreshContext->runForOrderId(
+            (int) $arguments[0]->id,
+            fn () => $proceed($operation, $arguments)
+        );
     }
 }
