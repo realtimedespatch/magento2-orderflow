@@ -2,6 +2,8 @@
 
 namespace RealtimeDespatch\OrderFlow\Plugin\Webapi\Soap;
 
+use RealtimeDespatch\OrderFlow\Api\RequestRepositoryInterface;
+
 class OrderExport
 {
     const OP_ORDER_EXPORT = 'salesOrderRepositoryV1Get';
@@ -22,19 +24,35 @@ class OrderExport
     protected $_orderRepository;
 
     /**
+     * @var \Magento\Sales\Model\OrderFactory
+     */
+    protected $_orderFactory;
+
+    /**
+     * @var RequestRepositoryInterface
+     */
+    protected $_requestRepository;
+
+    /**
      * OrderExport constructor.
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      * @param \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder
      * @param \Magento\Sales\Model\OrderRepository $orderRepository
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param RequestRepositoryInterface $requestRepository
      */
     public function __construct(
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \RealtimeDespatch\OrderFlow\Api\RequestBuilderInterface $requestBuilder,
-        \Magento\Sales\Model\OrderRepository $orderRepository)
+        \Magento\Sales\Model\OrderRepository $orderRepository,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        RequestRepositoryInterface $requestRepository)
     {
         $this->_objectManager = $objectManager;
         $this->_requestBuilder = $requestBuilder;
         $this->_orderRepository = $orderRepository;
+        $this->_orderFactory = $orderFactory;
+        $this->_requestRepository = $requestRepository;
     }
 
     public function around__call(\Magento\Webapi\Controller\Soap\Request\Handler $soapServer, callable $proceed, $operation, $arguments)
@@ -42,7 +60,11 @@ class OrderExport
         $result = $proceed($operation, $arguments);
 
         if ($this->_isOrderExport($operation) && isset($arguments[0]->id)) {
-            $this->_getRequestProcessor()->process($this->_buildOrderExportRequest($result['result'], $arguments[0]->id));
+            $request = $this->_buildOrderExportRequest($result['result'], $arguments[0]->id);
+            $this->_getRequestProcessor()->process($request);
+            $this->_applyExportStateToResult($result, $arguments[0]->id);
+            $request->setResponseBody(json_encode($result['result']));
+            $this->_requestRepository->save($request);
         }
 
         return $result;
@@ -94,5 +116,91 @@ class OrderExport
     protected function _getRequestProcessor()
     {
         return $this->_objectManager->create('OrderExportRequestProcessor');
+    }
+
+    /**
+     * Applies the persisted export metadata to the SOAP result before it is returned.
+     *
+     * @param array $result
+     * @param int|string $id
+     *
+     * @return void
+     */
+    protected function _applyExportStateToResult(array &$result, $id)
+    {
+        if ( ! isset($result['result'])) {
+            return;
+        }
+
+        $order = $this->_orderFactory->create()->load($id);
+
+        if ( ! $order->getId()) {
+            return;
+        }
+
+        $this->_setOrderflowExtensionAttribute(
+            $result['result'],
+            'orderflowExportStatus',
+            $order->getData('orderflow_export_status')
+        );
+        $this->_setOrderflowExtensionAttribute(
+            $result['result'],
+            'orderflowExportDate',
+            $order->getData('orderflow_export_date')
+        );
+    }
+
+    /**
+     * @param mixed $result
+     * @param string $key
+     * @param mixed $value
+     *
+     * @return void
+     */
+    protected function _setOrderflowExtensionAttribute(&$result, $key, $value)
+    {
+        if (is_object($result)) {
+            $extensionAttributes = $this->_getResultExtensionAttributes($result);
+            $setter = 'set'.ucfirst($key);
+
+            if (is_object($extensionAttributes) && method_exists($extensionAttributes, $setter)) {
+                $extensionAttributes->{$setter}($value);
+                return;
+            }
+
+            if ( ! is_object($extensionAttributes)) {
+                $extensionAttributes = new \stdClass();
+                $result->extensionAttributes = $extensionAttributes;
+            }
+
+            $extensionAttributes->{$key} = $value;
+            return;
+        }
+
+        if (is_array($result)) {
+            if ( ! isset($result['extensionAttributes']) || ! is_array($result['extensionAttributes'])) {
+                $result['extensionAttributes'] = [];
+            }
+
+            $result['extensionAttributes'][$key] = $value;
+        }
+    }
+
+    /**
+     * @param object $result
+     *
+     * @return mixed
+     */
+    protected function _getResultExtensionAttributes($result)
+    {
+        if (method_exists($result, 'getExtensionAttributes')) {
+            return $result->getExtensionAttributes();
+        }
+
+        if (isset($result->extensionAttributes)) {
+            return $result->extensionAttributes;
+        }
+
+        return null;
     }
 }
