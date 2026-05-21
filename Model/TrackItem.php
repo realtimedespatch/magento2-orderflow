@@ -15,11 +15,23 @@ class TrackItem implements TrackItemInterface
     public $trackingNumber;
 
     /**
+     * @var string
+     */
+    public $courierName;
+
+    /**
+     * @var string
+     */
+    public $serviceName;
+
+    /**
      * TrackItem constructor.
      */
     public function __construct()
     {
         $this->trackingNumber = null;
+        $this->courierName = null;
+        $this->serviceName = null;
     }
 
     /**
@@ -45,5 +57,55 @@ class TrackItem implements TrackItemInterface
         $this->trackingNumber = $trackingNumber;
 
         return $this;
+    }
+
+    /**
+     * Courier Name Getter.
+     *
+     * @api
+     * @return string
+     */
+    public function getCourierName()
+    {
+        return $this->courierName;
+    }
+
+    /**
+     * Courier Name Setter.
+     *
+     * @api
+     * @param string $courierName
+     * @return \RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface
+     */
+    public function setCourierName($courierName) 
+    {
+        $this->courierName = $courierName;
+
+        return $this;  
+    }
+
+    /**
+     * Service Name Getter.
+     *
+     * @api
+     * @return string
+     */
+    public function getServiceName() 
+    {
+        return $this->serviceName;
+    }
+
+    /**
+     * Service Name Setter.
+     *
+     * @api
+     * @param string $serviceName
+     * @return \RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface
+     */
+    public function setServiceName($serviceName) 
+    {
+        $this->serviceName = $serviceName;
+
+        return $this;   
     }
 }

@@ -25,4 +25,38 @@ interface TrackItemInterface
      * @return \RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface
      */
     public function setTrackingNumber($trackingNumber);
+
+    /**
+     * Courier Name Getter.
+     *
+     * @api
+     * @return string
+     */
+    public function getCourierName();
+
+    /**
+     * Courier Name Setter.
+     *
+     * @api
+     * @param string $courierName
+     * @return \RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface
+     */
+    public function setCourierName($courierName);
+
+    /**
+     * Service Name Getter.
+     *
+     * @api
+     * @return string
+     */
+    public function getServiceName();
+
+    /**
+     * Service Name Setter.
+     *
+     * @api
+     * @param string $serviceName
+     * @return \RealtimeDespatch\OrderFlow\Api\Data\TrackItemInterface
+     */
+    public function setServiceName($serviceName);
 }

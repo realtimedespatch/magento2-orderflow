@@ -194,8 +194,8 @@ class ShipmentService implements ShipmentManagementInterface
         foreach ($params->tracks as $track) {
             $this->_addTrack(
                 $shipment,
-                $params->courierName,
-                $params->serviceName,
+                $track->courierName ?? $params->courierName,
+                $track->serviceName ?? $params->serviceName,
                 $track->trackingNumber
             );
         }
