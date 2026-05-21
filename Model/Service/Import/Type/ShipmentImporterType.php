@@ -39,7 +39,7 @@ class ShipmentImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Imp
     public function isEnabled()
     {
         return $this->_config->getValue(
-            'orderflow_inventory_import/settings/is_enabled',
+            'orderflow_shipment_import/settings/is_enabled',
             \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
         );
     }
