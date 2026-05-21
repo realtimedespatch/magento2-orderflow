@@ -113,7 +113,7 @@ class ProductTest extends TestCase
                 ['orderflow_export_date', ['null' => true]],
                 [[
                     ['attribute' => 'orderflow_export_status', 'null' => true],
-                    ['attribute' => 'orderflow_export_status', 'nin' => ['Queued', 'Disabled']],
+                    ['attribute' => 'orderflow_export_status', 'nin' => ['Queued', 'Disabled', 'Failed']],
                 ], '', 'left']
             )
             ->willReturnSelf();

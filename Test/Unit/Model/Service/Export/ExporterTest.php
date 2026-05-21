@@ -20,35 +20,38 @@ class ExporterTest extends \PHPUnit\Framework\TestCase
         $this->exporter = new Exporter($this->mockExporterType, $this->mockMessageManager);
     }
 
-    public function testExportProductsDisabled(): void
+    public function testExportDoesNotCheckGlobalEnabledFlag(): void
     {
         $this->mockExporterType
-            ->expects($this->once())
-            ->method('isEnabled')
-            ->willReturn(false);
+            ->expects($this->never())
+            ->method('isEnabled');
 
         $this->mockExporterType
-            ->expects($this->exactly(2))
+            ->expects($this->once())
             ->method('getType')
             ->willReturn('InvalidType');
 
         $this->mockExporterType
-            ->expects($this->never())
-            ->method('export');
+            ->expects($this->once())
+            ->method('export')
+            ->willReturn('ExportedData');
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('InvalidType exports are currently disabled. Please review your OrderFlow module configuration.');
+        $this->mockMessageManager
+            ->expects($this->once())
+            ->method('dispatch')
+            ->with(
+                'orderflow_export_success',
+                ['export' => 'ExportedData', 'type' => 'InvalidType']
+            );
 
-        $this->exporter->export($this->createMock(\RealtimeDespatch\OrderFlow\Model\Request::class));
+        $this->assertEquals(
+            'ExportedData',
+            $this->exporter->export($this->createMock(\RealtimeDespatch\OrderFlow\Model\Request::class))
+        );
     }
 
     public function testExport(): void
     {
-        $this->mockExporterType
-            ->expects($this->once())
-            ->method('isEnabled')
-            ->willReturn(true);
-
         $this->mockExporterType
             ->expects($this->once())
             ->method('getType')
@@ -77,11 +80,6 @@ class ExporterTest extends \PHPUnit\Framework\TestCase
 
     public function testExportException(): void
     {
-        $this->mockExporterType
-            ->expects($this->once())
-            ->method('isEnabled')
-            ->willReturn(true);
-
         $this->mockExporterType
             ->expects($this->once())
             ->method('getType')

@@ -182,7 +182,7 @@ class ShipmentServiceTest extends \PHPUnit\Framework\TestCase
             ->method('register');
 
         $this->mockShipment
-            ->expects($this->exactly(2))
+            ->expects($this->once())
             ->method('save');
 
         $this->mockOrder

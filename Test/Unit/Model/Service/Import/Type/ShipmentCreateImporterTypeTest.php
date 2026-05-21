@@ -44,6 +44,6 @@ class ShipmentCreateImporterTypeTest extends AbstractImporterTypeTest
 
     protected function getEnabledXmlPath(): string
     {
-        return 'orderflow_inventory_import/settings/is_enabled';
+        return 'orderflow_shipment_import/settings/is_enabled';
     }
 }
