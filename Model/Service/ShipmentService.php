@@ -116,8 +116,6 @@ class ShipmentService implements ShipmentManagementInterface
                 if ($params->email) {
                     $this->_shipmentNotifier->notify($shipment);
                 }
-
-                $shipment->save();
             }
         } catch (\Exception $e) {
             throw new LocalizedException(
