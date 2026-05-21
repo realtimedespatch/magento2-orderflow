@@ -122,7 +122,7 @@ class ShipmentImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Imp
             }
 
             // Create the shipment.
-            $inventory = $this->_shipper->createShipments($body);
+            $shipment = $this->_shipper->createShipments($body);
 
             return $this->_createSuccessImportLine(
                 $import,
@@ -130,7 +130,7 @@ class ShipmentImporterType extends \RealtimeDespatch\OrderFlow\Model\Service\Imp
                 $incrementId,
                 $request->getOperation(),
                 __('Order '.$incrementId.' successfully shipped.'),
-                $inventory
+                $shipment
             );
         } catch (\Exception $ex) {
             return $this->_createFailureImportLine(

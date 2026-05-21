@@ -39,7 +39,7 @@ class ShipmentCreateImporterType extends \RealtimeDespatch\OrderFlow\Model\Servi
     public function isEnabled()
     {
         return $this->_config->getValue(
-            'orderflow_inventory_import/settings/is_enabled',
+            'orderflow_shipment_import/settings/is_enabled',
             \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE
         );
     }
@@ -126,7 +126,7 @@ class ShipmentCreateImporterType extends \RealtimeDespatch\OrderFlow\Model\Servi
             }
 
             // Create the shipment(s)
-            $inventory = $this->_shipper->createShipments($body);
+            $shipment = $this->_shipper->createShipments($body);
 
             return $this->_createSuccessImportLine(
                 $import,
@@ -134,7 +134,7 @@ class ShipmentCreateImporterType extends \RealtimeDespatch\OrderFlow\Model\Servi
                 $incrementId,
                 $request->getOperation(),
                 __('Order '.$incrementId.' successfully shipped.'),
-                $inventory
+                $shipment
             );
         } catch (\Exception $ex) {
             return $this->_createFailureImportLine(
